@@ -129,7 +129,7 @@ def create_contract(data: ContractCreateModel, email: str):
         )
 
 
-@contracts_router.patch("{contract_id}")
+@contracts_router.patch("/{contract_id}")
 def update_contract(contract_id: str, updates: ContractUpdateModel, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -162,7 +162,7 @@ def update_contract(contract_id: str, updates: ContractUpdateModel, email: str):
         )
 
 
-@contracts_router.delete("{contract_id}")
+@contracts_router.delete("/{contract_id}")
 def delete_contract(contract_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -354,7 +354,7 @@ def create_request(data: ContractRequestCreateModel, email: str):
         )
 
 
-@contract_requests_router.patch("{request_id}/accept")
+@contract_requests_router.patch("/{request_id}/accept")
 def accept_request(request_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)

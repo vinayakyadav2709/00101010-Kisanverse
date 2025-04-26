@@ -157,7 +157,7 @@ def get_subsidies(email: Optional[str] = None, type: Optional[str] = None):
         )
 
 
-@subsidies_router.patch("{subsidy_id}")
+@subsidies_router.patch("/{subsidy_id}")
 def update_subsidy(subsidy_id: str, updates: SubsidyUpdateModel, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -207,7 +207,7 @@ def update_subsidy(subsidy_id: str, updates: SubsidyUpdateModel, email: str):
         raise HTTPException(status_code=500, detail=f"Error updating subsidy: {str(e)}")
 
 
-@subsidies_router.patch("{subsidy_id}/reject")
+@subsidies_router.patch("/{subsidy_id}/reject")
 def reject_subsidy(subsidy_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -232,7 +232,7 @@ def reject_subsidy(subsidy_id: str, email: str):
         )
 
 
-@subsidies_router.patch("{subsidy_id}/approve")
+@subsidies_router.patch("/{subsidy_id}/approve")
 def approve_subsidy(subsidy_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -257,7 +257,7 @@ def approve_subsidy(subsidy_id: str, email: str):
         )
 
 
-@subsidies_router.delete("{subsidy_id}")
+@subsidies_router.delete("/{subsidy_id}")
 def delete_subsidy(subsidy_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -434,7 +434,7 @@ def create_request(data: SubsidyRequestCreateModel, email: str):
         )
 
 
-@subsidy_requests_router.patch("{request_id}/accept")
+@subsidy_requests_router.patch("/{request_id}/accept")
 def accept_request(request_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -490,7 +490,7 @@ def accept_request(request_id: str, email: str):
         )
 
 
-@subsidy_requests_router.patch("{request_id}/reject")
+@subsidy_requests_router.patch("/{request_id}/reject")
 def reject_request(request_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)
@@ -522,7 +522,7 @@ def reject_request(request_id: str, email: str):
         )
 
 
-@subsidy_requests_router.delete("{request_id}")
+@subsidy_requests_router.delete("/{request_id}")
 def delete_request(request_id: str, email: str):
     try:
         user = get_user_by_email_or_raise(email)

@@ -153,7 +153,7 @@ def get_crop_listings(email: Optional[str] = None, type: str = "all"):
         )
 
 
-@listings_router.get("{listing_id}")
+@listings_router.get("/{listing_id}")
 def get_crop_listing(listing_id: str):
     try:
         return get_document_or_raise(
@@ -213,7 +213,7 @@ def create_crop_listing(data: CropListingCreateModel, email: str):
         )
 
 
-@listings_router.patch("{listing_id}")
+@listings_router.patch("/{listing_id}")
 def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email: str):
     try:
         user = get_user_by_email(email)
@@ -293,7 +293,7 @@ def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email:
         )
 
 
-@listings_router.delete("{listing_id}")
+@listings_router.delete("/{listing_id}")
 def cancel_crop_listing(listing_id: str, email: str):
     try:
         user = get_user_by_email(email)
@@ -417,7 +417,7 @@ def get_bids(
         raise HTTPException(status_code=500, detail=f"Error fetching bids: {str(e)}")
 
 
-@bids_router.get("{bid_id}")
+@bids_router.get("/{bid_id}")
 def get_specific_bid(bid_id: str):
     try:
         bid = get_document_or_raise(COLLECTION_BIDS, bid_id, "Bid not found")
@@ -475,7 +475,7 @@ def accept_bid(bid_id: str, email: str):
         raise HTTPException(status_code=500, detail=f"Error accepting bid: {str(e)}")
 
 
-@bids_router.patch("reject/{bid_id}")
+@bids_router.patch("/reject/{bid_id}")
 def reject_bid(bid_id: str, email: str):
     try:
         user = get_user_by_email(email)
@@ -503,7 +503,7 @@ def reject_bid(bid_id: str, email: str):
         raise HTTPException(status_code=500, detail=f"Error rejecting bid: {str(e)}")
 
 
-@bids_router.patch("update/{bid_id}")
+@bids_router.patch("/update/{bid_id}")
 def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
     try:
         user = get_user_by_email(email)
@@ -555,7 +555,7 @@ def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
         raise HTTPException(status_code=500, detail=f"Error updating bid: {str(e)}")
 
 
-@bids_router.delete("{bid_id}")
+@bids_router.delete("/{bid_id}")
 def delete_bid(bid_id: str, email: str):
     try:
         user = get_user_by_email(email)
@@ -617,7 +617,7 @@ def delete_bid(bid_id: str, email: str):
 
 
 # bid fulfilled. set by admin or creator of the bid i.e buyer can
-@bids_router.patch("fulfill/{bid_id}")
+@bids_router.patch("/fulfill/{bid_id}")
 def fulfill_bid(bid_id: str, email: str):
     try:
         user = get_user_by_email(email)
