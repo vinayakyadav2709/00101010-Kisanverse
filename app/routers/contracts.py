@@ -29,7 +29,7 @@ class ContractCreateModel(BaseModel):
     @classmethod
     def validate_template_type(cls, value):
         if value not in TEMPLATE_TYPES:
-            raise ValueError(f"Invalid template_type. Must be one of {TEMPLATE_TYPES}")
+            return ValueError(f"Invalid template_type. Must be one of {TEMPLATE_TYPES}")
         return value
 
     @field_validator("dynamic_fields")
@@ -38,7 +38,7 @@ class ContractCreateModel(BaseModel):
         try:
             json.loads(value)  # Ensure it's valid JSON
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON format for dynamic_fields")
+            return ValueError("Invalid JSON format for dynamic_fields")
         return value
 
 
@@ -46,13 +46,12 @@ class ContractUpdateModel(BaseModel):
     template_type: Optional[str] = None
     locations: Optional[List[str]] = None
     dynamic_fields: Optional[str] = None
-    status: Optional[str] = None
 
     @field_validator("template_type", mode="before")
     @classmethod
     def validate_template_type(cls, value):
         if value and value not in TEMPLATE_TYPES:
-            raise ValueError(f"Invalid template_type. Must be one of {TEMPLATE_TYPES}")
+            return ValueError(f"Invalid template_type. Must be one of {TEMPLATE_TYPES}")
         return value
 
     @field_validator("dynamic_fields", mode="before")
@@ -62,7 +61,7 @@ class ContractUpdateModel(BaseModel):
             try:
                 json.loads(value)  # Ensure it's valid JSON
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON format for dynamic_fields")
+                return ValueError("Invalid JSON format for dynamic_fields")
         return value
 
 
@@ -93,6 +92,9 @@ def get_contracts(email: Optional[str] = None, template_type: Optional[str] = "a
             DATABASE_ID, COLLECTION_CONTRACTS, queries=query_filters
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error fetching contracts: {str(e)}"
         )
@@ -124,6 +126,10 @@ def create_contract(data: ContractCreateModel, email: str):
                     status_code=500, detail=f"Error creating contract: {str(e)}"
                 )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
+
         raise HTTPException(
             status_code=500, detail=f"Error creating contract: {str(e)}"
         )
@@ -142,21 +148,19 @@ def update_contract(contract_id: str, updates: ContractUpdateModel, email: str):
 
         updated_data = updates.model_dump(exclude_unset=True)
 
-        # Ensure status can only be changed from accepted to fulfilled
-        if "status" in updated_data:
-            if (
-                contract["status"] != "accepted"
-                or updated_data["status"] != "fulfilled"
-            ):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Status can only be changed from accepted to fulfilled",
-                )
+        if contract["status"] not in ["listed", "accepted"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Status can only be updated if the contract is listed or accepted",
+            )
 
         return DATABASES.update_document(
             DATABASE_ID, COLLECTION_CONTRACTS, contract_id, updated_data
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error updating contract: {str(e)}"
         )
@@ -193,6 +197,9 @@ def delete_contract(contract_id: str, email: str):
         else:
             raise HTTPException(status_code=403, detail="Permission denied")
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error deleting contract: {str(e)}"
         )
@@ -239,6 +246,9 @@ def reject_pending_requests(contract_id: str):
                 {"status": "rejected"},
             )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error rejecting pending requests: {str(e)}"
         )
@@ -285,6 +295,9 @@ def get_requests(
             DATABASE_ID, COLLECTION_CONTRACT_REQUESTS, queries=query_filters
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error fetching contract requests: {str(e)}"
         )
@@ -349,6 +362,9 @@ def create_request(data: ContractRequestCreateModel, email: str):
                     status_code=500, detail=f"Error creating contract request: {str(e)}"
                 )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error creating contract request: {str(e)}"
         )
@@ -393,6 +409,9 @@ def accept_request(request_id: str, email: str):
         return d
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error accepting contract request: {str(e)}"
         )
@@ -425,6 +444,9 @@ def reject_request(request_id: str, email: str):
         )
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error rejecting contract request: {str(e)}"
         )
@@ -475,6 +497,9 @@ def delete_request(request_id: str, email: str):
         )
         return d
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error deleting contract request: {str(e)}"
         )
@@ -513,6 +538,9 @@ def fulfill_request(request_id: str, email: str):
 
         return d
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error fulfilling contract request: {str(e)}"
         )

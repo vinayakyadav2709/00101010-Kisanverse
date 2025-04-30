@@ -39,7 +39,7 @@ class SubsidyCreateModel(BaseModel):
     @classmethod
     def validate_type(cls, value):
         if value not in SUBSIDY_TYPES:
-            raise ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
+            return ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
         return value
 
     @field_validator("dynamic_fields")
@@ -48,7 +48,7 @@ class SubsidyCreateModel(BaseModel):
         try:
             json.loads(value)  # Ensure it's valid JSON
         except json.JSONDecodeError:
-            raise ValueError("Invalid JSON format for dynamic_fields")
+            return ValueError("Invalid JSON format for dynamic_fields")
         return value
 
 
@@ -57,13 +57,12 @@ class SubsidyUpdateModel(BaseModel):
     locations: Optional[List[str]] = None
     max_recipients: Optional[int] = None
     dynamic_fields: Optional[str] = None
-    status: Optional[str] = None
 
     @field_validator("type", mode="before")
     @classmethod
     def validate_type(cls, value):
         if value and value not in SUBSIDY_TYPES:
-            raise ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
+            return ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
         return value
 
     @field_validator("dynamic_fields", mode="before")
@@ -73,7 +72,7 @@ class SubsidyUpdateModel(BaseModel):
             try:
                 json.loads(value)  # Ensure it's valid JSON
             except json.JSONDecodeError:
-                raise ValueError("Invalid JSON format for dynamic_fields")
+                return ValueError("Invalid JSON format for dynamic_fields")
         return value
 
 
@@ -103,6 +102,9 @@ def create_subsidy(data: SubsidyCreateModel, email: str):
                     status_code=500, detail=f"Error creating subsidy: {str(e)}"
                 )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error creating subsidy: {str(e)}")
 
 
@@ -152,6 +154,9 @@ def get_subsidies(email: Optional[str] = None, type: Optional[str] = None):
             DATABASE_ID, COLLECTION_SUBSIDIES, queries=query_filters
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error fetching subsidies: {str(e)}"
         )
@@ -192,18 +197,21 @@ def update_subsidy(subsidy_id: str, updates: SubsidyUpdateModel, email: str):
             if new_max_recipients == current_accepted:
                 updated_data["status"] = "fulfilled"
 
-        # Ensure status can only be changed from pending to approved
-        if "status" in updated_data:
-            if subsidy["status"] != "pending" or updated_data["status"] != "approved":
-                raise HTTPException(
-                    status_code=400,
-                    detail="Status can only be changed from pending to approved",
-                )
+        # only allow if staus is pending or approved
+
+        if subsidy["status"] not in ["pending", "approved"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Status can only be updated if the subsidy is pending or approved",
+            )
 
         return DATABASES.update_document(
             DATABASE_ID, COLLECTION_SUBSIDIES, subsidy_id, updated_data
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error updating subsidy: {str(e)}")
 
 
@@ -227,6 +235,9 @@ def reject_subsidy(subsidy_id: str, email: str):
             DATABASE_ID, COLLECTION_SUBSIDIES, subsidy_id, {"status": "rejected"}
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error rejecting subsidy: {str(e)}"
         )
@@ -252,6 +263,9 @@ def approve_subsidy(subsidy_id: str, email: str):
             DATABASE_ID, COLLECTION_SUBSIDIES, subsidy_id, {"status": "approved"}
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error rejecting subsidy: {str(e)}"
         )
@@ -269,15 +283,20 @@ def delete_subsidy(subsidy_id: str, email: str):
 
         if role == "admin":
             # Admin sets status to removed
+            if subsidy["status"] not in ["pending"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Only pending or approved subsidies can be removed",
+                )
             return DATABASES.update_document(
                 DATABASE_ID, COLLECTION_SUBSIDIES, subsidy_id, {"status": "removed"}
             )
         elif role == "provider" and subsidy["submitted_by"] == user["$id"]:
             # Provider sets status to withdrawn (only if in pending or approved state)
-            if subsidy["status"] not in ["pending", "approved"]:
+            if subsidy["status"] not in ["pending"]:
                 raise HTTPException(
                     status_code=400,
-                    detail="Only pending or approved subsidies can be withdrawn",
+                    detail="Only pending subsidies can be withdrawn",
                 )
             return DATABASES.update_document(
                 DATABASE_ID, COLLECTION_SUBSIDIES, subsidy_id, {"status": "withdrawn"}
@@ -285,6 +304,9 @@ def delete_subsidy(subsidy_id: str, email: str):
         else:
             raise HTTPException(status_code=403, detail="Permission denied")
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error deleting subsidy: {str(e)}")
 
 
@@ -293,7 +315,14 @@ subsidy_requests_router = APIRouter(
 )
 
 # Enums for status
-REQUEST_STATUSES = ["requested", "accepted", "rejected", "withdrawn", "removed"]
+REQUEST_STATUSES = [
+    "requested",
+    "accepted",
+    "rejected",
+    "withdrawn",
+    "removed",
+    "fulfilled",
+]
 
 
 # Pydantic models
@@ -320,6 +349,9 @@ def reject_pending_requests(subsidy_id: str):
                     {"status": "rejected"},
                 )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error rejecting pending requests: {str(e)}"
         )
@@ -367,6 +399,9 @@ def get_requests(
             DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS, queries=query_filters
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error fetching subsidy requests: {str(e)}"
         )
@@ -429,6 +464,9 @@ def create_request(data: SubsidyRequestCreateModel, email: str):
                     status_code=500, detail=f"Error creating subsidy request: {str(e)}"
                 )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error creating subsidy request: {str(e)}"
         )
@@ -485,6 +523,9 @@ def accept_request(request_id: str, email: str):
             )
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error accepting subsidy request: {str(e)}"
         )
@@ -517,11 +558,45 @@ def reject_request(request_id: str, email: str):
         )
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error rejecting subsidy request: {str(e)}"
         )
 
+@subsidy_requests_router.patch("/{request_id}/fulfill")
+def fulfill_request(request_id: str, email: str):
+    try:
+        user = get_user_by_email_or_raise(email)
+        request = get_document_or_raise(
+            COLLECTION_SUBSIDY_REQUESTS, request_id, "Request not found"
+        )
 
+        # Check permissions: Only the farmer who created the request or an admin can fulfill it
+        if user["role"] != "admin" and request["farmer_id"] != user["$id"]:
+            raise HTTPException(
+                status_code=403,
+                detail="Only the farmer who created the request or an admin can fulfill requests",
+            )
+
+        # Check if the request is in the correct status
+        if request["status"] != "accepted":
+            raise HTTPException(
+                status_code=400, detail="Request not available for fulfillment"
+            )
+
+        # Update request status to fulfilled
+        return DATABASES.update_document(
+            DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS, request_id, {"status": "fulfilled"}
+        )
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
+        raise HTTPException(
+            status_code=500, detail=f"Error fulfilling subsidy request: {str(e)}"
+        )
 @subsidy_requests_router.delete("/{request_id}")
 def delete_request(request_id: str, email: str):
     try:
@@ -578,6 +653,9 @@ def delete_request(request_id: str, email: str):
         else:
             raise HTTPException(status_code=403, detail="Permission denied")
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error deleting subsidy request: {str(e)}"
         )

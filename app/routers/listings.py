@@ -52,6 +52,9 @@ def reject_pending_bids(listing_id: str):
         return {"message": f"{len(pending_bids)} pending bids have been rejected."}
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error rejecting pending bids: {str(e)}"
         )
@@ -91,6 +94,9 @@ def reject_bids_below_available_quantity(listing_id: str, available_quantity: fl
         }
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error rejecting bids: {str(e)}")
 
 
@@ -126,6 +132,9 @@ class CropListingFilterModel(BaseModel):
     requester_email: str  # email of the requester (admin or farmer)
 
 
+LISTING_STATUSES = ["listed", "removed", "cancelled", "fulfilled"]
+
+
 @listings_router.get("")
 def get_crop_listings(email: Optional[str] = None, type: str = "all"):
     try:
@@ -140,7 +149,7 @@ def get_crop_listings(email: Optional[str] = None, type: str = "all"):
             query_filters.append(Query.equal("farmer_id", [farmer["$id"]]))
 
         if type != "all":
-            if type not in ["listed", "removed", "cancelled", "fulfilled"]:
+            if type not in LISTING_STATUSES:
                 raise HTTPException(status_code=400, detail="Invalid listing status")
             query_filters.append(Query.equal("status", [type]))
 
@@ -148,6 +157,9 @@ def get_crop_listings(email: Optional[str] = None, type: str = "all"):
             DATABASE_ID, COLLECTION_CROP_LISTINGS, queries=query_filters
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error fetching crop listings: {str(e)}"
         )
@@ -160,6 +172,9 @@ def get_crop_listing(listing_id: str):
             COLLECTION_CROP_LISTINGS, listing_id, "Crop listing not found"
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error retrieving crop listing: {str(e)}"
         )
@@ -208,6 +223,9 @@ def create_crop_listing(data: CropListingCreateModel, email: str):
                     detail=f"Error creating crop listing: {str(e)}",
                 )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error creating crop listing: {str(e)}"
         )
@@ -224,7 +242,15 @@ def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email:
         )
         is_owner = listing["farmer_id"] == user["$id"]
         is_closed = listing["available_quantity"] == 0
-
+        if listing["status"] != "listed":
+            raise HTTPException(
+                status_code=400, detail="Cannot update a non-listed crop listing"
+            )
+        if is_owner and updates.get("crop_type") != listing["crop_type"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Only admin can change crop type. Please contact admin.",
+            )
         if role != "admin" and not is_owner:
             raise HTTPException(status_code=403, detail="Permission denied")
 
@@ -288,6 +314,9 @@ def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email:
         )
         return output
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error updating crop listing: {str(e)}"
         )
@@ -305,7 +334,10 @@ def cancel_crop_listing(listing_id: str, email: str):
         if role != "admin" and doc["farmer_id"] != user["$id"]:
             raise HTTPException(status_code=403, detail="Permission denied")
         status = "removed" if role == "admin" else "cancelled"
-
+        if doc["status"] != "listed":
+            raise HTTPException(
+                status_code=400, detail="Cannot cancel a non-listed crop listing"
+            )
         updated_listing = DATABASES.update_document(
             DATABASE_ID, COLLECTION_CROP_LISTINGS, listing_id, {"status": status}
         )
@@ -313,6 +345,9 @@ def cancel_crop_listing(listing_id: str, email: str):
         reject_pending_bids(listing_id)
         return updated_listing
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error canceling crop listing: {str(e)}"
         )
@@ -359,7 +394,20 @@ def place_bid(data: BidCreateModel, email: str):
             DATABASE_ID, COLLECTION_BIDS, ID.unique(), bid_data
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error placing bid: {str(e)}")
+
+
+BID_STATUSES = [
+    "pending",
+    "accepted",
+    "rejected",
+    "withdrawn",
+    "fulfilled",
+    "removed",
+]
 
 
 @bids_router.get("")
@@ -373,14 +421,7 @@ def get_bids(
 
         # Filter by type
         if type and type != "all":
-            if type not in [
-                "pending",
-                "accepted",
-                "rejected",
-                "withdrawn",
-                "fulfilled",
-                "removed",
-            ]:
+            if type not in BID_STATUSES:
                 raise HTTPException(
                     status_code=400,
                     detail="Invalid bid status. Must be one of 'pending', 'accepted', 'rejected', 'withdrawn', 'fulfilled', 'removed', or 'all'.",
@@ -414,6 +455,9 @@ def get_bids(
         )
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fetching bids: {str(e)}")
 
 
@@ -423,10 +467,13 @@ def get_specific_bid(bid_id: str):
         bid = get_document_or_raise(COLLECTION_BIDS, bid_id, "Bid not found")
         return bid
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fetching bid: {str(e)}")
 
 
-@bids_router.patch("accept/{bid_id}")
+@bids_router.patch("/{bid_id}/accept")
 def accept_bid(bid_id: str, email: str):
     try:
         user = get_user_by_email(email)
@@ -472,10 +519,13 @@ def accept_bid(bid_id: str, email: str):
         reject_bids_below_available_quantity(listing["$id"], new_available_quantity)
         return bid_updated
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error accepting bid: {str(e)}")
 
 
-@bids_router.patch("/reject/{bid_id}")
+@bids_router.patch("/{bid_id}/reject")
 def reject_bid(bid_id: str, email: str):
     try:
         user = get_user_by_email(email)
@@ -500,10 +550,13 @@ def reject_bid(bid_id: str, email: str):
         )
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error rejecting bid: {str(e)}")
 
 
-@bids_router.patch("/update/{bid_id}")
+@bids_router.patch("/{bid_id}")
 def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
     try:
         user = get_user_by_email(email)
@@ -512,14 +565,19 @@ def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
             COLLECTION_CROP_LISTINGS, bid["listing_id"], "Listing not found"
         )
 
-        if bid["buyer_id"] != user["$id"]:
+        if bid["buyer_id"] != user["$id"] and user["role"] != "admin":
             raise HTTPException(
                 status_code=403, detail="Only the buyer can update their bid"
             )
 
-        if bid["status"] == "accepted":
-            raise HTTPException(status_code=400, detail="Cannot update an accepted bid")
-
+        if bid["status"] not in ["pending", "accepted"]:
+            raise HTTPException(
+                status_code=400, detail="Bid can only be updated if pending or accepted"
+            )
+        if bid["staus"] == "accepted" and user["role"] != "admin":
+            raise HTTPException(
+                status_code=400, detail="Accepted bid can only be updated by admin"
+            )
         updated_data = updates.model_dump(exclude_unset=True)
 
         # If the bid quantity or price is updated, validate
@@ -552,6 +610,9 @@ def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
             DATABASE_ID, COLLECTION_BIDS, bid_id, updated_data
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error updating bid: {str(e)}")
 
 
@@ -567,7 +628,10 @@ def delete_bid(bid_id: str, email: str):
                 status_code=403,
                 detail="Permission denied: Only the buyer or admin can delete the bid",
             )
-
+        if bid["status"] not in ["pending", "accepted"]:
+            raise HTTPException(
+                status_code=400, detail="Bid can only be deleted if pending or accepted"
+            )
         if bid["status"] == "accepted" and role != "admin":
             # If the bid is accepted, only admin can delete it
             raise HTTPException(
@@ -613,11 +677,14 @@ def delete_bid(bid_id: str, email: str):
                 )
         return bid_updated
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error deleting bid: {str(e)}")
 
 
 # bid fulfilled. set by admin or creator of the bid i.e buyer can
-@bids_router.patch("/fulfill/{bid_id}")
+@bids_router.patch("/{bid_id}/fulfill")
 def fulfill_bid(bid_id: str, email: str):
     try:
         user = get_user_by_email(email)
@@ -637,6 +704,9 @@ def fulfill_bid(bid_id: str, email: str):
             DATABASE_ID, COLLECTION_BIDS, bid_id, {"status": "fulfilled"}
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fulfilling bid: {str(e)}")
 
 

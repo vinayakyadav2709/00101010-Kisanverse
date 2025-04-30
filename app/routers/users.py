@@ -52,7 +52,7 @@ def register_user(payload: RegisterUserModel):
 
 
 @router.get("/{email}")
-def get_user(email: str):
+def get_user(email: str):  # -> dict:
     return get_user_by_email_or_raise(email)
 
 
@@ -82,6 +82,9 @@ def list_users(type: Optional[str] = "all"):
             DATABASE_ID, COLLECTION_USERS, queries=query_filters
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
 
 

@@ -122,7 +122,7 @@ Updates a subsidy. Only admins can update subsidies.
 Admins.
 
 ### **Path Parameters**
-- `subsidy_id` (string): The ID of the subsidy to update.
+- `subsidy_id` (string): The ID of the subsidy to update. can only be done if status of subsidy is pending or approved
 
 ### **Request Body**
 ```json
@@ -131,7 +131,6 @@ Admins.
   "locations": ["string (optional)"],
   "max_recipients": "integer (optional)",
   "dynamic_fields": "string (optional, valid JSON)",
-  "status": "string (optional, only 'approved' allowed)"
 }
 ```
 
@@ -253,6 +252,7 @@ curl -X PATCH http://localhost:8000/subsidies/subsidy_id/reject?email=admin@exam
 
 ### **Description**
 Deletes a subsidy. Admins can mark it as "removed," and providers can mark it as "withdrawn."
+admin can delete approved and pending ones, provider can only do pending ones.
 
 ### **Who Can Call It**
 - Admins.
@@ -356,7 +356,7 @@ Fetches subsidy requests based on the user's role and optional filters.
 
 ### **Query Parameters**
 - `email` (string): The email of the user fetching requests.
-- `status` (string, optional): Filter by request status (`requested`, `accepted`, `rejected`, `withdrawn`, `removed`, or `all`).
+- `status` (string, optional): Filter by request status (`requested`, `accepted`, `rejected`, `withdrawn`, `removed`,`fulfilled` or `all`).
 - `subsidy_id` (string, optional): Filter by subsidy ID.
 
 ### **Response**
@@ -476,7 +476,7 @@ curl -X PATCH http://localhost:8000/subsidy_requests/request_id/reject?email=pro
 `DELETE /subsidy_requests/{request_id}`
 
 ### **Description**
-Deletes a subsidy request. Farmers can delete their own requests if they are in the `requested` state. Admins can delete any request.
+Deletes a subsidy request. Farmers can delete their own requests if they are in the `requested` state. Admins can delete if they are in accepted or requested state.
 
 ### **Who Can Call It**
 - Farmers (only for their own requests in the `requested` state).
@@ -504,28 +504,59 @@ curl -X DELETE http://localhost:8000/subsidy_requests/request_id?email=farmer@ex
 }
 ```
 
+
 ---
 
-## **12. Auto-Reject Pending Requests**
+## **12. Fulfill a Subsidy Request**
 
-### **Function**
-`reject_pending_requests(subsidy_id: str)`
+### **Endpoint**
+`PATCH /subsidy_requests/{request_id}/fulfill`
 
 ### **Description**
-Automatically rejects all pending requests for a subsidy when the subsidy is fulfilled or removed.
+Marks a subsidy request as fulfilled. Only the farmer who created the request or an admin can fulfill it. The request must be in the `accepted` state to be fulfilled.
 
 ### **Who Can Call It**
-This function is called internally when a subsidy is marked as `fulfilled` or `removed`.
+- Farmers (only for their own requests).
+- Admins.
 
-### **Parameters**
-- `subsidy_id` (string): The ID of the subsidy for which pending requests should be rejected.
+### **Path Parameters**
+- `request_id` (string): The ID of the request to fulfill.
+
+### **Query Parameters**
+- `email` (string): The email of the user fulfilling the request.
 
 ### **Response**
-- **Success**: Returns a success message.
-- **Error**: Raises an HTTPException if there is an error rejecting requests.
+- **Success**: Returns the updated request document with the status set to `fulfilled`.
+- **Error**: Returns an error message if the request is not in a fulfillable state or if the user is unauthorized.
 
-### **Example Usage**
-This function is not exposed as an API endpoint but is triggered internally.
+### **Example API Call**
+```bash
+curl -X PATCH http://localhost:8000/subsidy_requests/request_id/fulfill?email=farmer@example.com
+```
 
----
+### **Example Response**
+**Success**:
+```json
+{
+  "subsidy_id": "subsidy_id",
+  "farmer_id": "farmer_id",
+  "status": "fulfilled",
+  "$id": "request_id",
+  "$createdAt": "2025-04-26T12:30:03.816+00:00",
+  "$updatedAt": "2025-04-26T12:45:03.816+00:00"
+}
+```
 
+**Error (Unauthorized)**:
+```json
+{
+  "detail": "Only the farmer who created the request or an admin can fulfill requests"
+}
+```
+
+**Error (Invalid State)**:
+```json
+{
+  "detail": "Request not available for fulfillment"
+}
+```

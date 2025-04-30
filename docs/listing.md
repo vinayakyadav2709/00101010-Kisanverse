@@ -153,7 +153,7 @@ curl -X POST http://localhost:8000/listing?email=farmer@example.com \
 `PATCH /listing/{listing_id}`
 
 ### **Description**
-Updates a crop listing. Only the farmer who created the listing or an admin can update it.
+Updates a crop listing. Only the farmer who created the listing or an admin can update it and only if its listed.
 
 ### **Who Can Call It**
 - Farmers (only for their own listings).
@@ -208,7 +208,7 @@ curl -X PATCH http://localhost:8000/listing/listing_id?email=farmer@example.com 
 `DELETE /listing/{listing_id}`
 
 ### **Description**
-Cancels a crop listing. Farmers can cancel their own listings, while admins can remove any listing.
+Cancels a crop listing. Farmers can cancel their own listings, while admins can remove any listing. can only be if listing is in listed state. 
 
 ### **Who Can Call It**
 - Farmers (only for their own listings).
@@ -303,7 +303,7 @@ curl -X POST http://localhost:8000/bids?email=buyer@example.com \
 ## **7. Accept a Bid**
 
 ### **Endpoint**
-`PATCH /bids/accept/{bid_id}`
+`PATCH /bids/{bid_id}/accept`
 
 ### **Description**
 Accepts a bid. Only the farmer who created the listing can accept bids.
@@ -351,7 +351,7 @@ This section provides details about the remaining endpoints for managing bids.
 ## **8. Reject a Bid**
 
 ### **Endpoint**
-`PATCH /bids/reject/{bid_id}`
+`PATCH /bids/{bid_id}/reject`
 
 ### **Description**
 Rejects a bid. Only the farmer who created the listing can reject bids.
@@ -393,10 +393,11 @@ curl -X PATCH http://localhost:8000/bids/reject/bid_id?email=farmer@example.com
 ## **9. Update a Bid**
 
 ### **Endpoint**
-`PATCH /bids/update/{bid_id}`
+`PATCH /bids/{bid_id}`
 
 ### **Description**
-Updates a bid. Only the buyer who placed the bid can update it.
+Updates a bid. Only the buyer who placed the bid and admin can update it. 
+admin can only update pending and accepted bids and buyer can only update pending bid.
 
 ### **Who Can Call It**
 Buyers (only for their own bids).
@@ -453,6 +454,7 @@ curl -X PATCH http://localhost:8000/bids/update/bid_id?email=buyer@example.com \
 
 ### **Description**
 Deletes a bid. Only the buyer who placed the bid or an admin can delete it.
+buyer can only delete pending bids and admin can only delete accepted or pending bids. 
 
 ### **Who Can Call It**
 - Buyers (only for their own bids).
@@ -485,7 +487,7 @@ curl -X DELETE http://localhost:8000/bids/bid_id?email=buyer@example.com
 ## **11. Fulfill a Bid**
 
 ### **Endpoint**
-`PATCH /bids/fulfill/{bid_id}`
+`PATCH /bids/{bid_id}/fulfill`
 
 ### **Description**
 Marks a bid as fulfilled. Only the farmer who created the listing or the buyer who placed the bid can mark it as fulfilled.

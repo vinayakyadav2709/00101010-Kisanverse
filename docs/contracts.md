@@ -112,7 +112,7 @@ curl -X POST http://localhost:8000/contracts?email=buyer@example.com \
 `PATCH /contracts/{contract_id}`
 
 ### **Description**
-Updates a contract. Only admins can update contracts.
+Updates a contract. Only admins can update contracts. can only be updated if contract is listed or accepted
 
 ### **Who Can Call It**
 Admins.
@@ -126,7 +126,6 @@ Admins.
   "template_type": "string (optional)",
   "locations": ["string (optional)"],
   "dynamic_fields": "string (optional, valid JSON)",
-  "status": "string (optional, only 'fulfilled' allowed)"
 }
 ```
 
@@ -166,6 +165,7 @@ curl -X PATCH http://localhost:8000/contracts/contract_id?email=admin@example.co
 
 ### **Description**
 Deletes a contract. Buyers can cancel their own contracts, while admins can remove any contract.
+admin can only delete accepted and listed contracts and buyer can only delete listed contracts.
 
 ### **Who Can Call It**
 - Buyers (only for their own contracts).
@@ -392,6 +392,7 @@ curl -X PATCH http://localhost:8000/contract_requests/request_id/reject?email=bu
 
 ### **Description**
 Deletes a contract request. Farmers can delete their own requests if they are in the `pending` state. Admins can delete any request.
+Admin can only delete pending and accepted requests.
 
 ### **Who Can Call It**
 - Farmers (only for their own requests in the `pending` state).
@@ -459,28 +460,3 @@ curl -X PATCH http://localhost:8000/contract_requests/request_id/fulfill?email=b
   "$updatedAt": "2025-04-26T12:45:03.816+00:00"
 }
 ```
-
----
-
-## **11. Reject All Pending Requests for a Contract**
-
-### **Function**
-`reject_pending_requests(contract_id: str)`
-
-### **Description**
-Automatically rejects all pending requests for a contract when the contract is marked as `fulfilled` or `removed`.
-
-### **Who Can Call It**
-This function is called internally when a contract is marked as `fulfilled` or `removed`.
-
-### **Parameters**
-- `contract_id` (string): The ID of the contract for which pending requests should be rejected.
-
-### **Response**
-- **Success**: Returns a success message.
-- **Error**: Raises an HTTPException if there is an error rejecting requests.
-
-### **Example Usage**
-This function is not exposed as an API endpoint but is triggered internally.
-
----
