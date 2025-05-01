@@ -21,9 +21,9 @@ Creates a new subsidy.
 ### **Request Body**
 - `program` (string, required): The name of the subsidy program.
 - `description` (string, required): A description of the subsidy.
-- `eligibility_criteria` (string, required): The criteria for eligibility.
+- `eligibility` (string, required): The criteria for eligibility.
 - `type` (string, required): The type of the subsidy (`cash`, `asset`, `training`, `loan`).
-- `benefit_value` (string, required): The value or benefit provided by the subsidy (e.g., `10000 cash`, `2 goats`, `150 weeks coaching`).
+- `benefits` (string, required): The value or benefit provided by the subsidy (e.g., `10000 cash`, `2 goats`, `150 weeks coaching`).
 - `duration` (string, required): The duration of the subsidy (e.g., `6 months`, `one time`).
 - `application_process` (string, required): The process for applying for the subsidy.
 - `locations` (list of strings, required): The locations where the subsidy is applicable. Can include `"all"` for universal applicability.
@@ -42,9 +42,9 @@ curl -X POST http://localhost:8000/subsidies \
 -d '{
   "program": "Goat Farming Support",
   "description": "Provides goats to farmers for livestock development.",
-  "eligibility_criteria": "Must own farmland and have livestock experience.",
+  "eligibility": "Must own farmland and have livestock experience.",
   "type": "asset",
-  "benefit_value": "2 goats",
+  "benefits": "2 goats",
   "duration": "one time",
   "application_process": "Apply online with proof of farmland ownership.",
   "locations": ["Haryana", "Punjab"],
@@ -59,9 +59,9 @@ curl -X POST http://localhost:8000/subsidies \
 {
   "program": "Goat Farming Support",
   "description": "Provides goats to farmers for livestock development.",
-  "eligibility_criteria": "Must own farmland and have livestock experience.",
+  "eligibility": "Must own farmland and have livestock experience.",
   "type": "asset",
-  "benefit_value": "2 goats",
+  "benefits": "2 goats",
   "duration": "one time",
   "application_process": "Apply online with proof of farmland ownership.",
   "locations": ["Haryana", "Punjab"],
@@ -110,9 +110,9 @@ curl -X GET "http://localhost:8000/subsidies?email=farmer@example.com&type=asset
     {
       "program": "Goat Farming Support",
       "description": "Provides goats to farmers for livestock development.",
-      "eligibility_criteria": "Must own farmland and have livestock experience.",
+      "eligibility": "Must own farmland and have livestock experience.",
       "type": "asset",
-      "benefit_value": "2 goats",
+      "benefits": "2 goats",
       "duration": "one time",
       "application_process": "Apply online with proof of farmland ownership.",
       "locations": ["Haryana", "Punjab"],
@@ -147,9 +147,9 @@ Updates an existing subsidy.
 - Any combination of the following fields:
   - `program` (string, optional): The name of the subsidy program.
   - `description` (string, optional): A description of the subsidy.
-  - `eligibility_criteria` (string, optional): The criteria for eligibility.
+  - `eligibility` (string, optional): The criteria for eligibility.
   - `type` (string, optional): The type of the subsidy (`cash`, `asset`, `training`, `loan`).
-  - `benefit_value` (string, optional): The value or benefit provided by the subsidy.
+  - `benefits` (string, optional): The value or benefit provided by the subsidy.
   - `duration` (string, optional): The duration of the subsidy.
   - `application_process` (string, optional): The process for applying for the subsidy.
   - `locations` (list of strings, optional): The locations where the subsidy is applicable.
@@ -176,9 +176,9 @@ curl -X PATCH http://localhost:8000/subsidies/subsidy_id \
 {
   "program": "Goat Farming Support",
   "description": "Provides goats to farmers for livestock development.",
-  "eligibility_criteria": "Must own farmland and have livestock experience.",
+  "eligibility": "Must own farmland and have livestock experience.",
   "type": "asset",
-  "benefit_value": "2 goats",
+  "benefits": "2 goats",
   "duration": "one time",
   "application_process": "Apply online with proof of farmland ownership.",
   "locations": ["Haryana", "Rajasthan"],
