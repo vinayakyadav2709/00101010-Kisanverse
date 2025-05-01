@@ -305,13 +305,14 @@ def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email:
         )
         if updated_data.get("status") == "fulfilled":
             reject_pending_bids(listing_id)
-        reject_bids_below_available_quantity(
-            listing_id,
-            updated_data.get(
-                "available_quantity" or listing["available_quantity"],
-                listing["available_quantity"],
-            ),
-        )
+        else:
+            reject_bids_below_available_quantity(
+                listing_id,
+                updated_data.get(
+                    "available_quantity" or listing["available_quantity"],
+                    listing["available_quantity"],
+                ),
+            )
         return output
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -516,7 +517,8 @@ def accept_bid(bid_id: str, email: str):
         )
         if status == "fulfilled":
             reject_pending_bids(listing["$id"])
-        reject_bids_below_available_quantity(listing["$id"], new_available_quantity)
+        else:
+            reject_bids_below_available_quantity(listing["$id"], new_available_quantity)
         return bid_updated
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -574,12 +576,15 @@ def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
             raise HTTPException(
                 status_code=400, detail="Bid can only be updated if pending or accepted"
             )
-        if bid["staus"] == "accepted" and user["role"] != "admin":
+        if bid["status"] == "accepted" and user["role"] != "admin":
             raise HTTPException(
                 status_code=400, detail="Accepted bid can only be updated by admin"
             )
         updated_data = updates.model_dump(exclude_unset=True)
-
+        if listing["status"] != "listed":
+            raise HTTPException(
+                status_code=400, detail="Cannot update a non-listed crop listing"
+            )
         # If the bid quantity or price is updated, validate
         if "quantity" in updated_data and updated_data["quantity"] <= 0:
             raise HTTPException(
@@ -591,24 +596,51 @@ def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
                 status_code=400, detail="Price must be greater than zero"
             )
 
-        if (
-            "quantity" in updated_data
-            and updated_data["quantity"] > listing["available_quantity"]
-        ):
+        # Calculate the new available quantity in the listing
+        new_available_quantity = (
+            listing["available_quantity"]
+            - bid["quantity"]
+            + updated_data.get("quantity", bid["quantity"])
+        )
+
+        if new_available_quantity < 0:
             raise HTTPException(
                 status_code=400,
                 detail="Bid quantity exceeds available quantity in the listing",
             )
+
         updated_data["price_per_kg"] = round(
             updated_data.get("price_per_kg", bid["price_per_kg"]), 2
         )
         updated_data["quantity"] = round(
             updated_data.get("quantity", bid["quantity"]), 2
         )
+
         # Update bid
-        return DATABASES.update_document(
+        updated_bid = DATABASES.update_document(
             DATABASE_ID, COLLECTION_BIDS, bid_id, updated_data
         )
+        # Update the listing's available quantity
+        DATABASES.update_document(
+            DATABASE_ID,
+            COLLECTION_CROP_LISTINGS,
+            listing["$id"],
+            {
+                "available_quantity": new_available_quantity,
+                "status": "fulfilled"
+                if new_available_quantity == 0
+                else listing["status"],
+            },
+        )
+        # Check if the updated quantity fulfills the listing
+        if new_available_quantity == 0:
+            reject_pending_bids(listing["$id"])
+        else:
+            reject_bids_below_available_quantity(
+                listing["$id"],
+                new_available_quantity,
+            )
+        return updated_bid
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is

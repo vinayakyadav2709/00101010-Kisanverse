@@ -32,7 +32,7 @@ class UpdateUserModel(BaseModel):
 def register_user(payload: RegisterUserModel):
     if get_user_by_email(payload.email):
         raise HTTPException(status_code=400, detail="User already exists")
-    if payload.role not in ["admin", "farmer", "buyer", "provider"]:
+    if payload.role not in ["admin", "farmer", "buyer"]:
         raise HTTPException(status_code=400, detail="Invalid role")
     data = payload.model_dump()
 
@@ -69,8 +69,6 @@ def list_users(type: Optional[str] = "all"):
             query_filters.append(Query.equal("role", ["farmer"]))
         elif type == "buyer":
             query_filters.append(Query.equal("role", ["buyer"]))
-        elif type == "provider":
-            query_filters.append(Query.equal("role", ["provider"]))
         elif type == "all":
             # No additional filters for "all"
             pass
@@ -156,7 +154,7 @@ def get_user_type(email: str):
 
 
 def create_all_user_types():
-    roles = ["admin", "farmer", "buyer", "provider"]
+    roles = ["admin", "farmer", "buyer"]
     for role in roles:
         payload = RegisterUserModel(
             name=f"{role.capitalize()} User",
@@ -230,7 +228,6 @@ def run_tests():
         print(list_users("farmer"))
         print(list_users("admin"))
         print(list_users("buyer"))
-        print(list_users("provider"))
         print(list_users("all"))
     except HTTPException as e:
         print(f"Error: {e.detail}")
@@ -273,7 +270,7 @@ def run_tests():
     # Test case: Admin tries to update another user's role
     print("\nTest: Admin tries to update another user's role")
     update_payload = UpdateUserModel(
-        role="provider",
+        role="buyer",
         email="jane.doe@example.com",
     )
 
