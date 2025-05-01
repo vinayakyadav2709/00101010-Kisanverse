@@ -55,7 +55,6 @@ class SubsidyCreateModel(BaseModel):
     eligibility: str
     type: str
     benefits: str
-    duration: str
     application_process: str
     locations: List[str]
     dynamic_fields: str
@@ -92,7 +91,6 @@ class SubsidyUpdateModel(BaseModel):
     eligibility: Optional[str] = None
     type: Optional[str] = None
     benefits: Optional[str] = None
-    duration: Optional[str] = None
     application_process: Optional[str] = None
     dynamic_fields: Optional[str] = None
     max_recipients: Optional[int] = None
@@ -586,10 +584,9 @@ def test_subsidies():
     subsidy_data = SubsidyCreateModel(
         program="Crop Insurance",
         description="Insurance for crop damage",
-        eligibility_criteria="Farmers with valid land records",
+        eligibility="Farmers with valid land records",
         type="cash",
-        benefit_value="5000",
-        duration="1 year",
+        benefits="5000",
         application_process="Apply online",
         locations=["location1", "location2"],
         dynamic_fields='{"field1": "value1"}',
@@ -642,10 +639,9 @@ def test_requests():
     subsidy_data = SubsidyCreateModel(
         program="Crop Insurance",
         description="Insurance for crop damage",
-        eligibility_criteria="Farmers with valid land records",
+        eligibility="Farmers with valid land records",
         type="cash",
-        benefit_value="5000",
-        duration="1 year",
+        benefits="5000",
         application_process="Apply online",
         locations=["location1", "Farmer Address"],
         dynamic_fields='{"field1": "value1"}',
