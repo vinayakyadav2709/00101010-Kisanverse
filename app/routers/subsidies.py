@@ -50,16 +50,16 @@ def reject_pending_requests(subsidy_id: str):
 
 # Pydantic models
 class SubsidyCreateModel(BaseModel):
+    type: str
+    max_recipients: int
+    dynamic_fields: str
+    locations: List[str]
+    provider: str
     program: str
     description: str
     eligibility: str
-    type: str
     benefits: str
     application_process: str
-    locations: List[str]
-    dynamic_fields: str
-    max_recipients: int
-    provider: str
 
     @field_validator("type")
     @classmethod
@@ -176,17 +176,18 @@ def get_subsidies(
         # Apply provider filter if specified
         if provider:
             query_filters.append(Query.equal("provider", [provider]))
-        user = get_user_by_email_or_raise(email)
-        if user["role"] == "farmer":
-            location = user["zipcode"]
-            query_filters.append(
-                Query.or_queries(
-                    [
-                        Query.contains("locations", [location]),
-                        Query.equal("locations", ["all"]),
-                    ]
+        if email:
+            user = get_user_by_email_or_raise(email)
+            if user["role"] == "farmer":
+                location = user["zipcode"]
+                query_filters.append(
+                    Query.or_queries(
+                        [
+                            Query.contains("locations", [location]),
+                            Query.equal("locations", ["all"]),
+                        ]
+                    )
                 )
-            )
 
         # Fetch subsidies with the applied filters
         subsidies = DATABASES.list_documents(
@@ -588,7 +589,7 @@ def test_subsidies():
         type="cash",
         benefits="5000",
         application_process="Apply online",
-        locations=["location1", "location2"],
+        locations=["00000", "12345"],
         dynamic_fields='{"field1": "value1"}',
         max_recipients=10,
         provider="Organization A",
@@ -643,7 +644,7 @@ def test_requests():
         type="cash",
         benefits="5000",
         application_process="Apply online",
-        locations=["location1", "Farmer Address"],
+        locations=["00000", "Farmer Address"],
         dynamic_fields='{"field1": "value1"}',
         max_recipients=5,
         provider="Organization A",

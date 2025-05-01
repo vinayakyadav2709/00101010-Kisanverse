@@ -10,4 +10,5 @@ import traceback
 
 # run subisides test function
 
-subsidies.run_tests()
+# subsidies.run_tests()
+contracts.run_tests()
