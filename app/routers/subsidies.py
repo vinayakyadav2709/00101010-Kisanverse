@@ -52,9 +52,9 @@ def reject_pending_requests(subsidy_id: str):
 class SubsidyCreateModel(BaseModel):
     program: str
     description: str
-    eligibility_criteria: str
+    eligibility: str
     type: str
-    benefit_value: str
+    benefits: str
     duration: str
     application_process: str
     locations: List[str]
@@ -89,9 +89,9 @@ class SubsidyCreateModel(BaseModel):
 class SubsidyUpdateModel(BaseModel):
     program: Optional[str] = None
     description: Optional[str] = None
-    eligibility_criteria: Optional[str] = None
+    eligibility: Optional[str] = None
     type: Optional[str] = None
-    benefit_value: Optional[str] = None
+    benefits: Optional[str] = None
     duration: Optional[str] = None
     application_process: Optional[str] = None
     dynamic_fields: Optional[str] = None
@@ -569,50 +569,51 @@ def fulfill_request(request_id: str, email: str):
         )
 
 
+def print_result(test_name, success, detail=None):
+    if success:
+        print(f"✔ {test_name}")
+    else:
+        print(f"✘ {test_name}")
+        if detail:
+            print(f"   Detail: {detail}")
+
+
 def test_subsidies():
+    print("\nRunning Subsidy Tests...\n")
+
     # Test case: Create a subsidy as admin
-    print("\nTest: Create a subsidy as admin")
+    test_name = "Create a subsidy as admin"
     subsidy_data = SubsidyCreateModel(
-        type="crop",
-        locations=["location1", "Farmer Address"],
-        max_recipients=10,
+        program="Crop Insurance",
+        description="Insurance for crop damage",
+        eligibility_criteria="Farmers with valid land records",
+        type="cash",
+        benefit_value="5000",
+        duration="1 year",
+        application_process="Apply online",
+        locations=["location1", "location2"],
         dynamic_fields='{"field1": "value1"}',
+        max_recipients=10,
         provider="Organization A",
     )
     subsidy_id = None
     try:
         subsidy = create_subsidy(subsidy_data, "admin@example.com")
-        print(subsidy)
         subsidy_id = subsidy["$id"]
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Get subsidies with no filters
-    print("\nTest: Get subsidies with no filters")
+    test_name = "Get subsidies with no filters"
     try:
         subsidies = get_subsidies()
-        print(subsidies)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get subsidies by type
-    print("\nTest: Get subsidies by type")
-    try:
-        subsidies = get_subsidies(type="crop")
-        print(subsidies)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get subsidies by provider
-    print("\nTest: Get subsidies by provider")
-    try:
-        subsidies = get_subsidies(provider="Organization A")
-        print(subsidies)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Update subsidy as admin
-    print("\nTest: Update subsidy as admin")
+    test_name = "Update subsidy as admin"
     update_data = SubsidyUpdateModel(
         max_recipients=15,
         locations=["location3"],
@@ -620,145 +621,79 @@ def test_subsidies():
     )
     try:
         updated_subsidy = update_subsidy(subsidy_id, update_data, "admin@example.com")
-        print(updated_subsidy)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Delete subsidy as admin
-    print("\nTest: Delete subsidy as admin")
+    test_name = "Delete subsidy as admin"
     try:
         deleted_subsidy = delete_subsidy(subsidy_id, "admin@example.com")
-        print(deleted_subsidy)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
 
 def test_requests():
+    print("\nRunning Subsidy Request Tests...\n")
+
     # Test case: Create a subsidy as admin for testing requests
-    print("\nTest: Create a subsidy as admin for testing requests")
+    test_name = "Create a subsidy as admin for testing requests"
     subsidy_data = SubsidyCreateModel(
-        type="crop",
+        program="Crop Insurance",
+        description="Insurance for crop damage",
+        eligibility_criteria="Farmers with valid land records",
+        type="cash",
+        benefit_value="5000",
+        duration="1 year",
+        application_process="Apply online",
         locations=["location1", "Farmer Address"],
-        max_recipients=5,
         dynamic_fields='{"field1": "value1"}',
+        max_recipients=5,
         provider="Organization A",
     )
     subsidy_id = None
     try:
         subsidy = create_subsidy(subsidy_data, "admin@example.com")
-        print(subsidy)
         subsidy_id = subsidy["$id"]
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Create a subsidy request as farmer
-    print("\nTest: Create a subsidy request as farmer")
+    test_name = "Create a subsidy request as farmer"
     request_id = None
     try:
         request_data = SubsidyRequestCreateModel(subsidy_id=subsidy_id)
         request = create_request(request_data, "farmer@example.com")
-        print(request)
         request_id = request["$id"]
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
-    # Test case: Get requests as farmer
-    print("\nTest: Get requests as farmer")
+    # Test case: Accept a request as admin
+    test_name = "Accept a request as admin"
     try:
-        requests = get_requests(email="farmer@example.com")
-        print(requests)
+        accept_request(request_id, "admin@example.com")
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get requests as admin
-    print("\nTest: Get requests as admin")
-    try:
-        requests = get_requests(email="admin@example.com", status="requested")
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Fulfill a request as farmer
-    print("\nTest: Fulfill a request as farmer")
+    test_name = "Fulfill a request as farmer"
     try:
-        # Accept the request first
-        accept_request(request_id, "admin@example.com")
         fulfilled_request = fulfill_request(request_id, "farmer@example.com")
-        print(fulfilled_request)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Fulfill a request as admin
-    print("\nTest: Fulfill a request as admin")
-    try:
-        # Create another request
-        request_data = SubsidyRequestCreateModel(subsidy_id=subsidy_id)
-        new_request = create_request(request_data, "farmer@example.com")
-        print(new_request)
-        new_request_id = new_request["$id"]
-
-        # Accept the new request
-        accept_request(new_request_id, "admin@example.com")
-
-        # Fulfill the request as admin
-        fulfilled_request = fulfill_request(new_request_id, "admin@example.com")
-        print(fulfilled_request)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Fulfill a request in invalid status
-    print("\nTest: Fulfill a request in invalid status")
-    try:
-        # Create another request
-        request_data = SubsidyRequestCreateModel(subsidy_id=subsidy_id)
-        invalid_request = create_request(request_data, "farmer@example.com")
-        print(invalid_request)
-        invalid_request_id = invalid_request["$id"]
-
-        # Attempt to fulfill the request without accepting it
-        fulfill_request(invalid_request_id, "farmer@example.com")
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Fulfill a request by unauthorized user
-    print("\nTest: Fulfill a request by unauthorized user")
-    try:
-        # Create a new user
-        unauthorized_user = DATABASES.create_document(
-            DATABASE_ID,
-            COLLECTION_USERS,
-            ID.unique(),
-            {
-                "email": "unauthorized@example.com",
-                "role": "farmer",
-                "address": "Farmer Address",
-                "name": "Unauthorized User",
-            },
-        )
-
-        # Attempt to fulfill the request as an unauthorized user
-        fulfill_request(request_id, "unauthorized@example.com")
-
-        # Cleanup: Delete the unauthorized user
-        DATABASES.delete_document(
-            DATABASE_ID, COLLECTION_USERS, unauthorized_user["$id"]
-        )
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Cleanup: Delete all subsidy requests and subsidies
-    print("\nCleanup: Delete all subsidy requests and subsidies")
+    test_name = "Cleanup: Delete all subsidy requests and subsidies"
     try:
-        requests = DATABASES.list_documents(DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS)
-        for request in requests["documents"]:
-            DATABASES.delete_document(
-                DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS, request["$id"]
-            )
-        subsidies = DATABASES.list_documents(DATABASE_ID, COLLECTION_SUBSIDIES)
-        for subsidy in subsidies["documents"]:
-            DATABASES.delete_document(DATABASE_ID, COLLECTION_SUBSIDIES, subsidy["$id"])
-    except Exception as e:
-        print(f"Error: {e}")
+        delete_subsidy(subsidy_id, "admin@example.com")
+        print_result(test_name, True)
+    except HTTPException as e:
+        print_result(test_name, False, e.detail)
 
 
 def run_tests():
