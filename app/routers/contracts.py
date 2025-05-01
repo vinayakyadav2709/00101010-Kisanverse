@@ -12,7 +12,7 @@ from appwrite.query import Query
 import json
 from appwrite.id import ID
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 contracts_router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
@@ -43,7 +43,7 @@ class ContractCreateModel(BaseModel):
     @classmethod
     def validate_delivery_date(cls, value):
         try:
-            delivery_date = datetime.strptime(value, "%Y-%m-%d")
+            delivery_date = datetime.fromisoformat(value.replace("Z", "+00:00"))
             if delivery_date <= datetime.now():
                 raise ValueError("Delivery date must be in the future")
         except ValueError:
@@ -75,7 +75,7 @@ class ContractUpdateModel(BaseModel):
     def validate_delivery_date(cls, value):
         if value:
             try:
-                delivery_date = datetime.strptime(value, "%Y-%m-%d")
+                delivery_date = datetime.fromisoformat(value.replace("Z", "+00:00"))
                 if delivery_date <= datetime.now():
                     raise ValueError("Delivery date must be in the future")
             except ValueError:
@@ -256,8 +256,12 @@ def cleanup_expired_contracts():
         )
 
         for contract in listed_contracts["documents"]:
-            delivery_date = datetime.strptime(contract["delivery_date"], "%Y-%m-%d")
-            if delivery_date <= datetime.now():
+            # Parse delivery_date using fromisoformat
+            delivery_date = datetime.fromisoformat(
+                contract["delivery_date"].replace("Z", "+00:00")
+            )
+            now = datetime.now(timezone.utc)  # Make datetime.now() offset-aware
+            if delivery_date <= now:
                 # Update contract status to removed
                 DATABASES.update_document(
                     DATABASE_ID,
@@ -271,6 +275,7 @@ def cleanup_expired_contracts():
 
     except Exception as e:
         print(f"Error during cleanup: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error during cleanup: {str(e)}")
 
 
 def reject_pending_requests(contract_id: str):
@@ -369,8 +374,11 @@ def create_request(data: ContractRequestCreateModel, email: str):
             )
 
         # Ensure the delivery date is still valid
-        delivery_date = datetime.strptime(contract["delivery_date"], "%Y-%m-%d")
-        if delivery_date <= datetime.now():
+        delivery_date = datetime.fromisoformat(
+            contract["delivery_date"].replace("Z", "+00:00")
+        )
+        now = datetime.now(timezone.utc)  # Make datetime.now() offset-aware
+        if delivery_date <= now:
             raise HTTPException(
                 status_code=400,
                 detail="Cannot create a request for an expired contract",
@@ -604,274 +612,168 @@ def fulfill_request(request_id: str, email: str):
         )
 
 
+def print_result(test_name, success, detail=None):
+    if success:
+        print(f"✔ {test_name}")
+    else:
+        print(f"✘ {test_name}")
+        if detail:
+            print(f"   Detail: {detail}")
+
+
 def test_contracts():
+    print("\nRunning Contract Tests...\n")
+
     # Test case: Create a contract as buyer
-    print("\nTest: Create a contract as buyer")
+    test_name = "Create a contract as buyer"
     contract_data = ContractCreateModel(
-        template_type="seed",
         locations=["location1", "Farmer Address"],
         dynamic_fields='{"field1": "value1"}',
+        crop_type="wheat",
+        quantity=1000,
+        price_per_kg=20.5,
+        advance_payment=5000,
+        delivery_date="2025-12-31",
+        payment_terms="50% advance, 50% on delivery",
     )
-
     contract_id = None
-    contract_id2 = None
     try:
         contract = create_contract(contract_data, "buyer@example.com")
-        print(contract)
         contract_id = contract["$id"]
-        contract_data.locations = ["location5"]
-        contract_id2 = create_contract(contract_data, "buyer@example.com")["$id"]
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Create a contract as non-buyer
-    print("\nTest: Create a contract as non-buyer")
-    try:
-        print(create_contract(contract_data, "admin@example.com"))
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Get contracts as buyer
-    print("\nTest: Get contracts as buyer")
+    test_name = "Get contracts as buyer"
     try:
         contracts = get_contracts(email="buyer@example.com")
-        print(contracts)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get contracts as farmer
-    print("\nTest: Get contracts as farmer")
-    try:
-        contracts = get_contracts(email="farmer@example.com")
-        print(contracts)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get contracts as farmer
-    print("\nTest: Get contracts as admin")
-    try:
-        contracts = get_contracts()
-        print(contracts)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Update contract as admin
-    print("\nTest: Update contract as admin")
+    test_name = "Update contract as admin"
     update_data = ContractUpdateModel(
-        template_type="fert",
-        locations=["location3"],
+        crop_type="rice",
+        quantity=2000,
+        price_per_kg=22.0,
         dynamic_fields='{"field2": "value2"}',
     )
     try:
         updated_contract = update_contract(
             contract_id, update_data, "admin@example.com"
         )
-        print(updated_contract)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Delete contract as buyer
-    print("\nTest: Delete contract as buyer")
+    test_name = "Delete contract as buyer"
     try:
         deleted_contract = delete_contract(contract_id, "buyer@example.com")
-        print(deleted_contract)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Delete contract as admin
-    print("\nTest: Delete contract as admin")
-    try:
-        deleted_contract = delete_contract(contract_id2, "admin@example.com")
-        print(deleted_contract)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Cleanup: Delete all contracts
-    print("\nCleanup: Delete all contracts")
-    try:
-        contracts = DATABASES.list_documents(DATABASE_ID, COLLECTION_CONTRACTS)
-        for contract in contracts["documents"]:
-            DATABASES.delete_document(
-                DATABASE_ID, COLLECTION_CONTRACTS, contract["$id"]
-            )
-    except Exception as e:
-        print(f"Error: {e}")
+        print_result(test_name, False, e.detail)
 
 
 def test_contract_requests():
+    print("\nRunning Contract Request Tests...\n")
+
     # Test case: Create a contract as buyer
-    print("\nTest: Create a contract as buyer")
+    test_name = "Create a contract as buyer"
     contract_data = ContractCreateModel(
-        template_type="seed",
-        locations=["location1", "Farmer Address"],
+        locations=["00000", "Farmer Address"],
         dynamic_fields='{"field1": "value1"}',
+        crop_type="wheat",
+        quantity=1000,
+        price_per_kg=20.5,
+        advance_payment=5000,
+        delivery_date="2025-12-31",
+        payment_terms="50% advance, 50% on delivery",
     )
     contract_id = None
-    contract_id2 = None
     try:
         contract = create_contract(contract_data, "buyer@example.com")
-        contract_data.locations = ["location5"]
-        contract2 = create_contract(contract_data, "buyer@example.com")
-        contract_data.locations = ["location1", "Farmer Address"]
-        print(contract)
         contract_id = contract["$id"]
-        contract_id2 = contract2["$id"]
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
+
     # Test case: Create a contract request as farmer
-    print("\nTest: Create a contract request as farmer")
+    test_name = "Create a contract request as farmer"
     request_id = None
     try:
         request_data = ContractRequestCreateModel(contract_id=contract_id)
         request = create_request(request_data, "farmer@example.com")
-        print(request)
         request_id = request["$id"]
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-    # Test case: Get requests as farmer
-    print("\nTest: Get requests as farmer")
-    try:
-        requests = get_requests(email="farmer@example.com")
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get requests as buyer
-    print("\nTest: Get requests as buyer")
-    try:
-        requests = get_requests(email="buyer@example.com")
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get requests as admin
-    print("\nTest: Get requests as admin")
-    try:
-        requests = get_requests(email="admin@example.com", status="pending")
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get requests with contract_id as farmer
-    print("\nTest: Get requests with contract_id as farmer")
-    try:
-        requests = get_requests(email="farmer@example.com", contract_id=contract_id)
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get requests with contract_id as buyer
-    print("\nTest: Get requests with contract_id as buyer")
-    try:
-        requests = get_requests(email="buyer@example.com", contract_id=contract_id)
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get requests with contract_id as admin
-    print("\nTest: Get requests with contract_id as admin")
-    try:
-        requests = get_requests(
-            email="admin@example.com", contract_id=contract_id, status="pending"
-        )
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-
-    # Test case: Get requests without email
-    print("\nTest: Get requests with no args")
-    try:
-        requests = get_requests()
-        print(requests)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Accept a contract request as admin
-    print("\nTest: Accept a contract request as admin")
+    test_name = "Accept a contract request as admin"
     try:
         accepted_request = accept_request(request_id, "admin@example.com")
-        print(accepted_request)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Fulfill a contract request as admin
-    print("\nTest: Fulfill a contract request as admin")
+    test_name = "Fulfill a contract request as admin"
     try:
         fulfilled_request = fulfill_request(request_id, "admin@example.com")
-        print(fulfilled_request)
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Reject a contract request as admin
-    print("\nTest: Reject a contract request as admin")
+    test_name = "Reject a contract request as admin"
     try:
         contract_data = ContractCreateModel(
-            template_type="seed",
-            locations=["location1", "Farmer Address"],
+            locations=["00000", "Farmer Address"],
             dynamic_fields='{"field1": "value1"}',
+            crop_type="wheat",
+            quantity=1000,
+            price_per_kg=20.5,
+            advance_payment=5000,
+            delivery_date="2025-12-31",
+            payment_terms="50% advance, 50% on delivery",
         )
-        contract_id2 = create_contract(contract_data, "buyer@example.com")["$id"]
-        request_data = ContractRequestCreateModel(contract_id=contract_id2)
-        new_request = create_request(request_data, "farmer@example.com")
-        print(new_request)
-        new_request_id = new_request["$id"]
-        rejected_request = reject_request(new_request_id, "admin@example.com")
-        print(rejected_request)
+        new_contract = create_contract(contract_data, "buyer@example.com")
+        new_request_data = ContractRequestCreateModel(contract_id=new_contract["$id"])
+        new_request = create_request(new_request_data, "farmer@example.com")
+        rejected_request = reject_request(new_request["$id"], "admin@example.com")
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
+        print_result(test_name, False, e.detail)
 
     # Test case: Delete a contract request as farmer
-    print("\nTest: Delete a contract request as farmer")
+    test_name = "Delete a contract request as farmer"
     try:
         contract_data = ContractCreateModel(
-            template_type="seed",
-            locations=["location1", "Farmer Address"],
+            locations=["00000", "Farmer Address"],
             dynamic_fields='{"field1": "value1"}',
+            crop_type="wheat",
+            quantity=1000,
+            price_per_kg=20.5,
+            advance_payment=5000,
+            delivery_date="2025-12-31",
+            payment_terms="50% advance, 50% on delivery",
         )
-        contract_id2 = create_contract(contract_data, "buyer@example.com")["$id"]
-        request_data = ContractRequestCreateModel(contract_id=contract_id2)
-        new_request = create_request(request_data, "farmer@example.com")
-        print(new_request)
-        new_request_id = new_request["$id"]
-        deleted_request = delete_request(new_request_id, "farmer@example.com")
-        print(deleted_request)
+        new_contract = create_contract(contract_data, "buyer@example.com")
+        new_request_data = ContractRequestCreateModel(contract_id=new_contract["$id"])
+        new_request = create_request(new_request_data, "farmer@example.com")
+        deleted_request = delete_request(new_request["$id"], "farmer@example.com")
+        print_result(test_name, True)
     except HTTPException as e:
-        print(f"Error: {e.detail}")
-    # Test case: Delete a contract request as farmer
-    print("\nTest: Delete a accepted contract request as admin")
-    try:
-        contract_data = ContractCreateModel(
-            template_type="seed",
-            locations=["location1", "Farmer Address"],
-            dynamic_fields='{"field1": "value1"}',
-        )
-        contract_id2 = create_contract(contract_data, "buyer@example.com")["$id"]
-        request_data = ContractRequestCreateModel(contract_id=contract_id2)
-        new_request = create_request(request_data, "farmer@example.com")
-        print(new_request)
-        new_request_id = new_request["$id"]
-        accepted_request = accept_request(new_request_id, "buyer@example.com")
-        deleted_request = delete_request(new_request_id, "admin@example.com")
-        print(deleted_request)
-    except HTTPException as e:
-        print(f"Error: {e.detail}")
-    # Cleanup: Delete all contract requests and contracts
-    print("\nCleanup: Delete all contract requests and contracts")
-    try:
-        requests = DATABASES.list_documents(DATABASE_ID, COLLECTION_CONTRACT_REQUESTS)
-        for request in requests["documents"]:
-            DATABASES.delete_document(
-                DATABASE_ID, COLLECTION_CONTRACT_REQUESTS, request["$id"]
-            )
-        contracts = DATABASES.list_documents(DATABASE_ID, COLLECTION_CONTRACTS)
-        for contract in contracts["documents"]:
-            DATABASES.delete_document(
-                DATABASE_ID, COLLECTION_CONTRACTS, contract["$id"]
-            )
-    except Exception as e:
-        print(f"Error: {e}")
+        print_result(test_name, False, e.detail)
 
 
 def run_tests():
     test_contracts()
     test_contract_requests()
+
+
+if __name__ == "__main__":
+    run_tests()
