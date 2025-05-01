@@ -7,7 +7,7 @@ from core.dependencies import (
     get_document_or_raise,
 )
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 import time
 from appwrite.query import Query
 
@@ -19,6 +19,7 @@ class RegisterUserModel(BaseModel):
     email: str
     role: str
     address: str
+    zipcode: str
 
 
 class UpdateUserModel(BaseModel):
@@ -26,6 +27,7 @@ class UpdateUserModel(BaseModel):
     email: Optional[str] = None
     role: Optional[str] = None
     address: Optional[str] = None
+    zipcode: Optional[str] = None
 
 
 @router.post("")
@@ -123,6 +125,8 @@ def update_user(
                 )
     if payload.address:
         updates["address"] = payload.address
+    if payload.zipcode:
+        updates["zipcode"] = payload.zipcode
 
     if not updates:
         raise HTTPException(status_code=400, detail="No valid updates provided")

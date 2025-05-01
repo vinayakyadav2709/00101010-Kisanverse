@@ -12,25 +12,23 @@ from appwrite.query import Query
 import json
 from appwrite.id import ID
 
+from datetime import datetime
+
 contracts_router = APIRouter(prefix="/contracts", tags=["Contracts"])
 
-# Enums for template_type and status
-TEMPLATE_TYPES = ["seed", "machine", "fert", "general"]
+# Enums for status
 CONTRACT_STATUSES = ["listed", "accepted", "cancelled", "removed", "fulfilled"]
 
 
-# Pydantic models
 class ContractCreateModel(BaseModel):
-    template_type: str
-    locations: List[str]
+    locations: Optional[List[str]] = ["all"]
     dynamic_fields: str
-
-    @field_validator("template_type")
-    @classmethod
-    def validate_template_type(cls, value):
-        if value not in TEMPLATE_TYPES:
-            return ValueError(f"Invalid template_type. Must be one of {TEMPLATE_TYPES}")
-        return value
+    crop_type: str
+    quantity: int
+    price_per_kg: float
+    advance_payment: float
+    delivery_date: str
+    payment_terms: str
 
     @field_validator("dynamic_fields")
     @classmethod
@@ -38,21 +36,29 @@ class ContractCreateModel(BaseModel):
         try:
             json.loads(value)  # Ensure it's valid JSON
         except json.JSONDecodeError:
-            return ValueError("Invalid JSON format for dynamic_fields")
+            raise ValueError("Invalid JSON format for dynamic_fields")
+        return value
+
+    @field_validator("delivery_date")
+    @classmethod
+    def validate_delivery_date(cls, value):
+        try:
+            delivery_date = datetime.strptime(value, "%Y-%m-%d")
+            if delivery_date <= datetime.now():
+                raise ValueError("Delivery date must be in the future")
+        except ValueError:
+            raise ValueError("Invalid date format. Use YYYY-MM-DD")
         return value
 
 
 class ContractUpdateModel(BaseModel):
-    template_type: Optional[str] = None
-    locations: Optional[List[str]] = None
     dynamic_fields: Optional[str] = None
-
-    @field_validator("template_type", mode="before")
-    @classmethod
-    def validate_template_type(cls, value):
-        if value and value not in TEMPLATE_TYPES:
-            return ValueError(f"Invalid template_type. Must be one of {TEMPLATE_TYPES}")
-        return value
+    crop_type: Optional[str] = None
+    quantity: Optional[int] = None
+    price_per_kg: Optional[float] = None
+    advance_payment: Optional[float] = None
+    delivery_date: Optional[str] = None
+    payment_terms: Optional[str] = None
 
     @field_validator("dynamic_fields", mode="before")
     @classmethod
@@ -61,21 +67,33 @@ class ContractUpdateModel(BaseModel):
             try:
                 json.loads(value)  # Ensure it's valid JSON
             except json.JSONDecodeError:
-                return ValueError("Invalid JSON format for dynamic_fields")
+                raise ValueError("Invalid JSON format for dynamic_fields")
+        return value
+
+    @field_validator("delivery_date", mode="before")
+    @classmethod
+    def validate_delivery_date(cls, value):
+        if value:
+            try:
+                delivery_date = datetime.strptime(value, "%Y-%m-%d")
+                if delivery_date <= datetime.now():
+                    raise ValueError("Delivery date must be in the future")
+            except ValueError:
+                raise ValueError("Invalid date format. Use YYYY-MM-DD")
         return value
 
 
 @contracts_router.get("")
-def get_contracts(email: Optional[str] = None, template_type: Optional[str] = "all"):
+def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
     try:
         query_filters = []
-        if template_type and template_type != "all":
-            if template_type not in TEMPLATE_TYPES:
+        if status and status != "all":
+            if status not in CONTRACT_STATUSES:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid template_type. Must be one of {TEMPLATE_TYPES}",
+                    detail=f"Invalid status. Must be one of {CONTRACT_STATUSES} or 'all'",
                 )
-            query_filters.append(Query.equal("template_type", [template_type]))
+            query_filters.append(Query.equal("status", [status]))
         if email:
             user = get_user_by_email_or_raise(email)
             role = user["role"]
@@ -85,15 +103,21 @@ def get_contracts(email: Optional[str] = None, template_type: Optional[str] = "a
                 query_filters.append(Query.equal("buyer_id", [user["$id"]]))
             elif role == "farmer":
                 # Show contracts applicable to the farmer based on locations
-                farmer_location = user.get("address", [])
-                query_filters.append(Query.contains("locations", farmer_location))
+                farmer_location = user["zipcode"]
+                query_filters.append(
+                    Query.or_queries(
+                        [
+                            Query.contains("locations", [farmer_location]),
+                            Query.equal("locations", ["all"]),
+                        ]
+                    )
+                )
 
         return DATABASES.list_documents(
             DATABASE_ID, COLLECTION_CONTRACTS, queries=query_filters
         )
     except Exception as e:
         if isinstance(e, HTTPException):
-            # If it's already an HTTPException, return it as is
             raise e
         raise HTTPException(
             status_code=500, detail=f"Error fetching contracts: {str(e)}"
@@ -103,6 +127,7 @@ def get_contracts(email: Optional[str] = None, template_type: Optional[str] = "a
 @contracts_router.post("")
 def create_contract(data: ContractCreateModel, email: str):
     try:
+        cleanup_expired_contracts()
         user = get_user_by_email_or_raise(email)
         if user["role"] != "buyer":
             raise HTTPException(
@@ -127,9 +152,7 @@ def create_contract(data: ContractCreateModel, email: str):
                 )
     except Exception as e:
         if isinstance(e, HTTPException):
-            # If it's already an HTTPException, return it as is
             raise e
-
         raise HTTPException(
             status_code=500, detail=f"Error creating contract: {str(e)}"
         )
@@ -159,7 +182,6 @@ def update_contract(contract_id: str, updates: ContractUpdateModel, email: str):
         )
     except Exception as e:
         if isinstance(e, HTTPException):
-            # If it's already an HTTPException, return it as is
             raise e
         raise HTTPException(
             status_code=500, detail=f"Error updating contract: {str(e)}"
@@ -198,7 +220,6 @@ def delete_contract(contract_id: str, email: str):
             raise HTTPException(status_code=403, detail="Permission denied")
     except Exception as e:
         if isinstance(e, HTTPException):
-            # If it's already an HTTPException, return it as is
             raise e
         raise HTTPException(
             status_code=500, detail=f"Error deleting contract: {str(e)}"
@@ -223,6 +244,33 @@ REQUEST_STATUSES = [
 # Pydantic models
 class ContractRequestCreateModel(BaseModel):
     contract_id: str
+
+
+def cleanup_expired_contracts():
+    try:
+        # Fetch all listed contracts
+        listed_contracts = DATABASES.list_documents(
+            DATABASE_ID,
+            COLLECTION_CONTRACTS,
+            queries=[Query.equal("status", ["listed"])],
+        )
+
+        for contract in listed_contracts["documents"]:
+            delivery_date = datetime.strptime(contract["delivery_date"], "%Y-%m-%d")
+            if delivery_date <= datetime.now():
+                # Update contract status to removed
+                DATABASES.update_document(
+                    DATABASE_ID,
+                    COLLECTION_CONTRACTS,
+                    contract["$id"],
+                    {"status": "removed"},
+                )
+
+                # Reject all pending requests for this contract
+                reject_pending_requests(contract["$id"])
+
+    except Exception as e:
+        print(f"Error during cleanup: {str(e)}")
 
 
 def reject_pending_requests(contract_id: str):
@@ -320,9 +368,19 @@ def create_request(data: ContractRequestCreateModel, email: str):
                 status_code=400, detail="Contract must be listed to create a request"
             )
 
+        # Ensure the delivery date is still valid
+        delivery_date = datetime.strptime(contract["delivery_date"], "%Y-%m-%d")
+        if delivery_date <= datetime.now():
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot create a request for an expired contract",
+            )
         # Ensure the farmer's location matches the contract's location
-        farmer_location = user.get("address", "")
-        if farmer_location not in contract["locations"]:
+        farmer_location = user.get("zipcode", "")
+        if (
+            farmer_location not in contract["locations"]
+            and "all" not in contract["locations"]
+        ):
             raise HTTPException(
                 status_code=400,
                 detail="Farmer's location does not match the contract's location",

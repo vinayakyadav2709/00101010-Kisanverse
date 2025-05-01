@@ -19,7 +19,7 @@ Fetches contracts based on optional filters.
 
 ### **Query Parameters**
 - `email` (string, optional): The email of the user fetching contracts.
-- `template_type` (string, optional): Filter by contract type (`seed`, `machine`, `fert`, `general`, or `all`).
+- `status` (string, optional): Filter contracts by location. If `"all"`, fetch contracts in any status.
 
 ### **Response**
 - **Success**: Returns a list of contracts.
@@ -27,7 +27,7 @@ Fetches contracts based on optional filters.
 
 ### **Example API Call**
 ```bash
-curl -X GET "http://localhost:8000/contracts?email=buyer@example.com&template_type=seed"
+curl -X GET "http://localhost:8000/contracts?email=buyer@example.com&status=listed"
 ```
 
 ### **Example Response**
@@ -36,9 +36,14 @@ curl -X GET "http://localhost:8000/contracts?email=buyer@example.com&template_ty
   "total": 2,
   "documents": [
     {
-      "template_type": "seed",
-      "locations": ["Haryana", "Punjab"],
+      "locations": ["12345", "12345"],
       "dynamic_fields": "{\"field1\": \"value1\"}",
+      "crop_type": "wheat",
+      "quantity": 1000,
+      "price_per_kg": 25.5,
+      "advance_payment": 5000.0,
+      "delivery_date": "2025-05-15",
+      "payment_terms": "10 days after delivery",
       "buyer_id": "buyer_id",
       "status": "listed",
       "$id": "contract_id_1",
@@ -66,9 +71,14 @@ Buyers.
 ### **Request Body**
 ```json
 {
-  "template_type": "string (seed, machine, fert, general)",
   "locations": ["string"],
-  "dynamic_fields": "string (valid JSON)"
+  "dynamic_fields": "string (valid JSON)",
+  "crop_type": "string",
+  "quantity": "integer",
+  "price_per_kg": "float",
+  "advance_payment": "float",
+  "delivery_date": "string (date in YYYY-MM-DD format)",
+  "payment_terms": "string"
 }
 ```
 
@@ -84,18 +94,28 @@ Buyers.
 curl -X POST http://localhost:8000/contracts?email=buyer@example.com \
 -H "Content-Type: application/json" \
 -d '{
-  "template_type": "seed",
-  "locations": ["Haryana", "Punjab"],
-  "dynamic_fields": "{\"field1\": \"value1\"}"
+  "locations": ["12345", "12345"],
+  "dynamic_fields": "{\"field1\": \"value1\"}",
+  "crop_type": "wheat",
+  "quantity": 1000,
+  "price_per_kg": 25.5,
+  "advance_payment": 5000.0,
+  "delivery_date": "2025-05-15",
+  "payment_terms": "10 days after delivery"
 }'
 ```
 
 ### **Example Response**
 ```json
 {
-  "template_type": "seed",
-  "locations": ["Haryana", "Punjab"],
+  "locations": ["12345", "12345"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
+  "crop_type": "wheat",
+  "quantity": 1000,
+  "price_per_kg": 25.5,
+  "advance_payment": 5000.0,
+  "delivery_date": "2025-05-15",
+  "payment_terms": "10 days after delivery",
   "buyer_id": "buyer_id",
   "status": "listed",
   "$id": "contract_id",
@@ -112,8 +132,8 @@ curl -X POST http://localhost:8000/contracts?email=buyer@example.com \
 `PATCH /contracts/{contract_id}`
 
 ### **Description**
-Updates a contract. Only admins can update contracts. can only be updated if contract is listed or accepted
-
+Updates a contract. Only admins can update contracts. Contracts can only be updated if their status is `listed` or `accepted`.
+cannot change locations. 
 ### **Who Can Call It**
 Admins.
 
@@ -123,9 +143,14 @@ Admins.
 ### **Request Body**
 ```json
 {
-  "template_type": "string (optional)",
-  "locations": ["string (optional)"],
+  
   "dynamic_fields": "string (optional, valid JSON)",
+  "crop_type": "string (optional)",
+  "quantity": "integer (optional)",
+  "price_per_kg": "float (optional)",
+  "advance_payment": "float (optional)",
+  "delivery_date": "string (optional, date in YYYY-MM-DD format)",
+  "payment_terms": "string (optional)"
 }
 ```
 
@@ -138,18 +163,23 @@ Admins.
 curl -X PATCH http://localhost:8000/contracts/contract_id?email=admin@example.com \
 -H "Content-Type: application/json" \
 -d '{
-  "status": "fulfilled"
+  "price_per_kg": 30.0
 }'
 ```
 
 ### **Example Response**
 ```json
 {
-  "template_type": "seed",
-  "locations": ["Haryana", "Punjab"],
+  "locations": ["12345"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
+  "crop_type": "wheat",
+  "quantity": 1000,
+  "price_per_kg": 30.0,
+  "advance_payment": 5000.0,
+  "delivery_date": "2025-05-15",
+  "payment_terms": "10 days after delivery",
   "buyer_id": "buyer_id",
-  "status": "fulfilled",
+  "status": "listed",
   "$id": "contract_id",
   "$createdAt": "2025-04-26T12:30:03.816+00:00",
   "$updatedAt": "2025-04-26T12:45:03.816+00:00"
@@ -164,8 +194,7 @@ curl -X PATCH http://localhost:8000/contracts/contract_id?email=admin@example.co
 `DELETE /contracts/{contract_id}`
 
 ### **Description**
-Deletes a contract. Buyers can cancel their own contracts, while admins can remove any contract.
-admin can only delete accepted and listed contracts and buyer can only delete listed contracts.
+Deletes a contract. Buyers can cancel their own contracts, while admins can remove any contract. Admins can only delete contracts with `listed` or `accepted` status, and buyers can only delete contracts with `listed` status.
 
 ### **Who Can Call It**
 - Buyers (only for their own contracts).
@@ -189,9 +218,14 @@ curl -X DELETE http://localhost:8000/contracts/contract_id?email=buyer@example.c
 ### **Example Response**
 ```json
 {
-  "template_type": "seed",
-  "locations": ["Haryana", "Punjab"],
+  "locations": ["12345", "12345"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
+  "crop_type": "wheat",
+  "quantity": 1000,
+  "price_per_kg": 25.5,
+  "advance_payment": 5000.0,
+  "delivery_date": "2025-05-15",
+  "payment_terms": "10 days after delivery",
   "buyer_id": "buyer_id",
   "status": "cancelled",
   "$id": "contract_id",
@@ -199,7 +233,6 @@ curl -X DELETE http://localhost:8000/contracts/contract_id?email=buyer@example.c
   "$updatedAt": "2025-04-26T12:45:03.816+00:00"
 }
 ```
-
 ---
 
 ## **5. Get Contract Requests**
@@ -255,7 +288,7 @@ curl -X GET "http://localhost:8000/contract_requests?email=farmer@example.com&st
 `POST /contract_requests`
 
 ### **Description**
-Creates a request for a contract. Only farmers can create requests for listed contracts.
+Creates a request for a contract. Only farmers can create requests for listed contracts, and only if their zipcode is mentioned in contract locations.
 
 ### **Who Can Call It**
 Farmers.

@@ -3,6 +3,9 @@
 This document provides details about the API endpoints defined in the subsidies.py file. It includes information about who can call the endpoints, required parameters, request bodies, and example API calls with expected outputs.
 
 ---
+Here is the updated documentation based on the new APIs:
+
+---
 
 ## **1. Create a Subsidy**
 
@@ -16,10 +19,16 @@ Creates a new subsidy.
 - Admins only.
 
 ### **Request Body**
-- `type` (string, required): The type of the subsidy (`crop`, `seed`, `fertilizer`, `machine`, `general`).
-- `locations` (list of strings, required): The locations where the subsidy is applicable.
-- `max_recipients` (integer, required): The maximum number of recipients for the subsidy.
+- `program` (string, required): The name of the subsidy program.
+- `description` (string, required): A description of the subsidy.
+- `eligibility_criteria` (string, required): The criteria for eligibility.
+- `type` (string, required): The type of the subsidy (`cash`, `asset`, `training`, `loan`).
+- `benefit_value` (string, required): The value or benefit provided by the subsidy (e.g., `10000 cash`, `2 goats`, `150 weeks coaching`).
+- `duration` (string, required): The duration of the subsidy (e.g., `6 months`, `one time`).
+- `application_process` (string, required): The process for applying for the subsidy.
+- `locations` (list of strings, required): The locations where the subsidy is applicable. Can include `"all"` for universal applicability.
 - `dynamic_fields` (string, required): Additional dynamic fields in JSON format.
+- `max_recipients` (integer, required): The maximum number of recipients for the subsidy.
 - `provider` (string, required): The name of the organization providing the subsidy.
 
 ### **Response**
@@ -31,22 +40,34 @@ Creates a new subsidy.
 curl -X POST http://localhost:8000/subsidies \
 -H "Content-Type: application/json" \
 -d '{
-  "type": "crop",
-  "locations": ["location1", "location2"],
-  "max_recipients": 100,
+  "program": "Goat Farming Support",
+  "description": "Provides goats to farmers for livestock development.",
+  "eligibility_criteria": "Must own farmland and have livestock experience.",
+  "type": "asset",
+  "benefit_value": "2 goats",
+  "duration": "one time",
+  "application_process": "Apply online with proof of farmland ownership.",
+  "locations": ["Haryana", "Punjab"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
-  "provider": "Organization A"
+  "max_recipients": 50,
+  "provider": "Livestock Development Board"
 }'
 ```
 
 ### **Example Response**
 ```json
 {
-  "type": "crop",
-  "locations": ["location1", "location2"],
-  "max_recipients": 100,
+  "program": "Goat Farming Support",
+  "description": "Provides goats to farmers for livestock development.",
+  "eligibility_criteria": "Must own farmland and have livestock experience.",
+  "type": "asset",
+  "benefit_value": "2 goats",
+  "duration": "one time",
+  "application_process": "Apply online with proof of farmland ownership.",
+  "locations": ["Haryana", "Punjab"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
-  "provider": "Organization A",
+  "max_recipients": 50,
+  "provider": "Livestock Development Board",
   "status": "listed",
   "$id": "subsidy_id",
   "$createdAt": "2025-05-01T12:00:00.000+00:00"
@@ -61,14 +82,14 @@ curl -X POST http://localhost:8000/subsidies \
 `GET /subsidies`
 
 ### **Description**
-Fetches subsidies based on optional filters.
+Fetches subsidies based on optional filters. If the email belongs to a farmer, filters subsidies relevant to their location.
 
 ### **Who Can Call It**
-Anyone.
+- Anyone.
 
 ### **Query Parameters**
-- `locations` (string or list of strings, optional): Filter subsidies by applicable locations.
-- `type` (string, optional): Filter subsidies by type (`crop`, `seed`, `fertilizer`, `machine`, `general`, or `all`).
+- `email` (string, optional): The email of the user fetching subsidies. If the user is a farmer, filters subsidies relevant to their location.
+- `type` (string, optional): Filter subsidies by type (`cash`, `asset`, `training`, `loan`, or `all`).
 - `status` (string, optional): Filter subsidies by status (`listed`, `removed`, `fulfilled`, or `all`).
 - `provider` (string, optional): Filter subsidies by the provider organization.
 
@@ -78,7 +99,7 @@ Anyone.
 
 ### **Example API Call**
 ```bash
-curl -X GET "http://localhost:8000/subsidies?locations=location1&type=crop&status=listed&provider=Organization%20A"
+curl -X GET "http://localhost:8000/subsidies?email=farmer@example.com&type=asset&status=listed&provider=Livestock%20Development%20Board"
 ```
 
 ### **Example Response**
@@ -87,11 +108,17 @@ curl -X GET "http://localhost:8000/subsidies?locations=location1&type=crop&statu
   "total": 1,
   "documents": [
     {
-      "type": "crop",
-      "locations": ["location1", "location2"],
-      "max_recipients": 100,
+      "program": "Goat Farming Support",
+      "description": "Provides goats to farmers for livestock development.",
+      "eligibility_criteria": "Must own farmland and have livestock experience.",
+      "type": "asset",
+      "benefit_value": "2 goats",
+      "duration": "one time",
+      "application_process": "Apply online with proof of farmland ownership.",
+      "locations": ["Haryana", "Punjab"],
       "dynamic_fields": "{\"field1\": \"value1\"}",
-      "provider": "Organization A",
+      "max_recipients": 50,
+      "provider": "Livestock Development Board",
       "status": "listed",
       "$id": "subsidy_id",
       "$createdAt": "2025-05-01T12:00:00.000+00:00"
@@ -118,10 +145,16 @@ Updates an existing subsidy.
 
 ### **Request Body**
 - Any combination of the following fields:
-  - `type` (string, optional): The type of the subsidy.
+  - `program` (string, optional): The name of the subsidy program.
+  - `description` (string, optional): A description of the subsidy.
+  - `eligibility_criteria` (string, optional): The criteria for eligibility.
+  - `type` (string, optional): The type of the subsidy (`cash`, `asset`, `training`, `loan`).
+  - `benefit_value` (string, optional): The value or benefit provided by the subsidy.
+  - `duration` (string, optional): The duration of the subsidy.
+  - `application_process` (string, optional): The process for applying for the subsidy.
   - `locations` (list of strings, optional): The locations where the subsidy is applicable.
-  - `max_recipients` (integer, optional): The maximum number of recipients for the subsidy.
   - `dynamic_fields` (string, optional): Additional dynamic fields in JSON format.
+  - `max_recipients` (integer, optional): The maximum number of recipients for the subsidy.
   - `provider` (string, optional): The name of the organization providing the subsidy.
 
 ### **Response**
@@ -133,26 +166,30 @@ Updates an existing subsidy.
 curl -X PATCH http://localhost:8000/subsidies/subsidy_id \
 -H "Content-Type: application/json" \
 -d '{
-  "max_recipients": 150,
-  "locations": ["location3"]
+  "max_recipients": 60,
+  "locations": ["Haryana", "Rajasthan"]
 }'
 ```
 
 ### **Example Response**
 ```json
 {
-  "type": "crop",
-  "locations": ["location3"],
-  "max_recipients": 150,
+  "program": "Goat Farming Support",
+  "description": "Provides goats to farmers for livestock development.",
+  "eligibility_criteria": "Must own farmland and have livestock experience.",
+  "type": "asset",
+  "benefit_value": "2 goats",
+  "duration": "one time",
+  "application_process": "Apply online with proof of farmland ownership.",
+  "locations": ["Haryana", "Rajasthan"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
-  "provider": "Organization A",
+  "max_recipients": 60,
+  "provider": "Livestock Development Board",
   "status": "listed",
   "$id": "subsidy_id",
   "$updatedAt": "2025-05-01T12:30:00.000+00:00"
 }
 ```
-
----
 
 ## **4. Delete a Subsidy**
 

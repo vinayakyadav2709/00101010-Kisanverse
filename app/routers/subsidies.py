@@ -17,12 +17,8 @@ from appwrite.id import ID
 subsidies_router = APIRouter(prefix="/subsidies", tags=["Subsidies"])
 
 # Enums for type and status
-SUBSIDY_TYPES = ["crop", "seed", "fertilizer", "machine", "general"]
-SUBSIDY_STATUSES = [
-    "listed",
-    "removed",
-    "fulfilled",
-]
+SUBSIDY_TYPES = ["cash", "asset", "training", "loan"]
+SUBSIDY_STATUSES = ["listed", "removed", "fulfilled"]
 
 
 def reject_pending_requests(subsidy_id: str):
@@ -54,17 +50,23 @@ def reject_pending_requests(subsidy_id: str):
 
 # Pydantic models
 class SubsidyCreateModel(BaseModel):
+    program: str
+    description: str
+    eligibility_criteria: str
     type: str
+    benefit_value: str
+    duration: str
+    application_process: str
     locations: List[str]
-    max_recipients: int
     dynamic_fields: str
+    max_recipients: int
     provider: str
 
     @field_validator("type")
     @classmethod
     def validate_type(cls, value):
         if value not in SUBSIDY_TYPES:
-            return ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
+            raise ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
         return value
 
     @field_validator("dynamic_fields")
@@ -73,22 +75,34 @@ class SubsidyCreateModel(BaseModel):
         try:
             json.loads(value)  # Ensure it's valid JSON
         except json.JSONDecodeError:
-            return ValueError("Invalid JSON format for dynamic_fields")
+            raise ValueError("Invalid JSON format for dynamic_fields")
+        return value
+
+    @field_validator("locations")
+    @classmethod
+    def validate_locations(cls, value):
+        if not value:
+            raise ValueError("Locations cannot be empty")
         return value
 
 
 class SubsidyUpdateModel(BaseModel):
+    program: Optional[str] = None
+    description: Optional[str] = None
+    eligibility_criteria: Optional[str] = None
     type: Optional[str] = None
-    locations: Optional[List[str]] = None
-    max_recipients: Optional[int] = None
+    benefit_value: Optional[str] = None
+    duration: Optional[str] = None
+    application_process: Optional[str] = None
     dynamic_fields: Optional[str] = None
+    max_recipients: Optional[int] = None
     provider: Optional[str] = None
 
     @field_validator("type", mode="before")
     @classmethod
     def validate_type(cls, value):
         if value and value not in SUBSIDY_TYPES:
-            return ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
+            raise ValueError(f"Invalid type. Must be one of {SUBSIDY_TYPES}")
         return value
 
     @field_validator("dynamic_fields", mode="before")
@@ -98,7 +112,7 @@ class SubsidyUpdateModel(BaseModel):
             try:
                 json.loads(value)  # Ensure it's valid JSON
             except json.JSONDecodeError:
-                return ValueError("Invalid JSON format for dynamic_fields")
+                raise ValueError("Invalid JSON format for dynamic_fields")
         return value
 
 
@@ -135,15 +149,11 @@ def create_subsidy(data: SubsidyCreateModel, email: str):
 
 @subsidies_router.get("")
 def get_subsidies(
-    locations: Optional[Union[str, List[str]]] = None,
+    email: str = None,
     type: Optional[str] = "all",
     status: Optional[str] = "all",
     provider: Optional[str] = None,
 ):
-    """
-    Fetch subsidies with optional filters for type, status, provider, and locations.
-    If locations are provided, only show subsidies relevant to those locations.
-    """
     try:
         query_filters = []
 
@@ -168,12 +178,17 @@ def get_subsidies(
         # Apply provider filter if specified
         if provider:
             query_filters.append(Query.equal("provider", [provider]))
-
-        # Apply locations filter if specified
-        if locations:
-            if isinstance(locations, str):
-                locations = [locations]  # Convert single string to a list
-            query_filters.append(Query.contains("locations", locations))
+        user = get_user_by_email_or_raise(email)
+        if user["role"] == "farmer":
+            location = user["zipcode"]
+            query_filters.append(
+                Query.or_queries(
+                    [
+                        Query.contains("locations", [location]),
+                        Query.equal("locations", ["all"]),
+                    ]
+                )
+            )
 
         # Fetch subsidies with the applied filters
         subsidies = DATABASES.list_documents(
@@ -224,7 +239,7 @@ def update_subsidy(subsidy_id: str, updates: SubsidyUpdateModel, email: str):
         val = DATABASES.update_document(
             DATABASE_ID, COLLECTION_SUBSIDIES, subsidy_id, updated_data
         )
-        if updated_data["status"] == "fulfilled":
+        if updated_data.get("status") == "fulfilled":
             # If the subsidy is fulfilled, reject all pending requests
             reject_pending_requests(subsidy["$id"])
         return val
@@ -332,12 +347,15 @@ def create_request(data: SubsidyRequestCreateModel, email: str):
             raise HTTPException(
                 status_code=400, detail="Subsidy must be listed to create a request"
             )
-        # only allow if farmer's address is in the subsidy locations
-        farmer_location = user.get("address", "")
-        if farmer_location not in subsidy["locations"]:
+        # only allow if farmer's zipcode is in the subsidy locations
+        farmer_location = user.get("zipcode", "")
+        if (
+            farmer_location not in subsidy["locations"]
+            and "all" not in subsidy["locations"]
+        ):
             raise HTTPException(
                 status_code=400,
-                detail="Farmer's address must be in the subsidy locations",
+                detail="Farmer's zipcode must be in the subsidy locations",
             )
         # Check if the farmer has already requested this subsidy
         existing_requests = DATABASES.list_documents(

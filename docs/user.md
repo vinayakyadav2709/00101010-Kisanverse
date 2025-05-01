@@ -1,3 +1,4 @@
+note: zipcode have been added. document api response may not show them. 
 # API Documentation for `/users` Endpoint
 
 This document provides details about the API endpoints defined in the users.py file. It includes information about who can call the endpoints, required parameters, request bodies, and example API calls with expected outputs.
@@ -21,7 +22,8 @@ Anyone.
   "name": "string",
   "email": "string",
   "role": "string (admin, farmer, buyer, provider)",
-  "address": "string"
+  "address": "string",
+  "zipcode": "string"
 }
 ```
 
@@ -38,6 +40,7 @@ curl -X POST http://localhost:8000/users \
   "email": "john.doe@example.com",
   "role": "admin",
   "address": "123 Main St"
+  "zipcode" : "12345"
 }'
 ```
 
@@ -168,7 +171,8 @@ Updates a user's details. Only the user themselves or an admin can update a user
   "name": "string (optional)",
   "email": "string (optional)",
   "role": "string (optional, admin only)",
-  "address": "string (optional)"
+  "address": "string (optional)",
+  "zipcode": "int (optional)"
 }
 ```
 
