@@ -24,7 +24,6 @@ Creates a new subsidy.
 - `eligibility` (string, required): The criteria for eligibility.
 - `type` (string, required): The type of the subsidy (`cash`, `asset`, `training`, `loan`).
 - `benefits` (string, required): The value or benefit provided by the subsidy (e.g., `10000 cash`, `2 goats`, `150 weeks coaching`).
-- `duration` (string, required): The duration of the subsidy (e.g., `6 months`, `one time`).
 - `application_process` (string, required): The process for applying for the subsidy.
 - `locations` (list of strings, required): The locations where the subsidy is applicable. Can include `"all"` for universal applicability.
 - `dynamic_fields` (string, required): Additional dynamic fields in JSON format.
@@ -45,7 +44,6 @@ curl -X POST http://localhost:8000/subsidies \
   "eligibility": "Must own farmland and have livestock experience.",
   "type": "asset",
   "benefits": "2 goats",
-  "duration": "one time",
   "application_process": "Apply online with proof of farmland ownership.",
   "locations": ["Haryana", "Punjab"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
@@ -62,7 +60,6 @@ curl -X POST http://localhost:8000/subsidies \
   "eligibility": "Must own farmland and have livestock experience.",
   "type": "asset",
   "benefits": "2 goats",
-  "duration": "one time",
   "application_process": "Apply online with proof of farmland ownership.",
   "locations": ["Haryana", "Punjab"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
@@ -113,7 +110,6 @@ curl -X GET "http://localhost:8000/subsidies?email=farmer@example.com&type=asset
       "eligibility": "Must own farmland and have livestock experience.",
       "type": "asset",
       "benefits": "2 goats",
-      "duration": "one time",
       "application_process": "Apply online with proof of farmland ownership.",
       "locations": ["Haryana", "Punjab"],
       "dynamic_fields": "{\"field1\": \"value1\"}",
@@ -150,7 +146,6 @@ Updates an existing subsidy.
   - `eligibility` (string, optional): The criteria for eligibility.
   - `type` (string, optional): The type of the subsidy (`cash`, `asset`, `training`, `loan`).
   - `benefits` (string, optional): The value or benefit provided by the subsidy.
-  - `duration` (string, optional): The duration of the subsidy.
   - `application_process` (string, optional): The process for applying for the subsidy.
   - `locations` (list of strings, optional): The locations where the subsidy is applicable.
   - `dynamic_fields` (string, optional): Additional dynamic fields in JSON format.
@@ -179,7 +174,6 @@ curl -X PATCH http://localhost:8000/subsidies/subsidy_id \
   "eligibility": "Must own farmland and have livestock experience.",
   "type": "asset",
   "benefits": "2 goats",
-  "duration": "one time",
   "application_process": "Apply online with proof of farmland ownership.",
   "locations": ["Haryana", "Rajasthan"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
