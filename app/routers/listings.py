@@ -444,7 +444,8 @@ def get_bids(
                 listing_ids = [
                     listing["$id"] for listing in buyer_listings["documents"]
                 ]
-                query_filters.append(Query.equal("listing_id", listing_ids))
+                if listing_ids:
+                    query_filters.append(Query.equal("listing_id", listing_ids))
 
         # Filter by listing_id
         if listing_id:
