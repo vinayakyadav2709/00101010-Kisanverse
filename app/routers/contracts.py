@@ -108,7 +108,7 @@ def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
                     Query.or_queries(
                         [
                             Query.contains("locations", [farmer_location]),
-                            Query.equal("locations", ["all"]),
+                            Query.contains("locations", ["all"]),
                         ]
                     )
                 )

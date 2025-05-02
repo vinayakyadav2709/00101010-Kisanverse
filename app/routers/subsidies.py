@@ -184,7 +184,7 @@ def get_subsidies(
                     Query.or_queries(
                         [
                             Query.contains("locations", [location]),
-                            Query.equal("locations", ["all"]),
+                            Query.contains("locations", ["all"]),
                         ]
                     )
                 )

@@ -1,5 +1,6 @@
 from appwrite.client import Client
 from appwrite.services.databases import Databases
+from appwrite.services.storage import Storage
 
 from dotenv import load_dotenv
 import os
@@ -15,7 +16,7 @@ CLIENT = (
 
 DATABASES = Databases(CLIENT)
 DATABASE_ID = "agri_marketplace"
-
+STORAGE = Storage(CLIENT)
 # Collection IDs
 COLLECTION_USERS = "users"
 COLLECTION_CROP_LISTINGS = "crop_listings"
@@ -24,3 +25,11 @@ COLLECTION_CONTRACTS = "contracts"
 COLLECTION_CONTRACT_REQUESTS = "contract_requests"
 COLLECTION_SUBSIDIES = "subsidies"
 COLLECTION_SUBSIDY_REQUESTS = "subsidy_requests"
+COLLECTION_ZIPCODES = "zipcodes"
+COLLECTION_CROP_PREDICTIONS = "crop_predictions"
+COLLECTION_DISEASE = "disease"
+BUCKET_DISEASE = "disease"
+COLLECTION_WEATHER = "weather"
+COLLECTION_WEATHER_HISTORY = "weather_history"
+BUCKET_SOIL = "soil"
+COLLECTION_SOIL = "soil"
