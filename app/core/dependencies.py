@@ -37,11 +37,11 @@ def get_coord(zipcode: str):
         val = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_ZIPCODES,
-            queries=[Query.equal("pincode", [zipcode])],
+            queries=[Query.equal("zipcode", [zipcode])],
         )
 
-        val = val["documents"][0]
-        if val:
+        if val["documents"]:
+            val = val["documents"][0]
             return {
                 "latitude": val["latitude"],
                 "longitude": val["longitude"],
@@ -60,12 +60,11 @@ def get_state(zipcode: str):
         val = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_ZIPCODES,
-            queries=[Query.equal("pincode", [zipcode])],
+            queries=[Query.equal("zipcode", [zipcode])],
         )
 
-        val = val["documents"][0]
-        if val:
-            return val["state"]
+        if val["documents"]:
+            return val["documents"][0]["state"]
         else:
             raise HTTPException(status_code=404, detail="Given zipcode not found")
     except Exception as e:
