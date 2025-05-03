@@ -13,7 +13,8 @@ CLIENT = (
     .set_key(os.getenv("APPWRITE_API_KEY"))
     .set_self_signed(True)
 )
-
+PROJECT_ID = os.environ["APPWRITE_PROJECT_ID"]
+ENDPOINT = "http://localhost/v1"
 DATABASES = Databases(CLIENT)
 DATABASE_ID = "agri_marketplace"
 STORAGE = Storage(CLIENT)

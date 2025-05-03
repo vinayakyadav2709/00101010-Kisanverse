@@ -27,6 +27,8 @@ from core.config import (
     COLLECTION_PRICES_HISTORY,
     COLLECTION_CROPS,
     BUCKET_CROP,
+    PROJECT_ID,
+    ENDPOINT,
 )
 from routers import contracts, subsidies
 from core.dependencies import get_user_by_email_or_raise, get_coord
@@ -47,6 +49,10 @@ import os
 # Define the router
 ai_router = APIRouter(prefix="/predictions", tags=["Predictions"])
 import numpy as np  # Add this import if not already present
+
+
+def get_url(bucket_id: str, file_id: str) -> str:
+    return f"{ENDPOINT}/storage/buckets/{bucket_id}/files/{file_id}/view?project={PROJECT_ID}"
 
 
 # Helper function to convert non-serializable types
@@ -156,7 +162,7 @@ def soil_classification_history(email: Optional[str] = None):
         history = []
         for doc in documents["documents"]:
             file_id = doc["file_id"]
-            file_url = STORAGE.get_file_view(BUCKET_SOIL, file_id)["href"]
+            file_url = get_url(BUCKET_SOIL, file_id)  # Generate file view URL
             history.append(
                 {
                     "file_id": file_id,
@@ -278,9 +284,7 @@ def disease_prediction_history(email: Optional[str] = None):
         history = []
         for doc in documents["documents"]:
             file_id = doc["file_id"]
-            file_url = STORAGE.get_file_view(BUCKET_DISEASE, file_id)[
-                "href"
-            ]  # Generate file view URL
+            file_url = get_url(BUCKET_DISEASE, file_id)  # Generate file view URL
             history.append(
                 {
                     "file_id": file_id,
@@ -314,8 +318,8 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
             )
 
         # Extract the year and month from start_date and end_date
-        start_month = start_date.strftime("%Y-%m")
-        end_month = end_date.strftime("%Y-%m")
+        start_month = start_date.strftime("%m")
+        end_month = end_date.strftime("%m")
 
         # Query the database for existing weather data
         val = DATABASES.list_documents(
@@ -326,7 +330,6 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
                 Query.equal("longitude", [lon]),
             ],
         )
-
         # Check if data exists
         if not val["documents"]:
             raise HTTPException(
@@ -344,7 +347,11 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
             for pred in predictions
             if start_month <= json.loads(pred)["month"] <= end_month
         ]
-
+        if not filtered_predictions:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No weather data found for the given month range.",
+            )
         # Extract only the required fields: month and other data
         result = [
             {
@@ -437,7 +444,7 @@ def weather_prediction(input_data: WeatherPredictionInput, store: bool = True):
         )
 
         # Step 7: Return the weather data
-        return weather_data
+        return serialized_weather_data
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -857,17 +864,6 @@ def llm(data: Dict[str, Any]) -> Dict[str, Any]:
     return data
 
 
-class CropPredictionInput(BaseModel):
-    """
-    Pydantic model for crop prediction input.
-    """
-
-    email: str
-    end_date: str
-    start_date: Optional[str] = None
-    acres: int
-
-
 def get_available_subsidies(email: str, status: str = "listed"):
     """
     Fetches available subsidies for a farmer and checks if the farmer has already applied for them.
@@ -931,21 +927,36 @@ def get_yield(crop: str) -> int:
         return 2000  # Default average yield in kg/acre
 
 
+class CropPredictionInput(BaseModel):
+    """
+    Pydantic model for crop prediction input.
+    """
+
+    email: str
+    end_date: str
+    start_date: Optional[str] = None
+    acres: int
+    soil_type: Optional[str] = None
+
+
+import logging
+
+
 @ai_router.post("/crop_prediction")
 def crop_prediction(
-    input_data: CropPredictionInput,
-    file: Optional[UploadFile] = File(None),  # Make file optional
+    email: str,
+    end_date: str,
+    acres: int,
+    start_date: Optional[str] = None,
     soil_type: Optional[str] = None,
+    file: Optional[UploadFile] = File(None),  # Make file optional
 ):
     local_file_path = None
+
+
     try:
-        # Step 1: Extract input data
-        email = input_data.email
-        end_date = input_data.end_date
-        start_date = input_data.start_date or datetime.now(timezone.utc).strftime(
-            "%Y-%m-%d"
-        )
-        # Validate if start_date is less than end_date
+        # Step 1: Validate input data
+        start_date = start_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
         if (
             datetime.strptime(start_date, "%Y-%m-%d").date()
             > datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -953,37 +964,69 @@ def crop_prediction(
             raise HTTPException(
                 status_code=400, detail="start_date should be less than end_date"
             )
+
+        # Step 2: Get user details and coordinates
         user = get_user_by_email_or_raise(email)
         user_id = user["$id"]
         cord = get_coord(user["zipcode"])
         latitude = cord["latitude"]
         longitude = cord["longitude"]
 
-        # Step 2: Handle soil classification
+        
+        
+
+        # Step 3: Handle soil classification or file upload
         file_url = None
+        soil_data = None
         if file is None and soil_type is None:
             raise HTTPException(
                 status_code=400, detail="Either file or soil_type must be provided"
             )
-        if file is not None:
-            # Save the file locally for later upload
+
+        if soil_type is None:
+            # Save the file locally
+            
             local_file_path = f"/tmp/{file.filename}"
-            with open(local_file_path, "wb") as f:
-                f.write(file.file.read())
+            try:
+                with open(local_file_path, "wb") as f:
+                    f.write(file.file.read())
+                
+
+                # Upload the file to Appwrite storage
+                response = STORAGE.create_file(
+                    bucket_id=BUCKET_CROP,
+                    file_id=ID.unique(),
+                    file=InputFile.from_path(local_file_path),
+                )
+                file_id = response["$id"]
+                file_url = get_url(BUCKET_CROP, file_id)
+                
+            except Exception as e:
+                
+                raise HTTPException(
+                    status_code=500, detail=f"Error handling file: {str(e)}"
+                )
+            finally:
+                # Clean up the local file
+                if local_file_path and os.path.exists(local_file_path):
+                    os.remove(local_file_path)
+                    
         else:
             # Use the provided soil_type
             soil_data = {
                 "soil_type": soil_type,
                 "confidence": 100.0,  # Assuming 100% confidence if provided
             }
+            
 
-        # Step 3: Call the weather prediction API
+        # Step 4: Call the weather prediction API
         weather_input = WeatherPredictionInput(
             email=email, start_date=start_date, end_date=end_date
         )
         weather_predictions = weather_prediction(weather_input, store=False)
+        
 
-        # Step 4: Fetch crop prices
+        # Step 5: Fetch crop prices
         crop_prices = fetch_prices(
             latitude,
             longitude,
@@ -991,11 +1034,12 @@ def crop_prediction(
             start_date,
             end_date,
         )
+        
         applicable = get_available_subsidies(email, status="listed")
-        # Extract subsidies id
         subsidy_ids = [subsidy["$id"] for subsidy in applicable]
+        
 
-        # Step 5: Merge all data into a single hash
+        # Step 6: Merge all data into a single hash
         combined_data = {
             "soil_type": soil_data["soil_type"] if file is None else None,
             "soil_type_confidence": soil_data["confidence"] if file is None else None,
@@ -1004,10 +1048,12 @@ def crop_prediction(
             "start_date": start_date,
             "end_date": end_date,
             "weather_predictions": weather_predictions,
-            "land_size": input_data.acres,
+            "land_size": acres,
             "crops_data": [],
             "subsidies": applicable,
         }
+
+        # Step 7: Process crop prices and contracts
         contract_ids = {}
         available_contracts = contracts.get_contracts(email, "listed")["documents"]
         for crop, value in crop_prices.items():
@@ -1032,28 +1078,18 @@ def crop_prediction(
                     "yield_per_kg": yield_per_kg,
                 }
             )
+        
 
-        # Step 6: Call the LLM function
+        # Step 8: Call the LLM function
         llm_result = llm(combined_data)
+        
 
-        file_url = None
-        # Step 8: Upload the file to BUCKET_CROP (if provided)
-        if file is not None:
-            response = STORAGE.create_file(
-                bucket_id=BUCKET_CROP,
-                file_id=ID.unique(),
-                file=InputFile.from_path(local_file_path),
-            )
-            file_url = STORAGE.get_file_view(BUCKET_DISEASE, response["$id"])["href"]
-            # Delete the local file after upload
-            if os.path.exists(local_file_path):
-                os.remove(local_file_path)
-                # Step 7: Store the input and output in COLLECTION_CROPS
+        # Step 9: Store the input and output in COLLECTION_CROPS
         input_data_to_store = {
             "email": email,
             "start_date": start_date,
             "end_date": end_date,
-            "acres": input_data.acres,
+            "acres": acres,
             "soil_type": soil_type if file is None else file_url,
         }
         DATABASES.create_document(
@@ -1067,14 +1103,14 @@ def crop_prediction(
                 "output": llm_result,
             },
         )
-        # Step 9: Return the result from the LLM function
+        
+
+        # Step 10: Return the result from the LLM function
         return json.loads(llm_result)
 
     except Exception as e:
-        if file is not None and os.path.exists(local_file_path):
-            os.remove(local_file_path)
+        
         if isinstance(e, HTTPException):
-            # If it's already an HTTPException, return it as is
             raise e
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
