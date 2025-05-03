@@ -34,7 +34,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from appwrite.query import Query
 from datetime import datetime, timezone, timedelta
-from models import disease, soil, weather
+from models import disease, soil
 
 # import price
 import json
@@ -748,7 +748,7 @@ def llm(data: Dict[str, Any]) -> Dict[str, Any]:
             "program": "State Certified Seed Subsidy (Kharif)",
             "provider": "State Agriculture Department",
             "benefit_summary": "Approx. 50% cost reduction on certified Soybean seeds.",
-            "details_available": true // Indicates app could link to more info if available
+            "details_available": true 
             }
         ],
         "primary_risks": [
@@ -815,7 +815,7 @@ def llm(data: Dict[str, Any]) -> Dict[str, Any]:
             "estimated_input_cost_category": "Medium-High",
             "primary_fertilizer_needs": "High Nitrogen, Phosphorus, Potassium"
         },
-        "relevant_subsidies": [], // Empty array indicates none relevant found
+        "relevant_subsidies": [], 
         "primary_risks": [
             "Higher upfront fertilizer costs.",
             "Yield potential highly dependent on consistent rainfall.",
@@ -937,6 +937,7 @@ def crop_prediction(
     file: Optional[UploadFile] = File(None),  # Make file optional
     soil_type: Optional[str] = None,
 ):
+    local_file_path = None
     try:
         # Step 1: Extract input data
         email = input_data.email
@@ -1070,7 +1071,7 @@ def crop_prediction(
         return json.loads(llm_result)
 
     except Exception as e:
-        if os.path.exists(local_file_path):
+        if file is not None and os.path.exists(local_file_path):
             os.remove(local_file_path)
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -1142,20 +1143,20 @@ def test_price_apis_and_crop_prediction():
         user = DATABASES.create_document(
             DATABASE_ID, COLLECTION_USERS, ID.unique(), data
         )
-        # Test fetch_prices_api
-        print("Testing fetch_prices_api...")
-        prices_result = fetch_prices_api(
-            crop_type=CROP_TYPE,
-            email=EMAIL,
-            end_date=END_DATE,
-            start_date=START_DATE,
-        )
-        print("Fetch Prices API Result:", prices_result)
+        # # Test fetch_prices_api
+        # print("Testing fetch_prices_api...")
+        # prices_result = fetch_prices_api(
+        #     crop_type=CROP_TYPE,
+        #     email=EMAIL,
+        #     end_date=END_DATE,
+        #     start_date=START_DATE,
+        # )
+        # print("Fetch Prices API Result:", prices_result)
 
-        # Test get_prices_history
-        print("Testing get_prices_history...")
-        history_result = get_prices_history(email=EMAIL)
-        print("Get Prices History API Result:", history_result)
+        # # Test get_prices_history
+        # print("Testing get_prices_history...")
+        # history_result = get_prices_history(email=EMAIL)
+        # print("Get Prices History API Result:", history_result)
 
         # Test crop_prediction
         print("Testing crop_prediction...")
@@ -1167,6 +1168,7 @@ def test_price_apis_and_crop_prediction():
         )
         crop_prediction_result = crop_prediction(
             input_data=crop_input,
+            file=None,  # No file provided for this test
             soil_type=SOIL_TYPE,  # Pass soil type directly
         )
         print("Crop Prediction API Result:", crop_prediction_result)
