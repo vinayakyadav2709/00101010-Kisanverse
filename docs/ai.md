@@ -31,6 +31,7 @@ Anyone.
 ### **Example API Call**
 ```bash
 curl -X POST http://localhost:8000/predictions/soil_type?email=farmer@example.com \
+-H "Content-Type: multipart/form-data"   \
 -F "file=@soil.jpg"
 ```
 
@@ -109,6 +110,7 @@ Anyone.
 ### **Example API Call**
 ```bash
 curl -X POST http://localhost:8000/predictions/disease?email=farmer@example.com \
+-H "Content-Type: multipart/form-data"   \
 -F "file=@plant.jpg"
 ```
 
@@ -305,6 +307,7 @@ Anyone.
 ### **Query Parameters**
 - `file` (file, optional): The soil image file for classification.
 - `soil_type` (string, optional): The soil type if known.
+- either file or soil_type needs to be given. if both given uses soil_type
 
 ### **Response**
 - **Success**: Returns the predicted crops and their details. dates in ascending order.
@@ -313,13 +316,13 @@ Anyone.
 ### **Example API Call**
 ```bash
 curl -X POST http://localhost:8000/predictions/crop_prediction \
--H "Content-Type: application/json" \
--d '{
-  "email": "farmer@example.com",
-  "start_date": "2025-07-01",
-  "end_date": "2025-07-10",
-  "acres": 5
-}'
+-H "Content-Type: multipart/form-data" \
+-F "file=@test_data/soil.jpg" \
+-F "soil_type=Loamy" \
+-F "email=farmer@example.com" \
+-F "start_date=2025-07-01" \
+-F "end_date=2025-07-10" \
+-F "acres=5"
 ```
 
 ### **Example Response**

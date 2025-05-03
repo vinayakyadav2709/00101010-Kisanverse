@@ -1,9 +1,7 @@
 import logging
 import uvicorn
 from fastapi import FastAPI
-from routers import users, listings, contracts, subsidies
-
-# ai
+from routers import users, listings, contracts, subsidies, ai
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -56,7 +54,11 @@ class LogMiddleware(BaseHTTPMiddleware):
         logger.info(f"Headers: {request.headers}")
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
-            logger.info(f"Body: {body.decode('utf-8')}")
+            # Log the body only if it's not binary data
+            if "multipart/form-data" not in request.headers.get("content-type", ""):
+                logger.info(f"Body: {body.decode('utf-8')}")
+            else:
+                logger.info("Binary data received, skipping body logging.")
 
         # Process the request
         response = await call_next(request)
@@ -76,7 +78,7 @@ routers = [
     contracts.contract_requests_router,
     subsidies.subsidies_router,
     subsidies.subsidy_requests_router,
-    # ai.ai_router
+    ai.ai_router,
 ]
 
 for router in routers:
