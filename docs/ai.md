@@ -316,14 +316,30 @@ Anyone.
 ### **Example API Call**
 ```bash
 curl -X POST http://localhost:8000/predictions/crop_prediction \
--H "Content-Type: multipart/form-data" \
--F "file=@test_data/soil.jpg" \
--F "soil_type=Loamy" \
+-F "file=@path/to/soil_image.jpg" \
 -F "email=farmer@example.com" \
 -F "start_date=2025-07-01" \
 -F "end_date=2025-07-10" \
 -F "acres=5"
 ```
+If you want to use the `soil_type` parameter instead of uploading a file:
+```bash
+curl -X POST http://localhost:8000/predictions/crop_prediction \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "farmer@example.com",
+  "start_date": "2025-07-01",
+  "end_date": "2025-07-10",
+  "acres": 5,
+  "soil_type": "Loamy"
+}'
+```
+### **Notes**
+- If both `file` and `soil_type` are provided, the `soil_type` parameter will take precedence, and the file will not be processed.
+- The `file` parameter should be a valid image file (e.g., `.jpg`, `.png`).
+- The `start_date` is optional. If not provided, it defaults to the current date.
+
+---
 
 ### **Example Response**
 ```json
@@ -350,8 +366,7 @@ curl -X POST http://localhost:8000/predictions/crop_prediction \
             "precipitation_sum": 1.2,
             "wind_speed_10m_max": 20.0,
             "shortwave_radiation_sum": 24.50
-        },
-        ...
+        }
     ],
   "land_size": 5,
   "crops_data": [
@@ -361,12 +376,16 @@ curl -X POST http://localhost:8000/predictions/crop_prediction \
       "dates": ["2025-07-01", "2025-07-02", "2025-07-03"],
       "contracts": ["id"],
       "yield_per_kg": 2500
-    },
-    ...
+    }
   ],
   "subsidies": ["id"]
 }
 ```
+
+---
+
+
+
 
 ## **8. Fetch Crop Prices**
 

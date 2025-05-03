@@ -1,7 +1,7 @@
 # import logging
 # import uvicorn
 # from fastapi import FastAPI
-from routers.ai import test_price_apis_and_crop_prediction
+# from routers.ai import test_price_apis_and_crop_prediction
 # from fastapi.middleware.cors import CORSMiddleware
 # from fastapi.responses import JSONResponse
 # from fastapi import Request
@@ -9,7 +9,7 @@ from routers.ai import test_price_apis_and_crop_prediction
 # import traceback
 
 # # run subisides test function
-test_price_apis_and_crop_prediction()
+# test_price_apis_and_crop_prediction()
 # # subsidies.run_tests()
 # # contracts.run_tests()
 # # upload.init()
@@ -31,3 +31,6 @@ from routers.other_scripts.upload_prices import (
 
 # insert_prices_from_files()
 # update_crop_names_to_uppercase()
+from routers.other_scripts.approx import main
+
+main()
