@@ -76,7 +76,7 @@ def list_users(type: Optional[str] = "all"):
             pass
         else:
             raise HTTPException(status_code=400, detail="Invalid type provided")
-
+        query_filters.append(Query.limit(10000))  # Limit to 100 results
         # List documents based on filters
         return DATABASES.list_documents(
             DATABASE_ID, COLLECTION_USERS, queries=query_filters

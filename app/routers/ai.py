@@ -23,6 +23,10 @@ from core.config import (
     COLLECTION_WEATHER_HISTORY,
     COLLECTION_USERS,
     COLLECTION_SUBSIDIES,
+    COLLECTION_PRICES,
+    COLLECTION_PRICES_HISTORY,
+    COLLECTION_CROPS,
+    BUCKET_CROP,
 )
 from routers import contracts, subsidies
 from core.dependencies import get_user_by_email_or_raise, get_coord
@@ -116,6 +120,9 @@ def soil_classification(email: str, file: UploadFile = File(...), store: bool = 
         # Ensure the local file is deleted even if an error occurs
         if os.path.exists(local_file_path):
             os.remove(local_file_path)
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error during soil classification: {str(e)}"
         )
@@ -138,7 +145,7 @@ def soil_classification_history(email: Optional[str] = None):
         if email:
             user_id = get_user_by_email_or_raise(email)["$id"]
             queries.append(Query.equal("user_id", user_id))
-
+        queries.append(Query.limit(10000))
         documents = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_SOIL,  # Replace with your collection ID
@@ -149,7 +156,7 @@ def soil_classification_history(email: Optional[str] = None):
         history = []
         for doc in documents["documents"]:
             file_id = doc["file_id"]
-            file_url = f"http://localhost/v1/storage/buckets/{BUCKET_SOIL}/files/{file_id}/view"  # Generate file view URL
+            file_url = STORAGE.get_file_view(BUCKET_SOIL, file_id)["href"]
             history.append(
                 {
                     "file_id": file_id,
@@ -161,10 +168,13 @@ def soil_classification_history(email: Optional[str] = None):
             )
 
         # Sort history by uploaded_at in descending order
-        history.sort(key=lambda x: x["uploaded_at"], reverse=True)
+        history.sort(key=lambda x: x["uploaded_at"])
         return {"history": history}
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fetching history: {str(e)}")
 
 
@@ -234,6 +244,9 @@ def disease_prediction(email: str, file: UploadFile = File(...), store: bool = T
         # Ensure the local file is deleted even if an error occurs
         if os.path.exists(local_file_path):
             os.remove(local_file_path)
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
@@ -254,7 +267,7 @@ def disease_prediction_history(email: Optional[str] = None):
         if email:
             user_id = get_user_by_email_or_raise(email)["$id"]
             queries.append(Query.equal("user_id", user_id))
-
+        queries.append(Query.limit(10000))
         documents = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_DISEASE,  # Replace with your collection ID
@@ -280,10 +293,13 @@ def disease_prediction_history(email: Optional[str] = None):
             )
 
         # Sort history by uploaded_at in descending order
-        history.sort(key=lambda x: x["uploaded_at"], reverse=True)
+        history.sort(key=lambda x: x["uploaded_at"])
         return {"history": history}
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fetching history: {str(e)}")
 
 
@@ -297,9 +313,9 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
                 status_code=400, detail="start_date should be less than end_date"
             )
 
-        # Adjust start_date and end_date to include one month before and after
-        adjusted_start_date = (start_date - timedelta(days=30)).strftime("%Y-%m-%d")
-        adjusted_end_date = (end_date + timedelta(days=30)).strftime("%Y-%m-%d")
+        # Extract the year and month from start_date and end_date
+        start_month = start_date.strftime("%Y-%m")
+        end_month = end_date.strftime("%Y-%m")
 
         # Query the database for existing weather data
         val = DATABASES.list_documents(
@@ -322,34 +338,35 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
         document = val["documents"][0]  # Assuming one document per lat/lon
         predictions = document["predictions"]  # Stored as an array of JSON strings
 
-        # Filter predictions for the adjusted date range
+        # Filter predictions for the given month range
         filtered_predictions = [
             json.loads(pred)
             for pred in predictions
-            if adjusted_start_date <= json.loads(pred)["date"] <= adjusted_end_date
+            if start_month <= json.loads(pred)["month"] <= end_month
         ]
 
-        # Extract only the required fields: month and other data (excluding date)
+        # Extract only the required fields: month and other data
         result = [
             {
-                "month": json.loads(pred)["month"].split("-")[
-                    1
-                ],  # Extract only the month
-                "temperature_2m_max": json.loads(pred)["temperature_2m_max"],
-                "temperature_2m_min": json.loads(pred)["temperature_2m_min"],
-                "precipitation_sum": json.loads(pred)["precipitation_sum"],
-                "wind_speed_10m_max": json.loads(pred)["wind_speed_10m_max"],
-                "shortwave_radiation_sum": json.loads(pred)["shortwave_radiation_sum"],
+                "month": pred["month"],  # Use the month directly
+                "temperature_2m_max": pred["temperature_2m_max"],
+                "temperature_2m_min": pred["temperature_2m_min"],
+                "precipitation_sum": pred["precipitation_sum"],
+                "wind_speed_10m_max": pred["wind_speed_10m_max"],
+                "shortwave_radiation_sum": pred["shortwave_radiation_sum"],
             }
             for pred in filtered_predictions
         ]
 
         # Sort the results by month in ascending order
-        result.sort(key=lambda x: int(x["month"]))
+        result.sort(key=lambda x: x["month"])
 
         return result
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(
             status_code=500, detail=f"Error fetching weather data: {str(e)}"
         )
@@ -423,6 +440,9 @@ def weather_prediction(input_data: WeatherPredictionInput, store: bool = True):
         return weather_data
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fetching weather: {str(e)}")
 
 
@@ -443,7 +463,7 @@ def weather_prediction_history(email: Optional[str] = None):
         if email:
             user = get_user_by_email_or_raise(email)
             queries.append(Query.equal("user_id", user["$id"]))
-
+        queries.append(Query.limit(10000))
         documents = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_WEATHER_HISTORY,  # Replace with your collection ID
@@ -466,33 +486,204 @@ def weather_prediction_history(email: Optional[str] = None):
             )
 
         # Sort history by end_date in descending order
-        history.sort(key=lambda x: x["end_date"], reverse=True)
+        history.sort(key=lambda x: x["end_date"])
         return {"history": history}
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"Error fetching history: {str(e)}")
 
 
-def get_prices(start_date: str, end_date: str, lat: float, lon: float):
-    # dummy
-    return {
-        "wheat": {
-            "dates": [
-                "2023-10-01",
-                "2023-10-02",
-                "2023-10-03",
+def fetch_prices(
+    lat: float, lon: float, crop: Optional[str], start_date: str, end_date: str
+) -> Dict[str, Any]:
+    """
+    Fetch prices and dates for a given crop, latitude, longitude, and date range.
+    If crop is not provided, fetch data for all crops.
+
+    Args:
+        lat (float): Latitude of the location.
+        lon (float): Longitude of the location.
+        crop (Optional[str]): Crop type. UPPERCASE. If None, fetch for all crops.
+        start_date (str): Start date in YYYY-MM-DD format.
+        end_date (str): End date in YYYY-MM-DD format.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing dates and prices for the crop(s).
+    """
+    try:
+        # Build the query
+        queries = [
+            Query.equal("latitude", [lat]),
+            Query.equal("longitude", [lon]),
+            Query.limit(10000),
+        ]
+        if crop:
+            crop = crop.upper()
+            queries.append(Query.equal("crop", [crop]))
+
+        # Query the PRICES collection
+        documents = DATABASES.list_documents(
+            database_id=DATABASE_ID,
+            collection_id=COLLECTION_PRICES,
+            queries=queries,
+        )
+
+        if not documents["documents"]:
+            raise HTTPException(
+                status_code=404,
+                detail="No price data found for the given crop and location.",
+            )
+
+        # Prepare the result
+        result = {}
+
+        for document in documents["documents"]:
+            crop_name = document["crop"]
+            all_dates = document["dates"]
+            all_prices = document["prices"]
+
+            # Filter dates and prices based on the given range
+            filtered_dates = []
+            filtered_prices = []
+            for date, price in zip(all_dates, all_prices):
+                if start_date <= date <= end_date:
+                    filtered_dates.append(date)
+                    filtered_prices.append(price)
+            filtered_data = sorted(
+                zip(filtered_dates, filtered_prices), key=lambda x: x[0]
+            )
+            filtered_dates = [item[0] for item in filtered_data]
+            filtered_prices = [item[1] for item in filtered_data]
+            # Add to the result
+            result[crop_name] = {"dates": filtered_dates, "prices": filtered_prices}
+        if crop:
+            # If a specific crop was requested, return only that crop's data
+            if crop not in result:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No price data found for the crop '{crop}' in the given date range.",
+                )
+            return result[crop]
+        else:
+            return result
+
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
+        raise HTTPException(status_code=500, detail=f"Error fetching prices: {str(e)}")
+
+
+@ai_router.post("/prices")
+def fetch_prices_api(
+    crop_type: str,
+    email: str,
+    end_date: str,
+    start_date: Optional[str] = None,
+    store: bool = True,
+):
+    """
+    API to fetch prices for a crop and store the result in PRICES_HISTORY.
+
+    Args:
+        crop_type (str): The crop type. UPPERCASE
+        email (str): The user's email.
+        end_date (str): The end date in YYYY-MM-DD format.
+        start_date (str, optional): The start date in YYYY-MM-DD format. Defaults to today.
+        store (bool): Whether to store the result in the database. only for internal use.
+
+    Returns:
+        dict: The fetched prices and dates.
+    """
+    try:
+        # Set start_date to today if not provided
+        start_date = start_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        crop_type = crop_type.upper()
+        # Validate date range
+        if datetime.strptime(start_date, "%Y-%m-%d") > datetime.strptime(
+            end_date, "%Y-%m-%d"
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="start_date should be less than or equal to end_date.",
+            )
+
+        # Get user details and coordinates
+        user = get_user_by_email_or_raise(email)
+        coord = get_coord(user["zipcode"])
+        latitude = coord["latitude"]
+        longitude = coord["longitude"]
+
+        # Fetch prices using the helper function
+        prices_data = fetch_prices(latitude, longitude, crop_type, start_date, end_date)
+        if not store:
+            # If store is False, return the prices data without storing
+            return prices_data
+        # Store the result in PRICES_HISTORY
+        DATABASES.create_document(
+            database_id=DATABASE_ID,
+            collection_id=COLLECTION_PRICES_HISTORY,
+            document_id=ID.unique(),
+            data={
+                "user_id": user["$id"],
+                "dates": prices_data["dates"],
+                "prices": prices_data["prices"],
+                "requested_at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+
+        return prices_data
+
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
+        raise HTTPException(status_code=500, detail=f"Error fetching prices: {str(e)}")
+
+
+@ai_router.get("/prices/history")
+def get_prices_history(email: str):
+    """
+    API to retrieve all price history records for a user.
+
+    Args:
+        email (str): The user's email.
+
+    Returns:
+        dict: A list of price history records.
+    """
+    try:
+        # Get user details
+        user = get_user_by_email_or_raise(email)
+
+        # Query the PRICES_HISTORY collection
+        documents = DATABASES.list_documents(
+            database_id=DATABASE_ID,
+            collection_id=COLLECTION_PRICES_HISTORY,
+            queries=[
+                Query.equal("user_id", user["$id"]),
+                Query.limit(10000),
             ],
-            "prices": [100, 105, 110],
-        },
-        "rice": {
-            "dates": [
-                "2023-10-01",
-                "2023-10-02",
-                "2023-10-03",
-            ],
-            "prices": [200, 205, 210],
-        },
-    }
+        )
+
+        # Sort documents by requested_at in descending order
+        history = sorted(
+            documents["documents"],
+            key=lambda x: x["requested_at"],
+        )
+
+        return {"history": history}
+
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching price history: {str(e)}"
+        )
 
 
 def llm(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -506,7 +697,163 @@ def llm(data: Dict[str, Any]) -> Dict[str, Any]:
         Dict[str, Any]: The predicted crop and its details.
     """
     # Simulate LLM processing
-    data["sample"] = "sample"
+    data = """
+        {
+    "request_details": {
+        "latitude": 22.520393976898,
+        "longitude": 88.007016991204,
+        "soil_type": "Black",
+        "land_size_acres": 2,
+        "analysis_period": {
+        "start_date": "2025-07-01",
+        "end_date": "2025-07-18"
+        },
+        "timestamp": "2024-05-16T11:30:00Z"
+    },
+    "recommendations": [
+        {
+        "rank": 1,
+        "crop_name": "Soybean",
+        "recommendation_score": 85.5,
+        "explanation_points": [
+            {
+            "reason_type": "High Profitability",
+            "detail": "Analysis indicates strong profit potential driven by stable-to-rising price forecasts combined with manageable 'Low-Medium' estimated input costs, significantly boosted by a seed subsidy.",
+            "ai_component": "Predictive Analytics, Heuristic Evaluation, Rule-Based Logic (Subsidy)"
+            },
+            {
+            "reason_type": "Optimal Agronomics",
+            "detail": "Excellent match for Black soil type. Weather forecast analysis confirms sufficient precipitation expected during the critical early growth stage in July.",
+            "ai_component": "Knowledge-Based Rules, Weather Data Integration"
+            },
+            {
+            "reason_type": "Financial Advantage",
+            "detail": "The available 50% Seed Subsidy directly reduces upfront costs, lowering financial risk.",
+            "ai_component": "Subsidy Data Integration, Rule-Based Impact"
+            },
+            {
+            "reason_type": "Favorable Market Conditions",
+            "detail": "Current market prices are stable, and moderate platform demand signals are positive.",
+            "ai_component": "Market Data Analysis"
+            }
+        ],
+        "key_metrics": {
+            "expected_yield_range": "8-10 quintals/acre",
+            "price_forecast_trend": "Stable to Slightly Rising",
+            "estimated_input_cost_category": "Low-Medium",
+            "primary_fertilizer_needs": "Inoculant, Phosphorus, Potassium (Nitrogen fixed)"
+        },
+        "relevant_subsidies": [
+            {
+            "program": "State Certified Seed Subsidy (Kharif)",
+            "provider": "State Agriculture Department",
+            "benefit_summary": "Approx. 50% cost reduction on certified Soybean seeds.",
+            "details_available": true // Indicates app could link to more info if available
+            }
+        ],
+        "primary_risks": [
+            "Sensitivity to waterlogging if heavy, prolonged rains occur.",
+            "Requires monitoring for common pests like girdle beetle and whitefly."
+        ],
+        "plotting_data": {
+            "price_forecast_chart": {
+            "description": "Predicted price range (INR/Quintal) near harvest.",
+            "data": [
+                { "date": "2025-11-01", "predicted_price_min": 4500, "predicted_price_max": 4800 },
+                { "date": "2025-11-15", "predicted_price_min": 4550, "predicted_price_max": 4900 },
+                { "date": "2025-12-01", "predicted_price_min": 4600, "predicted_price_max": 4950 },
+                { "date": "2025-12-15", "predicted_price_min": 4650, "predicted_price_max": 5000 }
+            ]
+            },
+            "water_need_chart": {
+            "description": "Relative water requirement across growth stages (1=Low, 5=Very High).",
+            "data": [
+                { "growth_stage": "Germination (0-2wk)", "relative_need_level": 2 },
+                { "growth_stage": "Vegetative (3-6wk)", "relative_need_level": 4 },
+                { "growth_stage": "Flowering/Podding (7-10wk)", "relative_need_level": 5 },
+                { "growth_stage": "Maturity (11+wk)", "relative_need_level": 1 }
+            ]
+            },
+            "fertilizer_schedule_chart": {
+            "description": "Typical nutrient application timing.",
+            "data": [
+                { "stage": "Basal", "timing": "At Sowing", "nutrients": "Inoculant, P, K" },
+                { "stage": "Top Dress", "timing": "~30 Days", "nutrients": "K (if needed)" }
+            ]
+            }
+        }
+        },
+        {
+        "rank": 2,
+        "crop_name": "Maize (Kharif)",
+        "recommendation_score": 78.0,
+        "explanation_points": [
+            {
+            "reason_type": "Strong Yield & Price",
+            "detail": "Offers high yield potential (25-30 q/acre) coupled with a rising price forecast driven by feed demand, leading to good revenue projection despite higher 'Medium-High' input costs.",
+            "ai_component": "Predictive Analytics, Heuristic Evaluation"
+            },
+            {
+            "reason_type": "Good Agronomic Fit",
+            "detail": "Suitable for Black soil and takes advantage of expected monsoon rainfall, although high water need requires consistent rainfall throughout the season.",
+            "ai_component": "Knowledge-Based Rules, Weather Data Integration"
+            },
+            {
+            "reason_type": "Positive Market Trend",
+            "detail": "Price trend is upward due to external factors (feed demand), indicating strong market pull.",
+            "ai_component": "Market Data Analysis, Event Correlation"
+            },
+            {
+            "reason_type": "Higher Risk Profile",
+            "detail": "Requires higher fertilizer investment ('Medium-High' cost category) and is more sensitive to rainfall consistency. No major subsidies noted to offset these risks.",
+            "ai_component": "Risk Factor Analysis"
+            }
+        ],
+        "key_metrics": {
+            "expected_yield_range": "25-30 quintals/acre",
+            "price_forecast_trend": "Rising",
+            "estimated_input_cost_category": "Medium-High",
+            "primary_fertilizer_needs": "High Nitrogen, Phosphorus, Potassium"
+        },
+        "relevant_subsidies": [], // Empty array indicates none relevant found
+        "primary_risks": [
+            "Higher upfront fertilizer costs.",
+            "Yield potential highly dependent on consistent rainfall.",
+            "Requires monitoring and potential management for Fall Armyworm."
+        ],
+        "plotting_data": {
+            "price_forecast_chart": {
+            "description": "Predicted price range (INR/Quintal) near harvest.",
+            "data": [
+                { "date": "2025-10-15", "predicted_price_min": 2100, "predicted_price_max": 2300 },
+                { "date": "2025-11-01", "predicted_price_min": 2150, "predicted_price_max": 2400 },
+                { "date": "2025-11-15", "predicted_price_min": 2200, "predicted_price_max": 2450 },
+                { "date": "2025-12-01", "predicted_price_min": 2250, "predicted_price_max": 2500 }
+            ]
+            },
+            "water_need_chart": {
+            "description": "Relative water requirement across growth stages (1=Low, 5=Very High).",
+            "data": [
+                { "growth_stage": "Seedling (0-3wk)", "relative_need_level": 3 },
+                { "growth_stage": "Vegetative (4-8wk)", "relative_need_level": 4 },
+                { "growth_stage": "Tasseling/Silking (9-12wk)", "relative_need_level": 5 },
+                { "growth_stage": "Grain Fill/Maturity (13+wk)", "relative_need_level": 3 }
+            ]
+            },
+            "fertilizer_schedule_chart": {
+            "description": "Typical nutrient application timing.",
+            "data": [
+                { "stage": "Basal", "timing": "At Sowing", "nutrients": "Partial N, P, K" },
+                { "stage": "Knee-High", "timing": "~30 Days", "nutrients": "N Top Dress" },
+                { "stage": "Tasseling", "timing": "~50-60 Days", "nutrients": "N Top Dress" }
+            ]
+            }
+        }
+        }
+    ],
+    "weather_context_summary": "Overall weather forecast for Jul 01-18 indicates generally favorable monsoon conditions (warm, frequent rain) for Kharif planting in this region."
+    }
+    """
     return data
 
 
@@ -546,6 +893,7 @@ def get_available_subsidies(email: str, status: str = "listed"):
             queries=[
                 Query.equal("farmer_id", [farmer_id]),
                 Query.equal("subsidy_id", [subsidy["$id"]]),
+                Query.limit(10000),
             ],
         )
         if existing_requests["total"] == 0:
@@ -563,6 +911,7 @@ def get_yield(crop: str) -> int:
     Returns the average yield (kg per acre) for the given crop.
     If the crop is unknown, returns a default estimate.
     """
+    crop = crop.lower()
     crop_yields = {
         "jowar": 1000,
         "maize": 2500,
@@ -595,7 +944,7 @@ def crop_prediction(
         start_date = input_data.start_date or datetime.now(timezone.utc).strftime(
             "%Y-%m-%d"
         )
-        # validate if start_date is less than end_date
+        # Validate if start_date is less than end_date
         if (
             datetime.strptime(start_date, "%Y-%m-%d").date()
             > datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -604,37 +953,51 @@ def crop_prediction(
                 status_code=400, detail="start_date should be less than end_date"
             )
         user = get_user_by_email_or_raise(email)
+        user_id = user["$id"]
         cord = get_coord(user["zipcode"])
         latitude = cord["latitude"]
         longitude = cord["longitude"]
 
-        # Step 2: Call the soil classification API as a function
+        # Step 2: Handle soil classification
+        file_url = None
         if file is None and soil_type is None:
             raise HTTPException(
                 status_code=400, detail="Either file or soil_type must be provided"
             )
-        if soil_type is None:
-            soil_data = soil_classification(email=email, file=file, store=False)
+        if file is not None:
+            # Save the file locally for later upload
+            local_file_path = f"/tmp/{file.filename}"
+            with open(local_file_path, "wb") as f:
+                f.write(file.file.read())
         else:
+            # Use the provided soil_type
             soil_data = {
                 "soil_type": soil_type,
                 "confidence": 100.0,  # Assuming 100% confidence if provided
             }
-        # Step 3: Call the weather prediction API as a function
+
+        # Step 3: Call the weather prediction API
         weather_input = WeatherPredictionInput(
             email=email, start_date=start_date, end_date=end_date
         )
         weather_predictions = weather_prediction(weather_input, store=False)
 
         # Step 4: Fetch crop prices
-        crop_prices = get_prices(start_date, end_date, latitude, longitude)
+        crop_prices = fetch_prices(
+            latitude,
+            longitude,
+            None,
+            start_date,
+            end_date,
+        )
         applicable = get_available_subsidies(email, status="listed")
-        # extract subsidies id
+        # Extract subsidies id
         subsidy_ids = [subsidy["$id"] for subsidy in applicable]
+
         # Step 5: Merge all data into a single hash
         combined_data = {
-            "soil_type": soil_data["soil_type"],
-            "soil_type_confidence": soil_data["confidence"],
+            "soil_type": soil_data["soil_type"] if file is None else None,
+            "soil_type_confidence": soil_data["confidence"] if file is None else None,
             "latitude": latitude,
             "longitude": longitude,
             "start_date": start_date,
@@ -672,11 +1035,145 @@ def crop_prediction(
         # Step 6: Call the LLM function
         llm_result = llm(combined_data)
 
-        # Step 7: Return the result from the LLM function
-        return llm_result
+        file_url = None
+        # Step 8: Upload the file to BUCKET_CROP (if provided)
+        if file is not None:
+            response = STORAGE.create_file(
+                bucket_id=BUCKET_CROP,
+                file_id=ID.unique(),
+                file=InputFile.from_path(local_file_path),
+            )
+            file_url = STORAGE.get_file_view(BUCKET_DISEASE, response["$id"])["href"]
+            # Delete the local file after upload
+            if os.path.exists(local_file_path):
+                os.remove(local_file_path)
+                # Step 7: Store the input and output in COLLECTION_CROPS
+        input_data_to_store = {
+            "email": email,
+            "start_date": start_date,
+            "end_date": end_date,
+            "acres": input_data.acres,
+            "soil_type": soil_type if file is None else file_url,
+        }
+        DATABASES.create_document(
+            database_id=DATABASE_ID,
+            collection_id=COLLECTION_CROPS,
+            document_id=ID.unique(),
+            data={
+                "user_id": user_id,
+                "requested_at": datetime.now(timezone.utc).isoformat(),
+                "input": json.dumps(input_data_to_store),
+                "output": llm_result,
+            },
+        )
+        # Step 9: Return the result from the LLM function
+        return json.loads(llm_result)
 
     except Exception as e:
+        if os.path.exists(local_file_path):
+            os.remove(local_file_path)
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@ai_router.get("/crop_prediction/history")
+def get_crop_prediction_history(email: str):
+    """
+    API to retrieve all crop prediction history records for a user.
+
+    Args:
+        email (str): The user's email.
+
+    Returns:
+        dict: A list of crop prediction history records.
+    """
+    try:
+        # Get user details
+        user = get_user_by_email_or_raise(email)
+        user_id = user["$id"]
+
+        # Query the COLLECTION_CROPS collection
+        documents = DATABASES.list_documents(
+            database_id=DATABASE_ID,
+            collection_id=COLLECTION_CROPS,
+            queries=[
+                Query.equal("user_id", user_id),
+                Query.limit(10000),
+            ],
+        )
+
+        # Sort documents by requested_at in descending order
+        history = sorted(
+            documents["documents"],
+            key=lambda x: x["requested_at"],
+        )
+
+        return {"history": history}
+
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            # If it's already an HTTPException, return it as is
+            raise e
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching crop prediction history: {str(e)}"
+        )
+
+
+def test_price_apis_and_crop_prediction():
+    """
+    Test the price APIs and crop prediction API.
+    """
+    try:
+        # Test data
+        EMAIL = "farmerx@example.com"
+        START_DATE = "2025-07-01"
+        END_DATE = "2025-11-18"
+        CROP_TYPE = "WHEAT"
+        SOIL_TYPE = "Loamy"
+        data = {
+            "email": EMAIL,
+            "name": "John Doe",
+            "zipcode": "900099",
+            "role": "farmer",
+            "address": "123 Main St, Springfield",
+        }
+        user = DATABASES.create_document(
+            DATABASE_ID, COLLECTION_USERS, ID.unique(), data
+        )
+        # Test fetch_prices_api
+        print("Testing fetch_prices_api...")
+        prices_result = fetch_prices_api(
+            crop_type=CROP_TYPE,
+            email=EMAIL,
+            end_date=END_DATE,
+            start_date=START_DATE,
+        )
+        print("Fetch Prices API Result:", prices_result)
+
+        # Test get_prices_history
+        print("Testing get_prices_history...")
+        history_result = get_prices_history(email=EMAIL)
+        print("Get Prices History API Result:", history_result)
+
+        # Test crop_prediction
+        print("Testing crop_prediction...")
+        crop_input = CropPredictionInput(
+            email=EMAIL,
+            start_date=START_DATE,
+            end_date=END_DATE,
+            acres=5,  # Example land size
+        )
+        crop_prediction_result = crop_prediction(
+            input_data=crop_input,
+            soil_type=SOIL_TYPE,  # Pass soil type directly
+        )
+        print("Crop Prediction API Result:", crop_prediction_result)
+        DATABASES.delete_document(DATABASE_ID, COLLECTION_USERS, user["$id"])
+    except Exception as e:
+        print(f"Error during testing: {str(e)}")
+        DATABASES.delete_document(DATABASE_ID, COLLECTION_USERS, user["$id"])
 
 
 def tests():

@@ -116,7 +116,7 @@ def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
                         ]
                     )
                 )
-
+        query_filters.append(Query.limit(10000))
         return DATABASES.list_documents(
             DATABASE_ID, COLLECTION_CONTRACTS, queries=query_filters
         )
@@ -256,7 +256,7 @@ def cleanup_expired_contracts():
         listed_contracts = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_CONTRACTS,
-            queries=[Query.equal("status", ["listed"])],
+            queries=[Query.equal("status", ["listed"]), Query.limit(10000)],
         )
 
         for contract in listed_contracts["documents"]:
@@ -293,6 +293,7 @@ def reject_pending_requests(contract_id: str):
             queries=[
                 Query.equal("contract_id", [contract_id]),
                 Query.equal("status", ["pending"]),
+                Query.limit(10000),
             ],
         )
         for request in pending_requests["documents"]:
@@ -338,7 +339,10 @@ def get_requests(
                 buyer_contracts = DATABASES.list_documents(
                     DATABASE_ID,
                     COLLECTION_CONTRACTS,
-                    queries=[Query.equal("buyer_id", [user["$id"]])],
+                    queries=[
+                        Query.equal("buyer_id", [user["$id"]]),
+                        Query.limit(10000),
+                    ],
                 )
                 contract_ids = [
                     contract["$id"] for contract in buyer_contracts["documents"]
@@ -347,7 +351,7 @@ def get_requests(
 
         if contract_id:
             query_filters.append(Query.equal("contract_id", [contract_id]))
-
+        query_filters.append(Query.limit(10000))
         return DATABASES.list_documents(
             DATABASE_ID, COLLECTION_CONTRACT_REQUESTS, queries=query_filters
         )

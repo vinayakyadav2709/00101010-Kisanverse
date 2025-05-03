@@ -307,10 +307,10 @@ Anyone.
 ### **Query Parameters**
 - `file` (file, optional): The soil image file for classification.
 - `soil_type` (string, optional): The soil type if known.
-- either file or soil_type needs to be given. if both given uses soil_type
+- Either `file` or `soil_type` needs to be provided. If both are given, `soil_type` is used.
 
 ### **Response**
-- **Success**: Returns the predicted crops and their details. dates in ascending order.
+- **Success**: Returns the predicted crops and their details. Dates are in ascending order.
 - **Error**: Returns an error message if the prediction fails.
 
 ### **Example API Call**
@@ -358,12 +358,174 @@ curl -X POST http://localhost:8000/predictions/crop_prediction \
     {
       "crop_name": "Wheat",
       "prices": [100, 105, 110],
-      "month": ["07", "08", "09",...],
+      "dates": ["2025-07-01", "2025-07-02", "2025-07-03"],
       "contracts": ["id"],
       "yield_per_kg": 2500
     },
     ...
   ],
   "subsidies": ["id"]
+}
+```
+
+## **8. Fetch Crop Prices**
+
+### **Endpoint**
+`POST /predictions/prices`
+
+### **Description**
+Fetches crop prices for a specific crop and date range based on the user's location. Optionally stores the result in the `PRICES_HISTORY` collection.
+
+### **Who Can Call It**
+Internal and external users.
+
+### **Query Parameters**
+- `crop_type` (string): The crop type. Must be in uppercase.
+- `email` (string): The email of the user.
+- `end_date` (string): The end date in `YYYY-MM-DD` format.
+- `start_date` (string, optional): The start date in `YYYY-MM-DD` format. Defaults to today.
+- `store` (boolean, optional): Whether to store the result in the database. Defaults to `true`. For internal use only.
+
+### **Response**
+- **Success**: Returns the crop prices and dates.
+- **Error**: Returns an error message if the price retrieval fails.
+
+### **Example API Call**
+```bash
+curl -X POST http://localhost:8000/predictions/prices \
+-H "Content-Type: application/json" \
+-d '{
+  "crop_type": "WHEAT",
+  "email": "farmer@example.com",
+  "end_date": "2025-07-10",
+  "start_date": "2025-07-01",
+  "store": false
+}'
+```
+
+### **Example Response**
+```json
+{
+  "dates": ["2025-07-01", "2025-07-02", "2025-07-03"],
+  "prices": [100, 105, 110]
+}
+```
+
+---
+
+## **9. Fetch Price History**
+
+### **Endpoint**
+`GET /predictions/prices/history`
+
+### **Description**
+Fetches the price history for a user from the `PRICES_HISTORY` collection.
+
+### **Who Can Call It**
+Anyone.
+
+### **Query Parameters**
+- `email` (string): The email of the user.
+
+### **Response**
+- **Success**: Returns a list of price history records sorted by `requested_at` in descending order.
+- **Error**: Returns an error message if the history retrieval fails.
+
+### **Example API Call**
+```bash
+curl -X GET http://localhost:8000/predictions/prices/history?email=farmer@example.com
+```
+
+### **Example Response**
+```json
+{
+  "history": [
+    {
+      "user_id": "user_id",
+      "dates": ["2025-07-01", "2025-07-02", "2025-07-03"],
+      "prices": [100, 105, 110],
+      "requested_at": "2025-05-01T12:00:00.000+00:00"
+    },
+    {
+      "user_id": "user_id",
+      "dates": ["2025-06-01", "2025-06-02", "2025-06-03"],
+      "prices": [90, 95, 100],
+      "requested_at": "2025-04-01T12:00:00.000+00:00"
+    }
+  ]
+}
+```
+
+
+---
+
+## **10. Crop Prediction History**
+
+### **Endpoint**
+`GET /predictions/crop_prediction/history`
+
+### **Description**
+Fetches the crop prediction history for a user.
+
+### **Who Can Call It**
+Anyone.
+
+### **Query Parameters**
+- `email` (string): The email of the user.
+
+### **Response**
+- **Success**: Returns a list of crop prediction history records sorted by `requested_at` in descending order.
+- **Error**: Returns an error message if the history retrieval fails.
+
+### **Example API Call**
+```bash
+curl -X GET http://localhost:8000/predictions/crop_prediction/history?email=farmer@example.com
+```
+
+### **Example Response**
+```json
+{
+  "history": [
+    {
+      "user_id": "user_id",
+      "requested_at": "2025-05-01T12:00:00.000+00:00",
+      "input": {
+        "email": "farmer@example.com",
+        "start_date": "2025-07-01",
+        "end_date": "2025-07-18",
+        "acres": 5,
+        "soil_type": "http://localhost/v1/storage/buckets/bucket_id/files/file_id/view"
+      },
+      "output": {
+        "recommendations": [
+          {
+            "rank": 1,
+            "crop_name": "Soybean",
+            "recommendation_score": 85.5
+          }
+        ]
+      }
+    },
+    {
+      "user_id": "user_id",
+      "requested_at": "2025-04-01T12:00:00.000+00:00",
+      "input": {
+        "email": "farmer@example.com",
+        "start_date": "2025-06-01",
+        "end_date": "2025-06-15",
+        "acres": 3,
+        "soil_type": "Loamy"
+      },
+      "output": {
+        "recommendations": [
+          {
+            "rank": 1,
+            "crop_name": "Maize",
+            "recommendation_score": 78.0
+          }
+        ]
+      }
+    }
+  ]
 }
 ```

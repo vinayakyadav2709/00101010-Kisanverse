@@ -31,7 +31,7 @@ def reject_pending_requests(subsidy_id: str):
         requests = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_SUBSIDY_REQUESTS,
-            queries=[Query.equal("subsidy_id", [subsidy_id])],
+            queries=[Query.equal("subsidy_id", [subsidy_id]), Query.limit(10000)],
         )
 
         # Reject all pending requests
@@ -192,7 +192,7 @@ def get_subsidies(
                         ]
                     )
                 )
-
+        query_filters.append(Query.limit(10000))
         # Fetch subsidies with the applied filters
         subsidies = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_SUBSIDIES, queries=query_filters
@@ -322,7 +322,7 @@ def get_requests(
                 query_filters.append(Query.equal("farmer_id", [user["$id"]]))
         if subsidy_id:
             query_filters.append(Query.equal("subsidy_id", [subsidy_id]))
-
+        query_filters.append(Query.limit(10000))
         return DATABASES.list_documents(
             DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS, queries=query_filters
         )
