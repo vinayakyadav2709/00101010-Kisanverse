@@ -27,6 +27,7 @@ def reject_pending_bids(listing_id: str):
         query = [
             Query.equal("listing_id", [listing_id]),
             Query.equal("status", ["pending"]),
+            Query.limit(10000),
         ]
         pending_bids = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_BIDS, queries=query
@@ -66,6 +67,7 @@ def reject_bids_below_available_quantity(listing_id: str, available_quantity: fl
         query = [
             Query.equal("listing_id", [listing_id]),
             Query.equal("status", ["pending"]),
+            Query.limit(10000),
         ]
         pending_bids = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_BIDS, queries=query
@@ -152,7 +154,7 @@ def get_crop_listings(email: Optional[str] = None, type: str = "all"):
             if type not in LISTING_STATUSES:
                 raise HTTPException(status_code=400, detail="Invalid listing status")
             query_filters.append(Query.equal("status", [type]))
-
+        query_filters.append(Query.limit(10000))
         return DATABASES.list_documents(
             DATABASE_ID, COLLECTION_CROP_LISTINGS, queries=query_filters
         )
@@ -439,7 +441,10 @@ def get_bids(
                 buyer_listings = DATABASES.list_documents(
                     DATABASE_ID,
                     COLLECTION_CROP_LISTINGS,
-                    queries=[Query.equal("farmer_id", [user["$id"]])],
+                    queries=[
+                        Query.equal("farmer_id", [user["$id"]]),
+                        Query.limit(10000),
+                    ],
                 )
                 listing_ids = [
                     listing["$id"] for listing in buyer_listings["documents"]
@@ -450,7 +455,7 @@ def get_bids(
         # Filter by listing_id
         if listing_id:
             query_filters.append(Query.equal("listing_id", [listing_id]))
-
+        query_filters.append(Query.limit(10000))
         # Fetch and return bids
         return DATABASES.list_documents(
             DATABASE_ID, COLLECTION_BIDS, queries=query_filters

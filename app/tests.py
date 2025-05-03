@@ -1,7 +1,7 @@
 # import logging
 # import uvicorn
 # from fastapi import FastAPI
-# from routers import users, listings, contracts, subsidies, ai
+from routers.ai import test_price_apis_and_crop_prediction
 # from fastapi.middleware.cors import CORSMiddleware
 # from fastapi.responses import JSONResponse
 # from fastapi import Request
@@ -9,17 +9,25 @@
 # import traceback
 
 # # run subisides test function
-
+test_price_apis_and_crop_prediction()
 # # subsidies.run_tests()
 # # contracts.run_tests()
 # # upload.init()
 # # ai.tests()
 # ai.test_test()
-from routers import insert_weather
-# from routers import create_mapping
+from routers.other_scripts.insert_weather import adjust_weather_data, printt
+from routers.other_scripts.fetch_data import (
+    count_unique_lat_lon,
+    fetch_and_store_weather_data,
+)
+from routers.other_scripts.upload_prices import (
+    insert_prices_from_files,
+    update_crop_names_to_uppercase,
+)
+# fetch_and_store_weather_data()
+# count_unique_lat_lon()
+# adjust_weather_data()
+# printt()
 
-# create_mapping.insert_zipcodes()
-# insert_weather.fetch_weather_data()
-from routers import fetch_data
-
-fetch_data.fetch_and_store_weather_data()
+# insert_prices_from_files()
+# update_crop_names_to_uppercase()
