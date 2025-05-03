@@ -295,7 +295,7 @@ def get_coord(zipcode: str):
         val = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_ZIPCODES,
-            queries=[Query.equal("pincode", [int(zipcode)])],
+            queries=[Query.equal("pincode", [zipcode])],
         )
 
         val = val["documents"][0]
@@ -322,7 +322,11 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
                 status_code=400, detail="start_date should be less than end_date"
             )
 
-        # Step 1: Query the database for existing weather data
+        # Adjust start_date and end_date to include one month before and after
+        adjusted_start_date = (start_date - timedelta(days=30)).strftime("%Y-%m-%d")
+        adjusted_end_date = (end_date + timedelta(days=30)).strftime("%Y-%m-%d")
+
+        # Query the database for existing weather data
         val = DATABASES.list_documents(
             DATABASE_ID,
             COLLECTION_WEATHER,
@@ -332,104 +336,43 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
             ],
         )
 
-        # Step 2: Check if data exists
+        # Check if data exists
         if not val["documents"]:
-            # No data exists, fetch new data and create a new document
-            predictions = []
-            current_date = start_date  # Already a datetime.date object
-            requested_end_date = end_date  # Already a datetime.date object
-
-            while current_date <= requested_end_date:
-                current_date_str = current_date.strftime(
-                    "%Y-%m-%d"
-                )  # Convert to string
-                forecast = weather.get_enhanced_forecast_on_end_date(
-                    lat, lon, start_date.strftime("%Y-%m-%d"), current_date_str
-                )
-                # Round values to 2 decimal places
-                for key in forecast:
-                    if isinstance(forecast[key], float):
-                        forecast[key] = round(forecast[key], 2)
-                predictions.append(
-                    json.dumps(forecast, default=convert_to_serializable)
-                )  # Serialize each forecast as a JSON string
-                current_date += timedelta(days=1)
-
-            # Sort predictions by date
-            predictions.sort(key=lambda x: json.loads(x)["date"])
-
-            # Create a new document in the database
-            DATABASES.create_document(
-                database_id=DATABASE_ID,
-                collection_id=COLLECTION_WEATHER,
-                document_id=ID.unique(),
-                data={
-                    "latitude": lat,
-                    "longitude": lon,
-                    "predictions": predictions,  # Store predictions as an array of JSON strings
-                },
+            raise HTTPException(
+                status_code=404,
+                detail=f"No weather data found for Latitude={lat}, Longitude={lon}",
             )
 
-        else:
-            # Step 3: Extract the predictions array and check the last date
-            document = val["documents"][0]  # Assuming one document per lat/lon
-            predictions = document[
-                "predictions"
-            ]  # Already stored as an array of JSON strings
-            predictions.sort(
-                key=lambda x: json.loads(x)["date"]
-            )  # Ensure predictions are sorted by date
+        # Extract the predictions array
+        document = val["documents"][0]  # Assuming one document per lat/lon
+        predictions = document["predictions"]  # Stored as an array of JSON strings
 
-            last_date = json.loads(predictions[-1])["date"] if predictions else None
-
-            # Step 4: If the last date is less than the requested end_date, fetch new data
-            if last_date is None or last_date < end_date.strftime("%Y-%m-%d"):
-                current_date = (
-                    datetime.strptime(last_date, "%Y-%m-%d").date()
-                    if last_date
-                    else start_date
-                )
-                requested_end_date = end_date
-
-                while current_date <= requested_end_date:
-                    current_date_str = current_date.strftime(
-                        "%Y-%m-%d"
-                    )  # Convert to string
-                    forecast = weather.get_enhanced_forecast_on_end_date(
-                        lat, lon, start_date.strftime("%Y-%m-%d"), current_date_str
-                    )
-                    # Round values to 2 decimal places
-                    for key in forecast:
-                        if isinstance(forecast[key], float):
-                            forecast[key] = round(forecast[key], 2)
-                    predictions.append(
-                        json.dumps(forecast, default=convert_to_serializable)
-                    )  # Serialize each forecast as a JSON string
-                    current_date += timedelta(days=1)
-
-                # Sort predictions again after appending new data
-                predictions.sort(key=lambda x: json.loads(x)["date"])
-
-                # Update the document in the database
-                DATABASES.update_document(
-                    DATABASE_ID,
-                    COLLECTION_WEATHER,
-                    document["$id"],
-                    {
-                        "predictions": predictions,  # Store updated predictions as an array of JSON strings
-                    },
-                )
-
-        # Step 5: Extract the requested date range
+        # Filter predictions for the adjusted date range
         filtered_predictions = [
             json.loads(pred)
             for pred in predictions
-            if start_date.strftime("%Y-%m-%d")
-            <= json.loads(pred)["date"]
-            <= end_date.strftime("%Y-%m-%d")
+            if adjusted_start_date <= json.loads(pred)["date"] <= adjusted_end_date
         ]
 
-        return filtered_predictions
+        # Extract only the required fields: month and other data (excluding date)
+        result = [
+            {
+                "month": json.loads(pred)["month"].split("-")[
+                    1
+                ],  # Extract only the month
+                "temperature_2m_max": json.loads(pred)["temperature_2m_max"],
+                "temperature_2m_min": json.loads(pred)["temperature_2m_min"],
+                "precipitation_sum": json.loads(pred)["precipitation_sum"],
+                "wind_speed_10m_max": json.loads(pred)["wind_speed_10m_max"],
+                "shortwave_radiation_sum": json.loads(pred)["shortwave_radiation_sum"],
+            }
+            for pred in filtered_predictions
+        ]
+
+        # Sort the results by month in ascending order
+        result.sort(key=lambda x: int(x["month"]))
+
+        return result
 
     except Exception as e:
         raise HTTPException(

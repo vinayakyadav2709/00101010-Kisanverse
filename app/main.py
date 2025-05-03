@@ -1,7 +1,9 @@
 import logging
 import uvicorn
 from fastapi import FastAPI
-from routers import users, listings, contracts, subsidies, ai
+from routers import users, listings, contracts, subsidies
+
+# ai
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -74,7 +76,7 @@ routers = [
     contracts.contract_requests_router,
     subsidies.subsidies_router,
     subsidies.subsidy_requests_router,
-    ai.ai_router
+    # ai.ai_router
 ]
 
 for router in routers:

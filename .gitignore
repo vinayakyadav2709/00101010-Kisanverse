@@ -5,5 +5,7 @@ ignore.txt
 ignore
 app/models
 app/test_data
-app/routers/unique_lat_long.csv
-zipcode_with_district_latlong.csv
+app/routers/other_scripts
+
+app/csvs
+

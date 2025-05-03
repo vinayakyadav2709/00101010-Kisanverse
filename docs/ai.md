@@ -202,13 +202,23 @@ curl -X POST http://localhost:8000/predictions/weather \
 ### **Example Response**
 ```json
 [
-  {
-    "date": "2025-07-01",
-    "temperature": 30.5,
-    "humidity": 70.0,
-    "rainfall": 5.0
-  },
-  ...
+    {
+        "month": "04",
+        "temperature_2m_max": 30.5,
+        "temperature_2m_min": 29.4,
+        "precipitation_sum": 0.0,
+        "wind_speed_10m_max": 22.5,
+        "shortwave_radiation_sum": 25.26
+    },
+    {
+        "month": "05",
+        "temperature_2m_max": 32.1,
+        "temperature_2m_min": 30.0,
+        "precipitation_sum": 1.2,
+        "wind_speed_10m_max": 20.0,
+        "shortwave_radiation_sum": 24.50
+    },
+    ...
 ]
 ```
 
@@ -245,14 +255,24 @@ curl -X GET http://localhost:8000/predictions/weather/history?email=farmer@examp
       "start_date": "2025-07-01",
       "end_date": "2025-07-10",
       "weather_data": [
-        {
-          "date": "2025-07-01",
-          "temperature": 30.5,
-          "humidity": 70.0,
-          "rainfall": 5.0
-        },
+          {
+              "month": "04",
+              "temperature_2m_max": 30.5,
+              "temperature_2m_min": 29.4,
+              "precipitation_sum": 0.0,
+              "wind_speed_10m_max": 22.5,
+              "shortwave_radiation_sum": 25.26
+          },
+          {
+              "month": "05",
+              "temperature_2m_max": 32.1,
+              "temperature_2m_min": 30.0,
+              "precipitation_sum": 1.2,
+              "wind_speed_10m_max": 20.0,
+              "shortwave_radiation_sum": 24.50
+          },
         ...
-      ],
+        ],
       "requested_at": "2025-05-01T12:00:00.000+00:00"
     }
   ]
@@ -311,18 +331,31 @@ curl -X POST http://localhost:8000/predictions/crop_prediction \
   "longitude": 77.1025,
   "start_date": "2025-07-01",
   "end_date": "2025-07-10",
-  "weather_predictions": [{
-          "date": "2025-07-01",
-          "temperature": 30.5,
-          "humidity": 70.0,
-          "rainfall": 5.0
-        },...],
+  "weather_predictions": [
+        {
+            "month": "04",
+            "temperature_2m_max": 30.5,
+            "temperature_2m_min": 29.4,
+            "precipitation_sum": 0.0,
+            "wind_speed_10m_max": 22.5,
+            "shortwave_radiation_sum": 25.26
+        },
+        {
+            "month": "05",
+            "temperature_2m_max": 32.1,
+            "temperature_2m_min": 30.0,
+            "precipitation_sum": 1.2,
+            "wind_speed_10m_max": 20.0,
+            "shortwave_radiation_sum": 24.50
+        },
+        ...
+    ],
   "land_size": 5,
   "crops_data": [
     {
       "crop_name": "Wheat",
       "prices": [100, 105, 110],
-      "dates": ["2025-07-01", "2025-07-02", "2025-07-03",...],
+      "month": ["07", "08", "09",...],
       "contracts": ["id"],
       "yield_per_kg": 2500
     },
