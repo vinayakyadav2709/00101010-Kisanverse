@@ -25,9 +25,7 @@ from core.config import (
     COLLECTION_SUBSIDIES,
 )
 from routers import contracts, subsidies
-from core.dependencies import (
-    get_user_by_email_or_raise,
-)
+from core.dependencies import get_user_by_email_or_raise, get_coord
 from typing import List, Optional
 from pydantic import BaseModel
 from appwrite.query import Query
@@ -287,29 +285,6 @@ def disease_prediction_history(email: Optional[str] = None):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching history: {str(e)}")
-
-
-# Function to fetch data from the collection
-def get_coord(zipcode: str):
-    try:
-        val = DATABASES.list_documents(
-            DATABASE_ID,
-            COLLECTION_ZIPCODES,
-            queries=[Query.equal("pincode", [zipcode])],
-        )
-
-        val = val["documents"][0]
-        if val:
-            return {
-                "latitude": val["latitude"],
-                "longitude": val["longitude"],
-            }
-        else:
-            raise HTTPException(status_code=404, detail="Given zipcode not found")
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error fetching zipcodes: {str(e)}"
-        )
 
 
 def get_weather(lat: float, lon: float, start_date: str, end_date: str):
