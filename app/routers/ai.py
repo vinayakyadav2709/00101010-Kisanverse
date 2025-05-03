@@ -938,10 +938,6 @@ class CropPredictionInput(BaseModel):
     acres: int
     soil_type: Optional[str] = None
 
-
-import logging
-
-
 @ai_router.post("/crop_prediction")
 def crop_prediction(
     email: str,

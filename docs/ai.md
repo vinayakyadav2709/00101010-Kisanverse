@@ -411,15 +411,7 @@ Internal and external users.
 
 ### **Example API Call**
 ```bash
-curl -X POST http://localhost:8000/predictions/prices \
--H "Content-Type: application/json" \
--d '{
-  "crop_type": "WHEAT",
-  "email": "farmer@example.com",
-  "end_date": "2025-07-10",
-  "start_date": "2025-07-01",
-  "store": false
-}'
+curl -X POST "http://localhost:8000/predictions/prices?crop_type=WHEAT&email=farmer@example.com&start_date=2025-07-01&end_date=2025-07-10&store=true"
 ```
 
 ### **Example Response**
