@@ -36,7 +36,7 @@ curl -X GET "http://localhost:8000/contracts?email=buyer@example.com&status=list
   "total": 2,
   "documents": [
     {
-      "locations": ["12345", "12345"],
+      "locations": ["location1", "location1"],
       "dynamic_fields": "{\"field1\": \"value1\"}",
       "crop_type": "wheat",
       "quantity": 1000,
@@ -94,7 +94,7 @@ Buyers.
 curl -X POST http://localhost:8000/contracts?email=buyer@example.com \
 -H "Content-Type: application/json" \
 -d '{
-  "locations": ["12345", "12345"],
+  "locations": ["location1", "location1"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
   "crop_type": "wheat",
   "quantity": 1000,
@@ -108,7 +108,7 @@ curl -X POST http://localhost:8000/contracts?email=buyer@example.com \
 ### **Example Response**
 ```json
 {
-  "locations": ["12345", "12345"],
+  "locations": ["location1", "location1"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
   "crop_type": "wheat",
   "quantity": 1000,
@@ -170,7 +170,7 @@ curl -X PATCH http://localhost:8000/contracts/contract_id?email=admin@example.co
 ### **Example Response**
 ```json
 {
-  "locations": ["12345"],
+  "locations": ["location1"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
   "crop_type": "wheat",
   "quantity": 1000,
@@ -218,7 +218,7 @@ curl -X DELETE http://localhost:8000/contracts/contract_id?email=buyer@example.c
 ### **Example Response**
 ```json
 {
-  "locations": ["12345", "12345"],
+  "locations": ["location1", "location1"],
   "dynamic_fields": "{\"field1\": \"value1\"}",
   "crop_type": "wheat",
   "quantity": 1000,
@@ -288,7 +288,7 @@ curl -X GET "http://localhost:8000/contract_requests?email=farmer@example.com&st
 `POST /contract_requests`
 
 ### **Description**
-Creates a request for a contract. Only farmers can create requests for listed contracts, and only if their zipcode is mentioned in contract locations.
+Creates a request for a contract. Only farmers can create requests for listed contracts, and only if the state corresponding to their zipcode is mentioned in contract locations.
 
 ### **Who Can Call It**
 Farmers.

@@ -7,7 +7,11 @@ from core.config import (
     COLLECTION_USERS,
     COLLECTION_SUBSIDY_REQUESTS,
 )
-from core.dependencies import get_document_or_raise, get_user_by_email_or_raise
+from core.dependencies import (
+    get_document_or_raise,
+    get_user_by_email_or_raise,
+    get_state,
+)
 from pydantic import BaseModel, field_validator
 from typing import List, Optional, Union
 from appwrite.query import Query
@@ -179,7 +183,7 @@ def get_subsidies(
         if email:
             user = get_user_by_email_or_raise(email)
             if user["role"] == "farmer":
-                location = user["zipcode"]
+                location = get_state(user["zipcode"])
                 query_filters.append(
                     Query.or_queries(
                         [
@@ -347,7 +351,7 @@ def create_request(data: SubsidyRequestCreateModel, email: str):
                 status_code=400, detail="Subsidy must be listed to create a request"
             )
         # only allow if farmer's zipcode is in the subsidy locations
-        farmer_location = user.get("zipcode", "")
+        farmer_location = get_state(user["zipcode"])
         if (
             farmer_location not in subsidy["locations"]
             and "all" not in subsidy["locations"]

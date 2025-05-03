@@ -5,7 +5,11 @@ from core.config import (
     COLLECTION_CONTRACTS,
     COLLECTION_CONTRACT_REQUESTS,
 )
-from core.dependencies import get_user_by_email_or_raise, get_document_or_raise
+from core.dependencies import (
+    get_user_by_email_or_raise,
+    get_document_or_raise,
+    get_state,
+)
 from pydantic import BaseModel, field_validator
 from typing import List, Optional
 from appwrite.query import Query
@@ -103,7 +107,7 @@ def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
                 query_filters.append(Query.equal("buyer_id", [user["$id"]]))
             elif role == "farmer":
                 # Show contracts applicable to the farmer based on locations
-                farmer_location = user["zipcode"]
+                farmer_location = get_state(user["zipcode"])
                 query_filters.append(
                     Query.or_queries(
                         [
@@ -384,7 +388,7 @@ def create_request(data: ContractRequestCreateModel, email: str):
                 detail="Cannot create a request for an expired contract",
             )
         # Ensure the farmer's location matches the contract's location
-        farmer_location = user.get("zipcode", "")
+        farmer_location = get_state(user["zipcode"])
         if (
             farmer_location not in contract["locations"]
             and "all" not in contract["locations"]

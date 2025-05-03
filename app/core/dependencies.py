@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from core.config import DATABASES, DATABASE_ID, COLLECTION_USERS
+from core.config import DATABASES, DATABASE_ID, COLLECTION_USERS, COLLECTION_ZIPCODES
 from appwrite.query import Query
 
 
@@ -29,3 +29,46 @@ def get_document_or_raise(
     except Exception as e:
         raise HTTPException(status_code=404, detail=detail)
     return document
+
+
+# Function to fetch data from the collection
+def get_coord(zipcode: str):
+    try:
+        val = DATABASES.list_documents(
+            DATABASE_ID,
+            COLLECTION_ZIPCODES,
+            queries=[Query.equal("pincode", [zipcode])],
+        )
+
+        val = val["documents"][0]
+        if val:
+            return {
+                "latitude": val["latitude"],
+                "longitude": val["longitude"],
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Given zipcode not found")
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching zipcodes: {str(e)}"
+        )
+
+
+# Function to fetch data from the collection
+def get_state(zipcode: str):
+    try:
+        val = DATABASES.list_documents(
+            DATABASE_ID,
+            COLLECTION_ZIPCODES,
+            queries=[Query.equal("pincode", [zipcode])],
+        )
+
+        val = val["documents"][0]
+        if val:
+            return val["state"]
+        else:
+            raise HTTPException(status_code=404, detail="Given zipcode not found")
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching zipcodes: {str(e)}"
+        )
