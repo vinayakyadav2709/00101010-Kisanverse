@@ -435,10 +435,12 @@ def get_bids(
         if email:
             user = get_user_by_email_or_raise(email)
             role = user["role"]
-
             if role == "buyer":
-                # Show bids placed on listings created by the buyer
-                buyer_listings = DATABASES.list_documents(
+                # Return all bids placed by the buyer
+                query_filters.append(Query.equal("buyer_id", [user["$id"]]))
+            elif role == "farmer":
+                # Return all bids on listings created by the farmer
+                farmer_listings = DATABASES.list_documents(
                     DATABASE_ID,
                     COLLECTION_CROP_LISTINGS,
                     queries=[
@@ -447,7 +449,7 @@ def get_bids(
                     ],
                 )
                 listing_ids = [
-                    listing["$id"] for listing in buyer_listings["documents"]
+                    listing["$id"] for listing in farmer_listings["documents"]
                 ]
                 if listing_ids:
                     query_filters.append(Query.equal("listing_id", listing_ids))

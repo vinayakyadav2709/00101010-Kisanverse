@@ -1,0 +1,36 @@
+{
+    "soil_type": "Black",
+    "soil_type_confidence": 99.34,
+    "latitude": 22.520393976898,
+    "longitude": 88.007016991204,
+    "start_date": "2025-07-01",
+    "end_date": "2025-07-18",
+    "weather_predictions": [
+      {"date": "2025-07-01", "temperature_2m_max": 32.85, "temperature_2m_min": 27.62, "precipitation_sum": 10.35, "wind_speed_10m_max": 12.43, "shortwave_radiation_sum": 13.4},
+      {"date": "2025-07-02", "temperature_2m_max": 33.95, "temperature_2m_min": 27.65, "precipitation_sum": 6.95, "wind_speed_10m_max": 14.0, "shortwave_radiation_sum": 19.39},
+      {"date": "2025-07-03", "temperature_2m_max": 34.23, "temperature_2m_min": 27.55, "precipitation_sum": 2.72, "wind_speed_10m_max": 12.8, "shortwave_radiation_sum": 18.4},
+      {"date": "2025-07-04", "temperature_2m_max": 36.1, "temperature_2m_min": 28.15, "precipitation_sum": 5.7, "wind_speed_10m_max": 8.65, "shortwave_radiation_sum": 16.09},
+      {"date": "2025-07-05", "temperature_2m_max": 35.53, "temperature_2m_min": 28.62, "precipitation_sum": 10.4, "wind_speed_10m_max": 9.75, "shortwave_radiation_sum": 14.82},
+      {"date": "2025-07-06", "temperature_2m_max": 35.05, "temperature_2m_min": 28.45, "precipitation_sum": 11.45, "wind_speed_10m_max": 10.45, "shortwave_radiation_sum": 22.66},
+      {"date": "2025-07-07", "temperature_2m_max": 34.62, "temperature_2m_min": 27.88, "precipitation_sum": 7.38, "wind_speed_10m_max": 11.25, "shortwave_radiation_sum": 17.86},
+      {"date": "2025-07-08", "temperature_2m_max": 36.38, "temperature_2m_min": 27.8, "precipitation_sum": 3.55, "wind_speed_10m_max": 10.25, "shortwave_radiation_sum": 22.17},
+      {"date": "2025-07-09", "temperature_2m_max": 35.8, "temperature_2m_min": 28.55, "precipitation_sum": 12.1, "wind_speed_10m_max": 8.3, "shortwave_radiation_sum": 18.7},
+      {"date": "2025-07-10", "temperature_2m_max": 35.95, "temperature_2m_min": 28.82, "precipitation_sum": 16.85, "wind_speed_10m_max": 10.07, "shortwave_radiation_sum": 19.19},
+      {"date": "2025-07-11", "temperature_2m_max": 35.9, "temperature_2m_min": 28.5, "precipitation_sum": 11.6, "wind_speed_10m_max": 10.48, "shortwave_radiation_sum": 21.39},
+      {"date": "2025-07-12", "temperature_2m_max": 34.25, "temperature_2m_min": 28.18, "precipitation_sum": 10.05, "wind_speed_10m_max": 11.22, "shortwave_radiation_sum": 16.31},
+      {"date": "2025-07-13", "temperature_2m_max": 35.1, "temperature_2m_min": 28.02, "precipitation_sum": 15.27, "wind_speed_10m_max": 10.35, "shortwave_radiation_sum": 20.37},
+      {"date": "2025-07-14", "temperature_2m_max": 35.32, "temperature_2m_min": 28.38, "precipitation_sum": 12.72, "wind_speed_10m_max": 10.43, "shortwave_radiation_sum": 20.54},
+      {"date": "2025-07-15", "temperature_2m_max": 35.7, "temperature_2m_min": 28.62, "precipitation_sum": 7.5, "wind_speed_10m_max": 9.65, "shortwave_radiation_sum": 19.69},
+      {"date": "2025-07-16", "temperature_2m_max": 34.9, "temperature_2m_min": 28.73, "precipitation_sum": 7.05, "wind_speed_10m_max": 10.47, "shortwave_radiation_sum": 14.6},
+      {"date": "2025-07-17", "temperature_2m_max": 34.17, "temperature_2m_min": 28.68, "precipitation_sum": 14.85, "wind_speed_10m_max": 9.55, "shortwave_radiation_sum": 14.5},
+      {"date": "2025-07-18", "temperature_2m_max": 35.92, "temperature_2m_min": 28.2, "precipitation_sum": 16.45, "wind_speed_10m_max": 8.72, "shortwave_radiation_sum": 19.54}
+    ],
+    "land_size": 2,
+    "crops_data": [
+      {"crop_name": "wheat", "prices": [100], "dates": ["2023-10-01"], "contracts": [], "yield_per_kg": 2500}
+    ],
+    "subsidies": [
+      { "type": "asset", "provider": "Livestock Dev Board", "program": "Goat Farming Support", "description": "...", "eligibility": "...", "benefits": "2 goats", "locations": ["900099"]},
+      { "type": "financial", "provider": "State Agriculture Dept.", "program": "Certified Soybean Seed Subsidy (Kharif)", "description": "Subsidy on seeds.", "eligibility": "All farmers", "benefits": "50% cost reduction", "locations": ["900099", "00000"]}
+    ]
+  }

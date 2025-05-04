@@ -1,0 +1,108 @@
+{
+  "JOWAR": {
+    "common_pests": [
+      "shoot fly",
+      "stem borer",
+      "midge",
+      "head smut",
+      "grain mold"
+    ],
+    "crop_name": "JOWAR",
+    "fertilizer_needs": "Medium N, Low P, Low K",
+    "general_notes": "Sorghum. Dual purpose (grain/fodder). Tolerant to drought and moderate salinity.",
+    "input_cost_cat": "Low",
+    "suitable_soils": ["LOAMY", "CLAY", "BLACK", "RED"],
+    "typical_yield_range_q_acre": [8.0, 22.0],
+    "water_needs": "Low"
+  },
+  "MAIZE": {
+    "common_pests": [
+      "fall armyworm",
+      "stem borer",
+      "shoot fly",
+      "cob borer",
+      "aphids"
+    ],
+    "crop_name": "MAIZE",
+    "fertilizer_needs": "Very High N, High P, Medium K, Zinc",
+    "general_notes": "Sensitive to waterlogging, especially early. Critical water need at tasseling/silking. Rabi version often higher yield.",
+    "input_cost_cat": "Medium-High",
+    "suitable_soils": ["LOAMY", "SANDY", "ALLUVIAL", "BLACK", "RED", "CLAY"],
+    "typical_yield_range_q_acre": [20.0, 45.0],
+    "water_needs": "High"
+  },
+  "MANGO": {
+    "common_pests": [
+      "hopper",
+      "mealybug",
+      "fruit fly",
+      "powdery mildew",
+      "anthracnose"
+    ],
+    "crop_name": "MANGO",
+    "fertilizer_needs": "Medium NPK during bearing, High Organic Matter",
+    "general_notes": "Perennial fruit tree. Requires distinct dry period for flowering. Sensitive to frost and waterlogging.",
+    "input_cost_cat": "Medium (Establishment), Low-Medium (Maintenance)",
+    "suitable_soils": ["ALLUVIAL", "LOAMY", "SANDY", "RED", "LATERITE"],
+    "typical_yield_range_q_acre": [30.0, 80.0],
+    "water_needs": "Moderate (during establishment/fruiting)"
+  },
+  "ONION": {
+    "common_pests": ["thrips", "maggots", "purple blotch", "basal rot"],
+    "crop_name": "ONION",
+    "fertilizer_needs": "Medium N, High P, High K, Sulphur essential",
+    "general_notes": "Sensitive to day length for bulbing. Requires good drainage.",
+    "input_cost_cat": "Medium-High",
+    "suitable_soils": ["SANDY", "LOAMY", "ALLUVIAL", "BLACK"],
+    "typical_yield_range_q_acre": [60.0, 130.0],
+    "water_needs": "Moderate"
+  },
+  "POTATO": {
+    "common_pests": [
+      "aphids (virus vector)",
+      "tuber moth",
+      "cutworm",
+      "late blight",
+      "early blight",
+      "black scurf"
+    ],
+    "crop_name": "POTATO",
+    "fertilizer_needs": "Very High NPK, High Organic Matter, Calcium, Magnesium",
+    "general_notes": "Requires quality seed tubers. Sensitive to frost and high temperatures during tuberization.",
+    "input_cost_cat": "High",
+    "suitable_soils": ["SANDY", "LOAMY", "ALLUVIAL"],
+    "typical_yield_range_q_acre": [80.0, 160.0],
+    "water_needs": "High"
+  },
+  "RICE": {
+    "common_pests": [
+      "stem borer",
+      "leaf folder",
+      "brown planthopper (BPH)",
+      "gall midge",
+      "bacterial blight"
+    ],
+    "crop_name": "RICE",
+    "fertilizer_needs": "High N, Medium P, Medium K, Zinc essential",
+    "general_notes": "Paddy. Requires puddling and standing water for optimal growth. Sensitive to salinity.",
+    "input_cost_cat": "Medium",
+    "suitable_soils": ["CLAY", "ALLUVIAL"],
+    "typical_yield_range_q_acre": [18.0, 32.0],
+    "water_needs": "Very High"
+  },
+  "WHEAT": {
+    "common_pests": [
+      "aphids",
+      "termite",
+      "rust (yellow, brown, black)",
+      "karnal bunt"
+    ],
+    "crop_name": "WHEAT",
+    "fertilizer_needs": "High N, Medium P, Low-Medium K, Sulphur often needed",
+    "general_notes": "Rabi crop. Cool weather needed for germination/tillering. Heat sensitive during grain filling.",
+    "input_cost_cat": "Medium",
+    "suitable_soils": ["LOAMY", "CLAY", "ALLUVIAL", "SANDY"],
+    "typical_yield_range_q_acre": [16.0, 28.0],
+    "water_needs": "Moderate"
+  }
+}

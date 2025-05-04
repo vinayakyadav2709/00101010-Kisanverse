@@ -1,0 +1,596 @@
+{
+  "request_details": {
+    "latitude": 11.1271,
+    "longitude": 78.6569,
+    "soil_type": "black",
+    "land_size_acres": 2.0,
+    "planting_date_estimate": "2025-07-01",
+    "timestamp": "2025-05-04T05:27:50.779586"
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "crop_name": "Urad Bean (Black Gram - Kharif)",
+      "recommendation_score": 93.9,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is strong, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Slightly Rising (1.1) * InvCostFactor:Low (1.2)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for black soil. Water needs (Low) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: Medium (Mod: 1.05), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "2.4-5.4 q/acre",
+        "price_forecast_trend": "Slightly Rising",
+        "estimated_input_cost_category": "Low",
+        "primary_fertilizer_needs": "Rhizobium Inoculant, Low N starter, Medium P"
+      },
+      "relevant_subsidies": [
+        {
+          "program": "PM-KISAN Input Support",
+          "provider": "Central Govt.",
+          "benefit_summary": "₹6000 per year in installments (generic)",
+          "estimated_value_inr": null
+        },
+        {
+          "program": "Nutrient Based Subsidy (NBS)",
+          "provider": "Dept. of Fertilizers",
+          "benefit_summary": "Reduced MRP on P&K fertilizers (Amount varies by product)",
+          "estimated_value_inr": null
+        }
+      ],
+      "primary_risks": [
+        "Monitor common pests/diseases: pod borer, aphids, jassids, whitefly, yellow mosaic virus (YMV)."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Acephate",
+          "target_pest": "aphids (common); jassids (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Acetamiprid",
+          "target_pest": "aphids (common); whitefly (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Buprofezin",
+          "target_pest": "jassids (common); whitefly (common)",
+          "timing_stage": "Nymph Stage"
+        },
+        {
+          "chemical_name": "Chlorantraniliprole (Coragen)",
+          "target_pest": "pod borer (common)",
+          "timing_stage": "Flowering/Podding"
+        },
+        {
+          "chemical_name": "Diafenthiuron",
+          "target_pest": "jassids (common); whitefly (common)",
+          "timing_stage": "Vegetative"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 4114.0,
+              "predicted_price_max": 5236.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 4237.0,
+              "predicted_price_max": 5393.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 4364.0,
+              "predicted_price_max": 5554.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 4494.0,
+              "predicted_price_max": 5720.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 1
+            },
+            {
+              "growth_stage": "Vegetative Growth",
+              "relative_need_level": 1
+            },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 2
+            },
+            {
+              "growth_stage": "Maturity/Harvest",
+              "relative_need_level": 1
+            }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Rhizobium Inoculant, Low N starter, Medium P)"
+            }
+          ]
+        }
+      },
+      "relevant_news": []
+    },
+    {
+      "rank": 2,
+      "crop_name": "Maize (Kharif)",
+      "recommendation_score": 40.3,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is moderate, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Rising (1.2) * InvCostFactor:Medium-High (0.9)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for black soil. Water needs (High) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: Low (Mod: 0.95), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "16.0-31.5 q/acre",
+        "price_forecast_trend": "Rising",
+        "estimated_input_cost_category": "Medium-High",
+        "primary_fertilizer_needs": "Very High N, High P, Medium K, Zinc"
+      },
+      "relevant_subsidies": [
+        {
+          "program": "PM-KISAN Input Support",
+          "provider": "Central Govt.",
+          "benefit_summary": "₹6000 per year in installments (generic)",
+          "estimated_value_inr": null
+        },
+        {
+          "program": "Nutrient Based Subsidy (NBS)",
+          "provider": "Dept. of Fertilizers",
+          "benefit_summary": "Reduced MRP on P&K fertilizers (Amount varies by product)",
+          "estimated_value_inr": null
+        }
+      ],
+      "primary_risks": [
+        "EVENT (MEDIUM): Pest Alert - Simulated MEDIUM alert for Armyworm.",
+        "Monitor common pests/diseases: fall armyworm, stem borer, shoot fly, cob borer.",
+        "Yield sensitive to dry spells during tasseling/silking."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Cartap Hydrochloride",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Chlorantraniliprole (Coragen)",
+          "target_pest": "stem borer (common); armyworm (alert)",
+          "timing_stage": "Early"
+        },
+        {
+          "chemical_name": "Chlorpyrifos",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Basal Spray"
+        },
+        {
+          "chemical_name": "Emamectin Benzoate",
+          "target_pest": "armyworm (alert)",
+          "timing_stage": "Vegetative/Reproductive"
+        },
+        {
+          "chemical_name": "Fipronil",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 5964.0,
+              "predicted_price_max": 7438.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 6141.0,
+              "predicted_price_max": 7661.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 6325.0,
+              "predicted_price_max": 7890.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 6514.0,
+              "predicted_price_max": 8126.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 3
+            },
+            {
+              "growth_stage": "Vegetative Growth",
+              "relative_need_level": 5
+            },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 5
+            },
+            {
+              "growth_stage": "Maturity/Harvest",
+              "relative_need_level": 2
+            }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Very High N, High P, Medium K, Zinc)"
+            },
+            {
+              "stage": "Top Dress 1",
+              "timing": "~25-40 DAS",
+              "nutrients": "Nitrogen Focus (e.g., Urea)"
+            },
+            {
+              "stage": "Top Dress 2 / Foliar",
+              "timing": "~50-75 DAS",
+              "nutrients": "NPK Balance / Potassium / Micronutrients as needed"
+            }
+          ]
+        }
+      },
+      "relevant_news": [
+        {
+          "headline": "Meet The IITian Growing Organic Food Under India’s Largest Agrivoltaic Solar Plant",
+          "url": "https://news.google.com/read/CBMirwFBVV95cUxQcVZZRnFtdl9fYXE4R2FmaEhmZ01Db1dLc0FJdjJXa19KaDVERXJPbjdldGxTbTZEYXBvVUdUWGJrRUdndnplZ3NzWUNkSkVkaHhXWnAwdC1LU0dnaFBSbXIwNl9qdTdKdkJ4SHVCTzB6emNJNzVKYTNDYmJRMXkxX0pPd1IyQmdqQWdLelZ0eVBodVVpVkJ4UGJQV1BZVlVjdkQydWdQRnhIMjRxeW8w0gG0AUFVX3lxTE1IR3A3VWw2QzdVN0hVMDZGMWZ3dDlYQmxLRzlEVnphdUN2aTlFdTV6VTRnNG1WM3hZV01xb09kX3ZNcDNEblJqM19yeDVRcHpsNjJiNDltaUo0Y1dBT1pFS0dORVRqUGdRRURzUFVXWWplLW1fd2NEaXBHWWZMVEo3TWNVaHN0eEJxQ1pBdlJXRDloQ0hLZFJ5cmRucDViUGJyajllWmpvRlVDVGd5X0NrNU9rYw?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "The Better India",
+          "date": "2025-05-02T14:00:00+00:00"
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "crop_name": "Sorghum (Jowar - Kharif/Rabi)",
+      "recommendation_score": 24.4,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is moderate, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Volatile (0.9) * InvCostFactor:Low (1.2)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for black soil. Water needs (Low) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: High (Mod: 1.20), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "6.4-19.8 q/acre",
+        "price_forecast_trend": "Volatile",
+        "estimated_input_cost_category": "Low",
+        "primary_fertilizer_needs": "Medium N, Low P, Low K"
+      },
+      "relevant_subsidies": [
+        {
+          "program": "PM-KISAN Input Support",
+          "provider": "Central Govt.",
+          "benefit_summary": "₹6000 per year in installments (generic)",
+          "estimated_value_inr": null
+        },
+        {
+          "program": "Nutrient Based Subsidy (NBS)",
+          "provider": "Dept. of Fertilizers",
+          "benefit_summary": "Reduced MRP on P&K fertilizers (Amount varies by product)",
+          "estimated_value_inr": null
+        }
+      ],
+      "primary_risks": [
+        "Monitor common pests/diseases: shoot fly, stem borer, midge, head smut, grain mold."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Cartap Hydrochloride",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Chlorantraniliprole (Coragen)",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Early"
+        },
+        {
+          "chemical_name": "Chlorpyrifos",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Basal Spray"
+        },
+        {
+          "chemical_name": "Fipronil",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Imidacloprid",
+          "target_pest": "shoot fly (common)",
+          "timing_stage": "Seed Treatment"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 3700.0,
+              "predicted_price_max": 4854.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 3700.0,
+              "predicted_price_max": 4854.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 3700.0,
+              "predicted_price_max": 4854.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 3700.0,
+              "predicted_price_max": 4854.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 1
+            },
+            {
+              "growth_stage": "Vegetative Growth",
+              "relative_need_level": 1
+            },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 2
+            },
+            {
+              "growth_stage": "Maturity/Harvest",
+              "relative_need_level": 1
+            }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Medium N, Low P, Low K)"
+            }
+          ]
+        }
+      },
+      "relevant_news": []
+    },
+    {
+      "rank": 4,
+      "crop_name": "Sugarcane",
+      "recommendation_score": 10.2,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is moderate, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Rising (1.2) * InvCostFactor:High (0.8)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for black soil. Water needs (Very High) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: Low (Mod: 0.95), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "200.0-450.0 q/acre",
+        "price_forecast_trend": "Rising",
+        "estimated_input_cost_category": "High",
+        "primary_fertilizer_needs": "Very High NPK, High Organic Matter, Sulphur, Iron"
+      },
+      "relevant_subsidies": [
+        {
+          "program": "PM-KISAN Input Support",
+          "provider": "Central Govt.",
+          "benefit_summary": "₹6000 per year in installments (generic)",
+          "estimated_value_inr": null
+        },
+        {
+          "program": "Nutrient Based Subsidy (NBS)",
+          "provider": "Dept. of Fertilizers",
+          "benefit_summary": "Reduced MRP on P&K fertilizers (Amount varies by product)",
+          "estimated_value_inr": null
+        }
+      ],
+      "primary_risks": [
+        "Long duration crop; high water/nutrient needs.",
+        "Monitor common pests/diseases: early shoot borer, top borer, internode borer, termites, whitefly, red rot disease."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Acetamiprid",
+          "target_pest": "whitefly (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Buprofezin",
+          "target_pest": "whitefly (common)",
+          "timing_stage": "Nymph Stage"
+        },
+        {
+          "chemical_name": "Chlorpyrifos",
+          "target_pest": "termite (alert)",
+          "timing_stage": "Soil Application (Pre/Post-sowing)"
+        },
+        {
+          "chemical_name": "Diafenthiuron",
+          "target_pest": "whitefly (common); mites (alert)",
+          "timing_stage": "Adult Stage"
+        },
+        {
+          "chemical_name": "Dimethoate",
+          "target_pest": "mites (alert)",
+          "timing_stage": "Any Stage"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 9338.0,
+              "predicted_price_max": 11645.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 9617.0,
+              "predicted_price_max": 11995.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 9905.0,
+              "predicted_price_max": 12354.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 10202.0,
+              "predicted_price_max": 12724.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 4
+            },
+            {
+              "growth_stage": "Vegetative Growth",
+              "relative_need_level": 5
+            },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 5
+            },
+            {
+              "growth_stage": "Maturity/Harvest",
+              "relative_need_level": 2
+            }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Very High NPK, High Organic Matter, Sulphur, Iron)"
+            },
+            {
+              "stage": "Top Dress 1",
+              "timing": "~25-40 DAS",
+              "nutrients": "Nitrogen Focus (e.g., Urea)"
+            },
+            {
+              "stage": "Top Dress 2 / Foliar",
+              "timing": "~50-75 DAS",
+              "nutrients": "NPK Balance / Potassium / Micronutrients as needed"
+            }
+          ]
+        }
+      },
+      "relevant_news": []
+    }
+  ],
+  "weather_context_summary": "Forecast (18 days) indicates avg temp ~31.7°C, total rainfall ~182.9mm.",
+  "news_headlines_considered": [
+    "Indian agriculture’s response to global warming",
+    "There’s potential to double India’s crop yields even with existing technologies: Mangi Lal Jat, Secretary,",
+    "‘Beej Ratna’ recognition framework for boosting India’s R&D in seed sector",
+    "How WTO Rules Undermine Indian Agriculture",
+    "Meet The IITian Growing Organic Food Under India’s Largest Agrivoltaic Solar Plant"
+  ],
+  "news_impact_summary_llm": "The headlines suggest a focus on technological advancements in agriculture, particularly through R&D and innovative approaches like agrivoltaics. There's also an underlying concern regarding global trade regulations and their impact on Indian farmers, alongside discussions about climate change adaptation and the need for increased crop yields. The emphasis on seed development and sustainable practices indicates a push for modernization and resilience within the agricultural sector.",
+  "overall_llm_summary": "Based on the current weather forecast of consistently warm temperatures and moderate rainfall over the next 18 days, alongside the broader agricultural news emphasizing innovation and resilience, I’d strongly recommend prioritizing Urad Bean (Black Gram) for your upcoming crop. Its high profitability potential, coupled with the need for adaptable farming strategies, makes it a particularly sound choice. While Maize also offers moderate profitability, focusing on Urad Bean will likely provide a more secure return given the evolving landscape of global trade and the importance of sustainable practices. Keep a close eye on potential market fluctuations and ensure you’re utilizing any available technological advancements to maximize your yield."
+}
