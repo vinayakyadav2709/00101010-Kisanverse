@@ -66,7 +66,7 @@ users = [
         "address": "Myfarm Naturals, Nandanvan main road, chandandih, Raipur, Chandanidih, CHHATTISGARH",
     },
     {
-        "email": "demoadmin@example.com",
+        "email": "admin@example.com",
         "name": "Sangeeta Sharma",
         "role": "admin",
         "zipcode": "000000",
