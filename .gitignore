@@ -1,11 +1,14 @@
 .env
 **/__pycache__/ 
+app/tmp/**
 .venv
 ignore.txt
 ignore
-app/models
+app/models/weights
+app/models/prices
 app/test_data
-app/routers/other_scripts
+app/routers/other_scripts/**csv
+app/routers/other_scripts/**json
 
 app/csvs
 
