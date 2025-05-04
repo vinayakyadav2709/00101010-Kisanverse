@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, HTTPException
 from matplotlib.style import available
 from pydantic import BaseModel, Field
@@ -5,6 +6,7 @@ from typing import Dict, Any
 import requests
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from appwrite.id import ID
+from models.llm import recommendation_api
 from appwrite.input_file import InputFile
 from core.config import (
     COLLECTION_CONTRACTS,
@@ -704,164 +706,13 @@ def llm(data: Dict[str, Any]) -> Dict[str, Any]:
         Dict[str, Any]: The predicted crop and its details.
     """
     # Simulate LLM processing
-    data = """
-        {
-    "request_details": {
-        "latitude": 22.520393976898,
-        "longitude": 88.007016991204,
-        "soil_type": "Black",
-        "land_size_acres": 2,
-        "analysis_period": {
-        "start_date": "2025-07-01",
-        "end_date": "2025-07-18"
-        },
-        "timestamp": "2024-05-16T11:30:00Z"
-    },
-    "recommendations": [
-        {
-        "rank": 1,
-        "crop_name": "Soybean",
-        "recommendation_score": 85.5,
-        "explanation_points": [
-            {
-            "reason_type": "High Profitability",
-            "detail": "Analysis indicates strong profit potential driven by stable-to-rising price forecasts combined with manageable 'Low-Medium' estimated input costs, significantly boosted by a seed subsidy.",
-            "ai_component": "Predictive Analytics, Heuristic Evaluation, Rule-Based Logic (Subsidy)"
-            },
-            {
-            "reason_type": "Optimal Agronomics",
-            "detail": "Excellent match for Black soil type. Weather forecast analysis confirms sufficient precipitation expected during the critical early growth stage in July.",
-            "ai_component": "Knowledge-Based Rules, Weather Data Integration"
-            },
-            {
-            "reason_type": "Financial Advantage",
-            "detail": "The available 50% Seed Subsidy directly reduces upfront costs, lowering financial risk.",
-            "ai_component": "Subsidy Data Integration, Rule-Based Impact"
-            },
-            {
-            "reason_type": "Favorable Market Conditions",
-            "detail": "Current market prices are stable, and moderate platform demand signals are positive.",
-            "ai_component": "Market Data Analysis"
-            }
-        ],
-        "key_metrics": {
-            "expected_yield_range": "8-10 quintals/acre",
-            "price_forecast_trend": "Stable to Slightly Rising",
-            "estimated_input_cost_category": "Low-Medium",
-            "primary_fertilizer_needs": "Inoculant, Phosphorus, Potassium (Nitrogen fixed)"
-        },
-        "relevant_subsidies": [
-            {
-            "program": "State Certified Seed Subsidy (Kharif)",
-            "provider": "State Agriculture Department",
-            "benefit_summary": "Approx. 50% cost reduction on certified Soybean seeds.",
-            "details_available": true 
-            }
-        ],
-        "primary_risks": [
-            "Sensitivity to waterlogging if heavy, prolonged rains occur.",
-            "Requires monitoring for common pests like girdle beetle and whitefly."
-        ],
-        "plotting_data": {
-            "price_forecast_chart": {
-            "description": "Predicted price range (INR/Quintal) near harvest.",
-            "data": [
-                { "date": "2025-11-01", "predicted_price_min": 4500, "predicted_price_max": 4800 },
-                { "date": "2025-11-15", "predicted_price_min": 4550, "predicted_price_max": 4900 },
-                { "date": "2025-12-01", "predicted_price_min": 4600, "predicted_price_max": 4950 },
-                { "date": "2025-12-15", "predicted_price_min": 4650, "predicted_price_max": 5000 }
-            ]
-            },
-            "water_need_chart": {
-            "description": "Relative water requirement across growth stages (1=Low, 5=Very High).",
-            "data": [
-                { "growth_stage": "Germination (0-2wk)", "relative_need_level": 2 },
-                { "growth_stage": "Vegetative (3-6wk)", "relative_need_level": 4 },
-                { "growth_stage": "Flowering/Podding (7-10wk)", "relative_need_level": 5 },
-                { "growth_stage": "Maturity (11+wk)", "relative_need_level": 1 }
-            ]
-            },
-            "fertilizer_schedule_chart": {
-            "description": "Typical nutrient application timing.",
-            "data": [
-                { "stage": "Basal", "timing": "At Sowing", "nutrients": "Inoculant, P, K" },
-                { "stage": "Top Dress", "timing": "~30 Days", "nutrients": "K (if needed)" }
-            ]
-            }
-        }
-        },
-        {
-        "rank": 2,
-        "crop_name": "Maize (Kharif)",
-        "recommendation_score": 78.0,
-        "explanation_points": [
-            {
-            "reason_type": "Strong Yield & Price",
-            "detail": "Offers high yield potential (25-30 q/acre) coupled with a rising price forecast driven by feed demand, leading to good revenue projection despite higher 'Medium-High' input costs.",
-            "ai_component": "Predictive Analytics, Heuristic Evaluation"
-            },
-            {
-            "reason_type": "Good Agronomic Fit",
-            "detail": "Suitable for Black soil and takes advantage of expected monsoon rainfall, although high water need requires consistent rainfall throughout the season.",
-            "ai_component": "Knowledge-Based Rules, Weather Data Integration"
-            },
-            {
-            "reason_type": "Positive Market Trend",
-            "detail": "Price trend is upward due to external factors (feed demand), indicating strong market pull.",
-            "ai_component": "Market Data Analysis, Event Correlation"
-            },
-            {
-            "reason_type": "Higher Risk Profile",
-            "detail": "Requires higher fertilizer investment ('Medium-High' cost category) and is more sensitive to rainfall consistency. No major subsidies noted to offset these risks.",
-            "ai_component": "Risk Factor Analysis"
-            }
-        ],
-        "key_metrics": {
-            "expected_yield_range": "25-30 quintals/acre",
-            "price_forecast_trend": "Rising",
-            "estimated_input_cost_category": "Medium-High",
-            "primary_fertilizer_needs": "High Nitrogen, Phosphorus, Potassium"
-        },
-        "relevant_subsidies": [], 
-        "primary_risks": [
-            "Higher upfront fertilizer costs.",
-            "Yield potential highly dependent on consistent rainfall.",
-            "Requires monitoring and potential management for Fall Armyworm."
-        ],
-        "plotting_data": {
-            "price_forecast_chart": {
-            "description": "Predicted price range (INR/Quintal) near harvest.",
-            "data": [
-                { "date": "2025-10-15", "predicted_price_min": 2100, "predicted_price_max": 2300 },
-                { "date": "2025-11-01", "predicted_price_min": 2150, "predicted_price_max": 2400 },
-                { "date": "2025-11-15", "predicted_price_min": 2200, "predicted_price_max": 2450 },
-                { "date": "2025-12-01", "predicted_price_min": 2250, "predicted_price_max": 2500 }
-            ]
-            },
-            "water_need_chart": {
-            "description": "Relative water requirement across growth stages (1=Low, 5=Very High).",
-            "data": [
-                { "growth_stage": "Seedling (0-3wk)", "relative_need_level": 3 },
-                { "growth_stage": "Vegetative (4-8wk)", "relative_need_level": 4 },
-                { "growth_stage": "Tasseling/Silking (9-12wk)", "relative_need_level": 5 },
-                { "growth_stage": "Grain Fill/Maturity (13+wk)", "relative_need_level": 3 }
-            ]
-            },
-            "fertilizer_schedule_chart": {
-            "description": "Typical nutrient application timing.",
-            "data": [
-                { "stage": "Basal", "timing": "At Sowing", "nutrients": "Partial N, P, K" },
-                { "stage": "Knee-High", "timing": "~30 Days", "nutrients": "N Top Dress" },
-                { "stage": "Tasseling", "timing": "~50-60 Days", "nutrients": "N Top Dress" }
-            ]
-            }
-        }
-        }
-    ],
-    "weather_context_summary": "Overall weather forecast for Jul 01-18 indicates generally favorable monsoon conditions (warm, frequent rain) for Kharif planting in this region."
-    }
-    """
-    return data
+    try:
+        result = json.dumps(recommendation_api.get_recommendations(data))
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error during LLM processing: {str(e)}"
+        )
 
 
 def get_available_subsidies(email: str, status: str = "listed"):
@@ -938,6 +789,7 @@ class CropPredictionInput(BaseModel):
     acres: int
     soil_type: Optional[str] = None
 
+
 @ai_router.post("/crop_prediction")
 def crop_prediction(
     email: str,
@@ -948,7 +800,6 @@ def crop_prediction(
     file: Optional[UploadFile] = File(None),  # Make file optional
 ):
     local_file_path = None
-
 
     try:
         # Step 1: Validate input data
@@ -968,9 +819,6 @@ def crop_prediction(
         latitude = cord["latitude"]
         longitude = cord["longitude"]
 
-        
-        
-
         # Step 3: Handle soil classification or file upload
         file_url = None
         soil_data = None
@@ -981,12 +829,11 @@ def crop_prediction(
 
         if soil_type is None:
             # Save the file locally
-            
+
             local_file_path = f"/tmp/{file.filename}"
             try:
                 with open(local_file_path, "wb") as f:
                     f.write(file.file.read())
-                
 
                 # Upload the file to Appwrite storage
                 response = STORAGE.create_file(
@@ -996,9 +843,8 @@ def crop_prediction(
                 )
                 file_id = response["$id"]
                 file_url = get_url(BUCKET_CROP, file_id)
-                
+
             except Exception as e:
-                
                 raise HTTPException(
                     status_code=500, detail=f"Error handling file: {str(e)}"
                 )
@@ -1006,21 +852,36 @@ def crop_prediction(
                 # Clean up the local file
                 if local_file_path and os.path.exists(local_file_path):
                     os.remove(local_file_path)
-                    
+
         else:
             # Use the provided soil_type
+            soil_type = soil_type.upper()
+            if soil_type not in [
+                "BLACK",
+                "ALLUVIAL",
+                "CINDER",
+                "CLAY",
+                "LATERITE",
+                "LOAMY",
+                "PEAT",
+                "RED",
+                "SANDY",
+                "YELLOW",
+            ]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid soil type. Valid options are: black, Alluvial, Cinder, Clay, Laterite, Loamy, Peat, Red, Sandy, Yellow",
+                )
             soil_data = {
                 "soil_type": soil_type,
                 "confidence": 100.0,  # Assuming 100% confidence if provided
             }
-            
 
         # Step 4: Call the weather prediction API
         weather_input = WeatherPredictionInput(
             email=email, start_date=start_date, end_date=end_date
         )
         weather_predictions = weather_prediction(weather_input, store=False)
-        
 
         # Step 5: Fetch crop prices
         crop_prices = fetch_prices(
@@ -1030,10 +891,9 @@ def crop_prediction(
             start_date,
             end_date,
         )
-        
+
         applicable = get_available_subsidies(email, status="listed")
         subsidy_ids = [subsidy["$id"] for subsidy in applicable]
-        
 
         # Step 6: Merge all data into a single hash
         combined_data = {
@@ -1074,11 +934,11 @@ def crop_prediction(
                     "yield_per_kg": yield_per_kg,
                 }
             )
-        
-
+        print("\n\n\n\n")
+        print(combined_data)
+        print("\n\n\n\n")
         # Step 8: Call the LLM function
         llm_result = llm(combined_data)
-        
 
         # Step 9: Store the input and output in COLLECTION_CROPS
         input_data_to_store = {
@@ -1099,13 +959,11 @@ def crop_prediction(
                 "output": llm_result,
             },
         )
-        
 
         # Step 10: Return the result from the LLM function
         return json.loads(llm_result)
 
     except Exception as e:
-        
         if isinstance(e, HTTPException):
             raise e
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
@@ -1163,8 +1021,7 @@ def test_price_apis_and_crop_prediction():
         EMAIL = "farmerx@example.com"
         START_DATE = "2025-07-01"
         END_DATE = "2025-11-18"
-        CROP_TYPE = "WHEAT"
-        SOIL_TYPE = "Loamy"
+        SOIL_TYPE = "BLACK"
         data = {
             "email": EMAIL,
             "name": "John Doe",
@@ -1192,14 +1049,12 @@ def test_price_apis_and_crop_prediction():
 
         # Test crop_prediction
         print("Testing crop_prediction...")
-        crop_input = CropPredictionInput(
+
+        crop_prediction_result = crop_prediction(
             email=EMAIL,
             start_date=START_DATE,
             end_date=END_DATE,
-            acres=5,  # Example land size
-        )
-        crop_prediction_result = crop_prediction(
-            input_data=crop_input,
+            acres=2,
             file=None,  # No file provided for this test
             soil_type=SOIL_TYPE,  # Pass soil type directly
         )

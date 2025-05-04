@@ -64,7 +64,7 @@ def get_state(zipcode: str):
         )
 
         if val["documents"]:
-            return val["documents"][0]["state"]
+            return val["documents"][0]["state"].upper()
         else:
             raise HTTPException(status_code=404, detail="Given zipcode not found")
     except Exception as e:

@@ -1,0 +1,134 @@
+{
+  "soil_type": "Black",
+  "soil_type_confidence": 99.34459328651428,
+  "latitude": 22.520393976898,
+  "longitude": 88.007016991204,
+  "start_date": "2025-07-01",
+  "end_date": "2025-08-18",
+  "weather_predictions": [
+    {
+      "month": 6,
+      "temperature_2m_max": 32.85,
+      "temperature_2m_min": 27.62,
+      "precipitation_sum": 10.35,
+      "wind_speed_10m_max": 12.43,
+      "shortwave_radiation_sum": 13.4
+    },
+    {
+      "month": 7,
+      "temperature_2m_max": 32.85,
+      "temperature_2m_min": 27.62,
+      "precipitation_sum": 10.35,
+      "wind_speed_10m_max": 12.43,
+      "shortwave_radiation_sum": 13.4
+    },
+    {
+      "month": 8,
+      "temperature_2m_max": 32.85,
+      "temperature_2m_min": 27.62,
+      "precipitation_sum": 10.35,
+      "wind_speed_10m_max": 12.43,
+      "shortwave_radiation_sum": 13.4
+    }
+  ],
+  "land_size": 2,
+  "crops_data": [
+    {
+      "crop_name": "wheat",
+      "prices": [100, 105, 110],
+      "dates": ["2023-10-01", "2023-10-02", "2023-10-03"],
+      "contracts": [],
+      "yield_per_kg": 2500
+    },
+    {
+      "crop_name": "rice",
+      "prices": [200, 205, 210],
+      "dates": ["2023-10-01", "2023-10-02", "2023-10-03"],
+      "contracts": [],
+      "yield_per_kg": 2500
+    }
+  ],
+  "subsidies": [
+    {
+      "type": "asset",
+      "max_recipients": 50,
+      "status": "listed",
+      "dynamic_fields": "{\"field1\": \"value1\"}",
+      "locations": ["900099", "00000"],
+      "recipients_accepted": 0,
+      "provider": "Livestock Development Board",
+      "program": "Goat Farming Support",
+      "description": "Provides goats to farmers for livestock development.",
+      "eligibility": "Must own farmland and have livestock experience.",
+      "benefits": "2 goats",
+      "application_process": "Apply online with proof of farmland ownership.",
+      "$id": "6814fb590006a7c1d7b8",
+      "$createdAt": "2025-05-02T17:05:29.805+00:00",
+      "$updatedAt": "2025-05-02T17:05:29.805+00:00",
+      "$permissions": [],
+      "$databaseId": "agri_marketplace",
+      "$collectionId": "subsidies"
+    },
+    {
+      "type": "asset",
+      "max_recipients": 50,
+      "status": "listed",
+      "dynamic_fields": "{\"field1\": \"value1\"}",
+      "locations": ["900099", "00000"],
+      "recipients_accepted": 0,
+      "provider": "Livestock Development Board",
+      "program": "Goat Farming Support",
+      "description": "Provides goats to farmers for livestock development.",
+      "eligibility": "Must own farmland and have livestock experience.",
+      "benefits": "2 goats",
+      "application_process": "Apply online with proof of farmland ownership.",
+      "$id": "6814fc0100329cfb7733",
+      "$createdAt": "2025-05-02T17:08:17.496+00:00",
+      "$updatedAt": "2025-05-02T17:08:17.496+00:00",
+      "$permissions": [],
+      "$databaseId": "agri_marketplace",
+      "$collectionId": "subsidies"
+    },
+    {
+      "type": "asset",
+      "max_recipients": 50,
+      "status": "listed",
+      "dynamic_fields": "{\"field1\": \"value1\"}",
+      "locations": ["900099", "00000"],
+      "recipients_accepted": 0,
+      "provider": "Livestock Development Board",
+      "program": "Goat Farming Support",
+      "description": "Provides goats to farmers for livestock development.",
+      "eligibility": "Must own farmland and have livestock experience.",
+      "benefits": "2 goats",
+      "application_process": "Apply online with proof of farmland ownership.",
+      "$id": "6814fc5c002d8d8704fc",
+      "$createdAt": "2025-05-02T17:09:48.843+00:00",
+      "$updatedAt": "2025-05-02T17:09:48.843+00:00",
+      "$permissions": [],
+      "$databaseId": "agri_marketplace",
+      "$collectionId": "subsidies"
+    },
+    {
+      "type": "asset",
+      "max_recipients": 50,
+      "status": "listed",
+      "dynamic_fields": "{\"field1\": \"value1\"}",
+      "locations": ["900099", "00000"],
+      "recipients_accepted": 0,
+      "provider": "Livestock Development Board",
+      "program": "Goat Farming Support",
+      "description": "Provides goats to farmers for livestock development.",
+      "eligibility": "Must own farmland and have livestock experience.",
+      "benefits": "2 goats",
+      "application_process": "Apply online with proof of farmland ownership.",
+      "$id": "6814fcd7000c6c9f6f12",
+      "$createdAt": "2025-05-02T17:11:51.812+00:00",
+      "$updatedAt": "2025-05-02T17:11:51.812+00:00",
+      "$permissions": [],
+      "$databaseId": "agri_marketplace",
+      "$collectionId": "subsidies"
+    }
+  ],
+  "sample": "sample"
+}

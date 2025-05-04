@@ -1,0 +1,264 @@
+{
+    "soil_type": "black",
+    "soil_type_confidence": 99.34459328651428,
+    "latitude": 11.1271,
+    "longitude": 78.6569,
+    "start_date": "2025-07-01",
+    "end_date": "2025-07-18",
+    "weather_predictions": [
+      {
+        "date": "2025-07-01",
+        "temperature_2m_max": 32.85,
+        "temperature_2m_min": 27.62,
+        "precipitation_sum": 10.35,
+        "wind_speed_10m_max": 12.43,
+        "shortwave_radiation_sum": 13.4
+      },
+      {
+        "date": "2025-07-02",
+        "temperature_2m_max": 33.95,
+        "temperature_2m_min": 27.65,
+        "precipitation_sum": 6.95,
+        "wind_speed_10m_max": 14.0,
+        "shortwave_radiation_sum": 19.39
+      },
+      {
+        "date": "2025-07-03",
+        "temperature_2m_max": 34.23,
+        "temperature_2m_min": 27.55,
+        "precipitation_sum": 2.72,
+        "wind_speed_10m_max": 12.8,
+        "shortwave_radiation_sum": 18.4
+      },
+      {
+        "date": "2025-07-04",
+        "temperature_2m_max": 36.1,
+        "temperature_2m_min": 28.15,
+        "precipitation_sum": 5.7,
+        "wind_speed_10m_max": 8.65,
+        "shortwave_radiation_sum": 16.09
+      },
+      {
+        "date": "2025-07-05",
+        "temperature_2m_max": 35.53,
+        "temperature_2m_min": 28.62,
+        "precipitation_sum": 10.4,
+        "wind_speed_10m_max": 9.75,
+        "shortwave_radiation_sum": 14.82
+      },
+      {
+        "date": "2025-07-06",
+        "temperature_2m_max": 35.05,
+        "temperature_2m_min": 28.45,
+        "precipitation_sum": 11.45,
+        "wind_speed_10m_max": 10.45,
+        "shortwave_radiation_sum": 22.66
+      },
+      {
+        "date": "2025-07-07",
+        "temperature_2m_max": 34.62,
+        "temperature_2m_min": 27.88,
+        "precipitation_sum": 7.38,
+        "wind_speed_10m_max": 11.25,
+        "shortwave_radiation_sum": 17.86
+      },
+      {
+        "date": "2025-07-08",
+        "temperature_2m_max": 36.38,
+        "temperature_2m_min": 27.8,
+        "precipitation_sum": 3.55,
+        "wind_speed_10m_max": 10.25,
+        "shortwave_radiation_sum": 22.17
+      },
+      {
+        "date": "2025-07-09",
+        "temperature_2m_max": 35.8,
+        "temperature_2m_min": 28.55,
+        "precipitation_sum": 12.1,
+        "wind_speed_10m_max": 8.3,
+        "shortwave_radiation_sum": 18.7
+      },
+      {
+        "date": "2025-07-10",
+        "temperature_2m_max": 35.95,
+        "temperature_2m_min": 28.82,
+        "precipitation_sum": 16.85,
+        "wind_speed_10m_max": 10.07,
+        "shortwave_radiation_sum": 19.19
+      },
+      {
+        "date": "2025-07-11",
+        "temperature_2m_max": 35.9,
+        "temperature_2m_min": 28.5,
+        "precipitation_sum": 11.6,
+        "wind_speed_10m_max": 10.48,
+        "shortwave_radiation_sum": 21.39
+      },
+      {
+        "date": "2025-07-12",
+        "temperature_2m_max": 34.25,
+        "temperature_2m_min": 28.18,
+        "precipitation_sum": 10.05,
+        "wind_speed_10m_max": 11.22,
+        "shortwave_radiation_sum": 16.31
+      },
+      {
+        "date": "2025-07-13",
+        "temperature_2m_max": 35.1,
+        "temperature_2m_min": 28.02,
+        "precipitation_sum": 15.27,
+        "wind_speed_10m_max": 10.35,
+        "shortwave_radiation_sum": 20.37
+      },
+      {
+        "date": "2025-07-14",
+        "temperature_2m_max": 35.32,
+        "temperature_2m_min": 28.38,
+        "precipitation_sum": 12.72,
+        "wind_speed_10m_max": 10.43,
+        "shortwave_radiation_sum": 20.54
+      },
+      {
+        "date": "2025-07-15",
+        "temperature_2m_max": 35.7,
+        "temperature_2m_min": 28.62,
+        "precipitation_sum": 7.5,
+        "wind_speed_10m_max": 9.65,
+        "shortwave_radiation_sum": 19.69
+      },
+      {
+        "date": "2025-07-16",
+        "temperature_2m_max": 34.9,
+        "temperature_2m_min": 28.73,
+        "precipitation_sum": 7.05,
+        "wind_speed_10m_max": 10.47,
+        "shortwave_radiation_sum": 14.6
+      },
+      {
+        "date": "2025-07-17",
+        "temperature_2m_max": 34.17,
+        "temperature_2m_min": 28.68,
+        "precipitation_sum": 14.85,
+        "wind_speed_10m_max": 9.55,
+        "shortwave_radiation_sum": 14.5
+      },
+      {
+        "date": "2025-07-18",
+        "temperature_2m_max": 35.92,
+        "temperature_2m_min": 28.2,
+        "precipitation_sum": 16.45,
+        "wind_speed_10m_max": 8.72,
+        "shortwave_radiation_sum": 19.54
+      }
+    ],
+    "land_size": 2,
+    "crops_data": [
+      {
+        "crop_name": "wheat",
+        "prices": [100, 105, 110],
+        "dates": ["2023-10-01", "2023-10-02", "2023-10-03"],
+        "contracts": [],
+        "yield_per_kg": 2500
+      },
+      {
+        "crop_name": "rice",
+        "prices": [200, 205, 210],
+        "dates": ["2023-10-01", "2023-10-02", "2023-10-03"],
+        "contracts": [],
+        "yield_per_kg": 2500
+      }
+    ],
+    "subsidies": [
+      {
+        "type": "asset",
+        "provider": "Livestock Development Board",
+        "program": "Goat Farming Support",
+        "description": "Provides goats to farmers for livestock development.",
+        "eligibility": "Must own farmland and have livestock experience.",
+        "benefits": "2 goats",
+        "locations": ["IN_EAST", "IN_OTHER"],
+        "$id": "6814fb590006a7c1d7b8"
+      },
+      {
+        "type": "financial",
+        "provider": "State Agriculture Dept.",
+        "program": "Certified Soybean Seed Subsidy (Kharif)",
+        "description": "Subsidy on purchase of certified soybean seeds for Kharif season.",
+        "eligibility": "All farmers cultivating Soybean",
+        "benefits": "50% cost reduction on certified seeds, up to a limit.",
+        "locations": ["IN_WEST_CENTRAL", "IN_SOUTH_WEST", "IN_OTHER"],
+         "$id": "6814fc0100329cfb7733"
+      },
+      {
+        "type": "input",
+        "provider": "Central Govt.",
+        "program": "PM-KISAN Input Support",
+        "description": "General input support as direct benefit transfer.",
+        "eligibility": "Landholding farmers registered on portal",
+        "benefits": "₹6000 per year in installments (generic)",
+        "locations": [],
+        "$id": "6814fc5c002d8d8704fc"
+      },
+      {
+        "type": "input",
+        "provider": "State Horticulture Mission",
+        "program": "Kharif Vegetable Seed Kit",
+        "description": "Distribution of subsidized seed kits for Kharif vegetables.",
+        "eligibility": "Small and marginal farmers",
+        "benefits": "Seed kit for common vegetables at 75% subsidy",
+        "locations": ["IN_OTHER", "IN_EAST"],
+        "$id": "6814fcd7000c6c9f6f12"
+      },
+      {
+        "type": "financial",
+        "provider": "National Food Security Mission (NFSM)",
+        "program": "NFSM - Pulses Support",
+        "description": "Incentives for increasing production of pulses like Urad, Moong.",
+        "eligibility": "Farmers cultivating pulses in designated districts",
+        "benefits": "Subsidy on seeds, micronutrients, IPM measures for pulses.",
+        "locations": ["IN_WEST_CENTRAL", "IN_NORTH_CENTRAL", "IN_OTHER"],
+        "$id": "newsub1"
+      },
+      {
+          "type": "input",
+          "provider": "State Dept. of Agriculture",
+          "program": "Kharif Maize & Sorghum Demo Kits",
+          "description": "Demonstration kits with high-yielding seeds and fertilizer.",
+          "eligibility": "Selected farmers in specific blocks",
+          "benefits": "Free kit containing seeds for Maize/Sorghum and recommended fertilizer dose for demonstration plots.",
+          "locations": ["IN_OTHER", "IN_SOUTH_WEST"],
+          "$id": "newsub2"
+      },
+      {
+          "type": "financial",
+          "provider": "Dept. of Fertilizers",
+          "program": "Nutrient Based Subsidy (NBS)",
+          "description": "Subsidy provided on P&K fertilizers based on nutrient content.",
+          "eligibility": "All farmers purchasing subsidized fertilizers",
+          "benefits": "Reduced MRP on P&K fertilizers (Amount varies by product)",
+          "locations": [],
+          "$id": "newsub3"
+      },
+       {
+          "type": "input",
+          "provider": "Cooperative Sugar Mills Federation",
+          "program": "Sugarcane Planting Material Subsidy",
+          "description": "Subsidy on procuring high-quality sugarcane setts.",
+          "eligibility": "Registered sugarcane growers supplying to member mills",
+          "benefits": "Subsidy of ₹500 per quintal on certified sugarcane setts.",
+          "locations": ["IN_SOUTH_WEST", "IN_OTHER"],
+          "$id": "newsub4"
+      },
+      {
+          "type": "asset",
+          "provider": "Ministry of Agriculture",
+          "program": "Sub-Mission on Agricultural Mechanization (SMAM)",
+          "description": "Subsidy on purchase of agricultural machinery.",
+          "eligibility": "Farmers, Farmer Groups, Cooperatives",
+          "benefits": "Pattern of assistance varies (e.g., 40-50% subsidy on tractors, power tillers, planters, etc.)",
+          "locations": [],
+          "$id": "newsub5"
+      }
+    ],
+    "sample": "sample"
+  }
