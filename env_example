@@ -1,0 +1,45 @@
+
+# Example Environment Variables for Kisanverse Project
+# Copy this file to .env and fill in your actual values.
+# DO NOT COMMIT YOUR ACTUAL .env FILE TO VERSION CONTROL.
+
+# --- LLM Configuration ---
+LLM_PROVIDER="e2e" # 'ollama' or 'e2e'
+
+# Ollama Settings (Defaults if LLM_PROVIDER=ollama)
+OLLAMA_HOST="http://ollama:11434" # Use service name if running Ollama in compose
+# OLLAMA_HOST="http://host.docker.internal:11434" # Use this if Ollama runs on host (Docker Desktop)
+# OLLAMA_HOST="http://172.17.0.1:11434" # Use this if Ollama runs on host (Linux - check your docker0 bridge IP)
+OLLAMA_MODEL="gemma3:4b-it-q8_0"
+
+# E2E Networks LLM Settings (REQUIRED if LLM_PROVIDER=e2e)
+E2E_BASE_URL="<your_e2e_llm_base_url>"
+E2E_API_KEY="<your_e2e_llm_api_key>"
+E2E_MODEL_NAME="<your_e2e_llm_model_name>"
+
+# --- STT Configuration ---
+STT_PROVIDER="whisper" # 'whisper' (local) or 'e2e_whisper'
+
+# Local Whisper Settings (Used if STT_PROVIDER=whisper)
+WHISPER_MODEL_SIZE="small" # tiny, base, small, medium, large
+
+# E2E Whisper Settings (REQUIRED if STT_PROVIDER=e2e_whisper)
+E2E_TIR_ACCESS_TOKEN="<your_e2e_tir_token_here>"
+E2E_TIR_API_KEY="<your_e2e_tir_apikey_here>"
+E2E_TIR_PROJECT_ID="<your_e2e_tir_project_id>"
+E2E_TIR_TEAM_ID="<your_e2e_tir_team_id>"
+E2E_WHISPER_MODEL_NAME="whisper-large-v3"
+
+# --- Twilio Credentials ---
+TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+TWILIO_AUTH_TOKEN="your_twilio_auth_token_here"
+TWILIO_PHONE_NUMBER="+1xxxxxxxxxx" # Optional: Your Twilio number
+
+# --- Backend API Configuration (Example) ---
+# Add any variables needed by your 'backend' service (e.g., Database URL)
+# DATABASE_URL="postgresql://user:password@db:5432/mydatabase" # Example if using a 'db' service
+
+# --- Admin UI Configuration ---
+# NEXT_PUBLIC_API_URL is set in docker-compose.yml to point to the backend service
+# Add any other NEXT_PUBLIC_ variables needed by the admin UI here
+# NEXT_PUBLIC_SOME_OTHER_VAR="value"

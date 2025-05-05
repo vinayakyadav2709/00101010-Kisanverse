@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  voice-assistant:
+    container_name: voice_assistant_app
+    build:
+      context: ./AICallAssistant # Path to the voice assistant code
+      dockerfile: Dockerfile # Assumes Dockerfile exists in AICallAssistant
+    ports:
+      - "5000:5000" # Map host port 5000 to container port 5000
+    volumes:
+      # Mount code for hot-reloading (adjust if not using --reload equivalent)
+      - ./AICallAssistant:/app
+      # Mount data files needed by the backend functions (read-only ideally)
+      - ./AICallAssistant/all_data.json:/app/all_data.json:ro
+      - ./AICallAssistant/recommendation_output.json:/app/recommendation_output.json:ro
+      - ./AICallAssistant/ss.json:/app/ss.json:ro
+      - ./AICallAssistant/weather_list.json:/app/weather_list.json:ro
+    env_file:
+      - .env # Load environment variables from .env file
+    environment:
+      # Ensure Python outputs logs immediately
+      PYTHONUNBUFFERED: 1
+      # Point to Ollama service if running in compose, otherwise needs host access
+      OLLAMA_HOST: http://ollama:11434 # Use service name 'ollama'
+    networks:
+      - kisanverse_net
+    depends_on:
+      - ollama # Optional: wait for ollama service to start (doesn't guarantee readiness)
+
+  backend-api:
+    container_name: backend_api_app
+    build:
+      context: ./backend # Path to the separate backend API code
+      dockerfile: Dockerfile # Assumes Dockerfile exists in backend
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    volumes:
+      - ./backend:/app # Mount code for hot-reloading
+    env_file:
+      - .env # Load common vars, backend might need specific DB vars too
+    environment:
+      PYTHONUNBUFFERED: 1
+      # Example: DATABASE_URL: ${DATABASE_URL} # Get from .env
+    networks:
+      - kisanverse_net
+
+  admin-ui:
+    container_name: admin_ui_app
+    build:
+      context: ./admin # Path to the Next.js admin frontend
+      dockerfile: Dockerfile # Assumes Dockerfile exists in admin
+    ports:
+      - "3000:3000" # Map host port 3000 to container port 3000
+    volumes:
+      # Mount code for hot-reloading (Next.js handles this well)
+      - ./admin:/app
+      # Prevent host node_modules from overwriting container node_modules
+      - /app/node_modules
+      # Mount .next build cache for faster restarts (optional)
+      - ./admin/.next:/app/.next
+    env_file:
+      - .env # Load common vars if needed
+    environment:
+      # Tell Next.js to use the backend service name
+      # Ensure this matches how your Next.js app expects the API URL
+      NEXT_PUBLIC_API_URL: http://backend-api:8000
+      NODE_ENV: development # Run in development mode
+    networks:
+      - kisanverse_net
+    depends_on:
+      - backend-api # Wait for backend API to start
+
+  ollama:
+    container_name: ollama_service
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama # Persist models using a named volume
+    networks:
+      - kisanverse_net
+    # --- GPU Acceleration (Optional - Requires Docker Desktop/Nvidia Container Toolkit) ---
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1 # Or 'all'
+    #           capabilities: [gpu]
+    # ----------------------------------------------------------------------------------
+
+networks:
+  kisanverse_net:
+    driver: bridge
+
+volumes:
+  ollama_data: # Define the named volume for Ollama models
