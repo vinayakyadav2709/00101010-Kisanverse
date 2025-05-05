@@ -1,4 +1,3 @@
-[
 # AI-Driven Agricultural Intelligence System: Technical Report
 
 **Version:** 1.2
@@ -246,4 +245,3 @@ This report has outlined the AI-driven components of an agricultural intelligenc
 *   **Scope Expansion:** Increase the number of supported crops, diseases, soil types, and geographic regions based on user needs and data availability.
 
 The continued development of this AI system aims to provide increasingly accurate, comprehensive, context-aware, and accessible decision support tools for farmers, contributing to more efficient and sustainable agricultural practices.
-](https://github.com/vinayakyadav2709/00101010-Kisanverse)
