@@ -1,3 +1,4 @@
+
 # Kisanverse Project
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -6,45 +7,53 @@ Kisanverse aims to provide an AI-powered suite of tools for farmers, including a
 
 ## Features
 
-*   **AI Voice Assistant (`AICallAssistant`):** A Flask-based application providing a conversational interface via voice (integrates with Twilio, STT, LLM).
-*   **Backend API (`backend`):** A FastAPI/Uvicorn application serving as the core API for marketplace listings, contracts, subsidies, and potentially other data interactions.
-*   **Admin Panel (`admin`):** A Next.js web application for managing platform data and users.
-*   **Mobile Application (`mobile-app`):** An Expo (React Native) application for farmer/user interaction.
-*   **Crop Prediction (`Crop_prediction`):** Contains models and scripts related to crop yield or suitability predictions (likely used by the backend).
-*   **Marketplace Functionality:** Includes features for listing crops, placing bids, managing contracts, and viewing subsidies (powered by the `backend` and potentially visualized in `admin` and `mobile-app`).
+*   **AI Voice Assistant (`AICallAssistant`):** A Flask-based application providing a conversational interface via voice (integrates with Twilio, STT, LLM). Handles core voice interaction logic and uses backend functions for data operations.
+*   **Backend API (`backend`):** A FastAPI/Uvicorn application serving as the core API for marketplace listings, contracts, subsidies, user data, and potentially other data interactions. Intended to be consumed by the `admin` panel and `mobile-app`.
+*   **Admin Panel (`admin`):** A Next.js web application for managing platform data and users via the `backend` API.
+*   **Mobile Application (`mobile-app`):** An Expo (React Native) application for farmer/user interaction, communicating with the `backend` API.
+*   **Crop Prediction (`Crop_prediction`):** Contains models and scripts related to crop yield or suitability predictions (likely integrated into or called by the `backend` API).
+*   **Marketplace Functionality:** Features for listing crops, placing bids, managing contracts, and viewing subsidies are primarily handled by the `backend` API, with interfaces provided by the `admin`, `mobile-app`, and potentially queried via the `AICallAssistant`.
 
 ## Directory Structure
-Use code with caution.
-Markdown
+
+```
 .
-├── AICallAssistant/ # Flask Voice Assistant code
-├── admin/ # Next.js Admin Panel code
-├── backend/ # FastAPI/Uvicorn Backend API code
-├── Crop_prediction/ # Crop prediction models/scripts
-├── mobile-app/ # Expo Mobile Application code
-├── all_data.json # Static data for marketplace (used by AICallAssistant backend_functions)
-├── recommendation_output.json # Static data for crop recommendations (used by AICallAssistant backend_functions)
-├── ss.json # Static soil/weather data (used by AICallAssistant backend_functions)
-├── weather_list.json # Static daily weather forecast data (used by AICallAssistant backend_functions)
-├── PredictionReport.md # Markdown report related to predictions
-├── README.md # This file
-├── LICENSE # Project License (MIT)
-├── CONTRIBUTING.md # Contribution Guidelines
-├── docker-compose.yml # Docker Compose configuration
-├── .env.example # Example environment variables
-└── .gitignore # Git ignore rules
+├── AICallAssistant/      # Flask Voice Assistant code + its backend_functions.py
+│   ├── all_data.json         # Static data (used by AICallAssistant)
+│   ├── recommendation_output.json # Static data (used by AICallAssistant)
+│   ├── ss.json               # Static data (used by AICallAssistant)
+│   ├── weather_list.json     # Static data (used by AICallAssistant)
+│   ├── Dockerfile            # Dockerfile for this service
+│   └── ... (other python files: app.py, config.py, etc.)
+├── admin/                # Next.js Admin Panel code
+│   ├── Dockerfile            # Dockerfile for this service
+│   └── ... (next.js files)
+├── backend/              # FastAPI/Uvicorn Backend API code
+│   ├── Dockerfile            # Dockerfile for this service
+│   └── ... (fastapi files, main.py)
+├── Crop_prediction/      # Crop prediction models/scripts (if separate)
+├── mobile-app/           # Expo Mobile Application code
+├── PredictionReport.md   # Markdown report related to predictions
+├── README.md             # This file
+├── LICENSE               # Project License (MIT)
+├── CONTRIBUTING.md       # Contribution Guidelines
+├── docker-compose.yml    # Docker Compose configuration
+├── .env.example          # Example environment variables
+└── .gitignore            # Git ignore rules
+```
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
 *   **Git:** For cloning the repository.
 *   **Docker & Docker Compose:** For running the application using containers (Recommended method).
-*   **Python:** (>= 3.10 recommended) For running services individually or for dependency installation if not using Docker for everything.
+*   **Python:** (>= 3.10 recommended) For running services individually or for initial setup if not using Docker for everything.
 *   **Node.js:** (>= 18.x recommended) Required for the `admin` (Next.js) and `mobile-app` (Expo) development.
 *   **npm or yarn:** Node package manager.
 *   **Ollama:** (Optional, if using `LLM_PROVIDER=ollama`) Needs to be installed and running locally if not using the Docker Compose `ollama` service. [https://ollama.com/](https://ollama.com/)
 *   **Expo CLI:** For running the mobile application locally. (`npm install -g expo-cli` or `yarn global add expo-cli`)
-*   **System Dependencies for Voice Assistant:**
+*   **System Dependencies for Voice Assistant Container/Host:**
     *   `ffmpeg`: Required by `openai-whisper`. (e.g., `sudo apt update && sudo apt install ffmpeg`)
     *   `mpg123`: Required by the simulator (`twilio_simulator.py`) for TTS playback and MP3->WAV conversion. (e.g., `sudo apt update && sudo apt install mpg123`)
 
@@ -61,116 +70,106 @@ Before you begin, ensure you have the following installed:
         ```bash
         cp .env.example .env
         ```
-    *   **Edit the `.env` file** and fill in your actual credentials and settings for:
-        *   `LLM_PROVIDER` (e.g., `e2e` or `ollama`)
-        *   E2E LLM/Whisper Credentials (if applicable)
-        *   Twilio Credentials (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`)
-        *   Any backend-specific variables (like `DATABASE_URL`, if needed).
-        *   Refer to the comments in `.env.example` for details.
-    *   **Important:** Do NOT commit your actual `.env` file to version control.
+    *   **Edit the `.env` file** and fill in your actual credentials and settings. Refer to the comments in `.env.example` for required variables (LLM Provider, STT Provider, Twilio keys, E2E keys if used, etc.).
+    *   **Important:** Do NOT commit your actual `.env` file to version control. The `.gitignore` file should prevent this.
 
-3.  **(Optional) Build Docker Images:** While `docker compose up` will build images if they don't exist, you can pre-build them:
+3.  **(Optional) Build Docker Images:** While `docker compose up` builds automatically, you can pre-build:
     ```bash
     docker compose build
     ```
 
 ## Running the Application (Recommended: Docker Compose)
 
-This method runs the Voice Assistant, Backend API, Admin Panel, and optionally Ollama in separate containers.
+This method runs the Voice Assistant, Backend API, Admin Panel, and optionally Ollama in containers.
 
-1.  **Ensure Docker Desktop or Docker Engine with Compose is running.**
-2.  **Ensure Ollama models are pulled (if using Ollama):** If `LLM_PROVIDER=ollama` in your `.env`, make sure the model specified (`OLLAMA_MODEL`) is pulled locally *before* starting compose if you aren't relying solely on the container's volume persistence yet:
+1.  **Start Docker:** Ensure Docker Desktop or Docker Engine with Compose is running.
+2.  **Pull Ollama Model (if using Ollama in `.env`):** Make sure the `OLLAMA_MODEL` specified in `.env` is pulled locally if you want to use it immediately (Compose volume will persist it later):
     ```bash
-    ollama pull <your_model_name>
+    ollama pull <your_model_name_from_env>
     # e.g., ollama pull gemma3:4b-it-q8_0
     ```
-3.  **Start the services:**
+3.  **Start Services:** From the project root directory:
     ```bash
     docker compose up -d
     ```
-    (Use `docker-compose up -d` if you have the older standalone version). The `-d` flag runs containers in detached mode.
+    (`-d` runs in detached mode).
 
 4.  **Access Services:**
-    *   **Admin Panel:** Open your browser to [http://localhost:3000](http://localhost:3000)
-    *   **Backend API:** Accessible at `http://localhost:8000`. Check its documentation (often at `http://localhost:8000/docs` for FastAPI) for available endpoints.
-    *   **Voice Assistant API:** Accessible at `http://localhost:5000`. Use this URL in the Twilio simulator or your Twilio phone number configuration (e.g., webhook for `/voice`).
-    *   **Ollama API (if running in compose):** Accessible at `http://localhost:11434`.
+    *   **Admin Panel:** [http://localhost:3000](http://localhost:3000)
+    *   **Backend API:** `http://localhost:8000` (Check `/docs` for Swagger UI if using FastAPI)
+    *   **Voice Assistant API:** `http://localhost:5000` (Use for Twilio webhooks/simulator)
+    *   **Ollama API (if running in compose):** `http://localhost:11434`
 
 5.  **View Logs:**
     ```bash
-    docker compose logs -f # View logs for all services
-    docker compose logs -f voice-assistant # View logs for a specific service
+    docker compose logs -f                # Tail logs for all services
+    docker compose logs -f voice-assistant # Tail logs for a specific service
     ```
 
-6.  **Stop the services:**
+6.  **Stop Services:**
     ```bash
-    docker compose down
+    docker compose down                  # Stop and remove containers, networks
+    # docker compose down -v               # Stop and remove containers, networks, AND volumes (e.g., Ollama model cache)
     ```
-    Use `docker compose down -v` to also remove associated volumes (like the Ollama model cache).
 
 ## Running Services Individually (Alternative)
 
-If you prefer not to use Docker, you can run each service separately. Ensure all prerequisites are installed on your host machine. You'll need separate terminal windows for each service.
+Run each service in a separate terminal. Ensure host prerequisites are met.
 
 **1. Backend API (`backend` directory):**
 
 ```bash
 cd backend
-# Create virtual env (optional but recommended)
-# python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt # Make sure this file exists
-# Set any required backend environment variables (e.g., DATABASE_URL)
-export DATABASE_URL="your_db_connection_string" # Example
+# Recommended: python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt # Ensure file exists
+# export DATABASE_URL="..." # Set necessary ENV VARS
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-Use code with caution.
-2. AI Voice Assistant (AICallAssistant directory):
+```
+
+**2. AI Voice Assistant (`AICallAssistant` directory):**
+
+```bash
 cd AICallAssistant
-# Create virtual env (optional but recommended)
-# python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt # Make sure this file exists
-# Ensure Ollama is running locally if LLM_PROVIDER=ollama
-# Ensure E2E credentials are set if LLM_PROVIDER=e2e
-# Ensure Twilio credentials are set
-# Ensure STT Provider selected is set up (Whisper model downloaded or E2E creds set)
-uv run app.py # Or: flask run --host=0.0.0.0 --port=5000
-Use code with caution.
-Bash
-3. Admin Panel (admin directory):
+# Recommended: python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt # Ensure file exists
+# Ensure .env file is present in project root or required VARS are exported
+# Ensure Ollama server running if LLM_PROVIDER=ollama
+# Ensure required system packages (ffmpeg, mpg123) are installed
+uv run app.py
+# Or: flask run --host=0.0.0.0 --port=5000
+```
+*Note: Ensure `.env` is in the root (`00101010-Kisanverse`), and `AICallAssistant/config.py` loads it correctly (using `load_dotenv()` without path usually works if run from root, adjust if needed).*
+
+**3. Admin Panel (`admin` directory):**
+
+```bash
 cd admin
 npm install # or yarn install
-# Set the backend API URL environment variable for the frontend
-export NEXT_PUBLIC_API_URL="http://localhost:8000" # Point to backend running locally
+export NEXT_PUBLIC_API_URL="http://localhost:8000" # Point to locally running backend
 npm run dev # or yarn dev
-Use code with caution.
-Bash
-Access at http://localhost:3000.
-Running the Mobile App (mobile-app directory)
-The Expo mobile app is typically run using the Expo CLI for development.
-Navigate to the directory:
+```
+Access at [http://localhost:3000](http://localhost:3000).
+
+**4. Mobile App (`mobile-app` directory):**
+
+```bash
 cd mobile-app
-Use code with caution.
-Bash
-Install dependencies:
-npm install
-# or
-yarn install
-Use code with caution.
-Bash
-Start the development server:
+npm install # or yarn install
 npx expo start
-Use code with caution.
-Bash
-Follow the instructions in the terminal:
-Scan the QR code with the Expo Go app on your physical device.
-Or press a for Android emulator, i for iOS simulator (if configured).
-Ensure the mobile app is configured to point to your backend API (likely http://<your-local-ip>:8000 if running the backend locally, or the appropriate deployed URL).
-Environment Variables
-Key environment variables are configured in the .env file. Refer to .env.example for a full list and descriptions. Main variables include:
-LLM_PROVIDER: Selects the Language Model service (ollama or e2e).
-STT_PROVIDER: Selects the Speech-to-Text service (whisper or e2e_whisper).
-*_HOST, *_MODEL, *_API_KEY, etc.: Credentials and endpoints for selected services.
-TWILIO_*: Twilio account credentials.
-DATABASE_URL: (Example) Connection string for the backend database.
-NEXT_PUBLIC_API_URL: Used by the admin frontend to locate the backend API (set automatically in docker-compose).
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
+```
+Follow terminal instructions to connect via Expo Go or emulators. Ensure the app's API configuration points to your locally running backend (`http://<YOUR_LOCAL_IP>:8000`).
+
+## Environment Variables
+
+Key environment variables are configured in the project's root `.env` file (copied from `.env.example`). These control service credentials, API endpoints, and feature selections.
+
+*   **`LLM_PROVIDER`**: `ollama` or `e2e`.
+*   **`STT_PROVIDER`**: `whisper` or `e2e_whisper`.
+*   **`OLLAMA_*` / `E2E_*` / `E2E_TIR_*`**: Service-specific credentials and model names.
+*   **`TWILIO_*`**: Twilio account credentials.
+*   **`DATABASE_URL`**: (Example) Connection string for the backend database.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```
