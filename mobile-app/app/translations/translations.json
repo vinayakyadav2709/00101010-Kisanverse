@@ -1,0 +1,38 @@
+{
+  "en": {
+    "hello": "Hello",
+    "welcome": "Welcome to your farm dashboard",
+    "searchHere": "Search here...",
+    "commoditiesAndFood": "Commodities and Food",
+    "myFields": "My Fields",
+    "seeAll": "See All",
+    "addField": "Add Field",
+    "recommendedCrops": "Recommended Crops",
+    "viewAll": "View All",
+    "actionItems": "Action Items"
+  },
+  "hi": {
+    "hello": "नमस्ते",
+    "welcome": "आपके कृषि डैशबोर्ड में आपका स्वागत है",
+    "searchHere": "यहां खोजें...",
+    "commoditiesAndFood": "वस्तुएँ और खाद्य पदार्थ",
+    "myFields": "मेरे खेत",
+    "seeAll": "सभी देखें",
+    "addField": "खेत जोड़ें",
+    "recommendedCrops": "अनुशंसित फसलें",
+    "viewAll": "सभी देखें",
+    "actionItems": "कार्य सूची"
+  },
+  "mr": {
+    "hello": "नमस्कार",
+    "welcome": "आपल्या शेती डॅशबोर्डवर आपले स्वागत आहे",
+    "searchHere": "येथे शोधा...",
+    "commoditiesAndFood": "वस्तू आणि अन्न",
+    "myFields": "माझी शेते",
+    "seeAll": "सर्व पहा",
+    "addField": "शेत जोडा",
+    "recommendedCrops": "शिफारस केलेली पिके",
+    "viewAll": "सर्व पहा",
+    "actionItems": "क्रिया आयटम"
+  }
+}
