@@ -51,7 +51,7 @@ The system employs a modular pipeline architecture, allowing for specialized AI 
 
 This architecture facilitates independent model updates and the integration of diverse data sources for comprehensive agricultural intelligence.
 
-![flowchart](Report_Images/flowchart.png)
+![flowchart](AIPredictions/Report_Images/flowchart.png)
 *(Caption: Conceptual flow diagram illustrating the interaction between the core AI models and data sources within the system pipeline.)*
 
 ---
@@ -110,7 +110,7 @@ Weather is a fundamental driver of agricultural outcomes. This module focuses on
 *   **Processing:** Data is cleaned, standardized (units, names), and resampled to a consistent daily frequency. Missing values are imputed using appropriate methods (e.g., temporal filling for temperature, statistical defaults for radiation).
 *   **Role in Pipeline:** Provides historical weather as *past covariates* for training time series models and future weather estimates as *future covariates* during the prediction phase. The accuracy of weather data, sourced from leading models like ECMWF-IFS via aggregators like Open-Meteo, directly impacts the reliability of downstream models.
 
-![Forecast Animation](Report_Images/forecast_animation.gif)
+![Forecast Animation](AIPredictions/Report_Images/forecast_animation.gif)
 *(Caption: Conceptual animation illustrating the flow of weather and price data contributing to future predictions.)*
 
 ### 4.2 Crop Price Prediction using N-BEATS
@@ -128,13 +128,13 @@ Predicting volatile crop prices helps farmers make informed decisions about plan
 *Training & Forecast Examples:*
 | Crop      | Training History Plot                          | Forecast Plot                               |
 | :-------- | :--------------------------------------------- | :------------------------------------------ |
-| Jowar     | ![Jowar Training](Report_Images/Jowar_training_plot.png)   | ![Jowar Forecast](Report_Images/Jowar_forecast_plot_kg.png) |
-| Maize     | ![Maize Training](Report_Images/Maize_training_plot.png)   | ![Maize Forecast](Report_Images/Maize_forecast_plot_kg.png) |
-| Mango     | ![Mango Training](Report_Images/Mango_training_plot.png)   | ![Mango Forecast](Report_Images/Mango_forecast_plot_kg.png) |
-| Onion     | ![Onion Training](Report_Images/Onion_training_plot.png)   | ![Onion Forecast](Report_Images/Onion_forecast_plot_kg.png) |
-| Potato    | ![Potato Training](Report_Images/Potato_training_plot.png) | ![Potato Forecast](Report_Images/Potato_forecast_plot_kg.png)|
-| Rice      | ![Rice Training](Report_Images/Rice_training_plot.png)     | ![Rice Forecast](Report_Images/Rice_forecast_plot_kg.png)   |
-| Wheat     | ![Wheat Training](Report_Images/Wheat_training_plot.png)   | ![Wheat Forecast](Report_Images/Wheat_forecast_plot_kg.png) |
+| Jowar     | ![Jowar Training](AIPredictions/Report_Images/Jowar_training_plot.png)   | ![Jowar Forecast](AIPredictions/Report_Images/Jowar_forecast_plot_kg.png) |
+| Maize     | ![Maize Training](AIPredictions/Report_Images/Maize_training_plot.png)   | ![Maize Forecast](AIPredictions/Report_Images/Maize_forecast_plot_kg.png) |
+| Mango     | ![Mango Training](AIPredictions/Report_Images/Mango_training_plot.png)   | ![Mango Forecast](AIPredictions/Report_Images/Mango_forecast_plot_kg.png) |
+| Onion     | ![Onion Training](AIPredictions/Report_Images/Onion_training_plot.png)   | ![Onion Forecast](AIPredictions/Report_Images/Onion_forecast_plot_kg.png) |
+| Potato    | ![Potato Training](AIPredictions/Report_Images/Potato_training_plot.png) | ![Potato Forecast](AIPredictions/Report_Images/Potato_forecast_plot_kg.png)|
+| Rice      | ![Rice Training](AIPredictions/Report_Images/Rice_training_plot.png)     | ![Rice Forecast](AIPredictions/Report_Images/Rice_forecast_plot_kg.png)   |
+| Wheat     | ![Wheat Training](AIPredictions/Report_Images/Wheat_training_plot.png)   | ![Wheat Forecast](AIPredictions/Report_Images/Wheat_forecast_plot_kg.png) |
 
 *(Caption: Example training loss curves (left column) showing model convergence and forecast results (right column) depicting predicted prices (red) against historical data (black) for various crops.)*
 
@@ -151,7 +151,7 @@ Understanding soil type is crucial for selecting appropriate crops and managing 
 *   **Output:** Probabilities for each predefined soil class, identifying the most likely type.
 
 *Training & Evaluation Visualization:*
-![Soil Model Training History](Report_Images/training_history.png)
+![Soil Model Training History](AIPredictions/Report_Images/training_history.png)
 *(Caption: Training and validation accuracy/loss curves for the ResNet50 soil classifier.)*
 
 ### 4.4 Plant Disease Detection using CNN
@@ -167,7 +167,7 @@ Early detection of plant diseases can significantly reduce crop losses. This mod
 *   **Output:** Probabilities for each plant-disease class, indicating the most likely diagnosis.
 
 *Training & Example Prediction:*
-![Disease Model Training History](Report_Images/traininghist.png)
+![Disease Model Training History](AIPredictions/Report_Images/traininghist.png)
 *(Caption: Training and validation accuracy/loss curves for the plant disease detection CNN.)*
 
 ### 4.5 Crop Recommendation Engine
@@ -203,27 +203,27 @@ To ensure the complex analysis is easily digestible, a final summarization step 
 The implemented AI modules demonstrated promising results during evaluation:
 
 *   **Soil Classification (ResNet50):** Achieved a test accuracy of **94.34%**. The confusion matrix indicates strong performance across most classes, with minor confusion observed between some visually similar soil types.
-![Soil Confusion Matrix](Report_Images/Soil_CM.png)
+![Soil Confusion Matrix](AIPredictions/Report_Images/Soil_CM.png)
 *(Caption: Confusion matrix for the soil classification model.)*
 
-![Soil Example UI](Report_Images/UI_soil.png)
+![Soil Example UI](AIPredictions/Report_Images/UI_soil.png)
 *(Caption: Example soil image input and classification.)*
 
 *   **Plant Disease Detection (CNN):** Reached a high test accuracy of **99.44%** on the specific diseases included in the dataset, demonstrating effectiveness in identifying trained visual symptoms.
-![Disease Detection Example UI](Report_Images/Disease_UI.png)
+![Disease Detection Example UI](AIPredictions/Report_Images/Disease_UI.png)
 *(Caption: Example leaf image input and disease prediction.)*
 
 *   **Crop Price Prediction (N-BEATS):** Achieved an average accuracy (based on metrics like MAE or MAPE during validation, translating conceptually) of approximately **92.48%**. Validation loss curves and forecast plots confirm the model's ability to capture complex temporal patterns influenced by weather covariates.
-![Recommendation Overview UI](Report_Images/crop_UI1.jpeg)
+![Recommendation Overview UI](AIPredictions/Report_Images/crop_UI1.jpeg)
 *(Caption: Main recommendation screen showing top suggested crops based on synthesized data.)*
 
-![Detailed Crop View UI](Report_Images/crop_UI2.jpeg)
+![Detailed Crop View UI](AIPredictions/Report_Images/crop_UI2.jpeg)
 *(Caption: Detailed information for a specific recommended crop, including suitability score, price forecast, and required inputs.)*
 
-![Risk Assessment UI](Report_Images/crop_UI3.jpeg)
+![Risk Assessment UI](AIPredictions/Report_Images/crop_UI3.jpeg)
 *(Caption: UI highlighting potential risks like disease prevalence (based on image analysis) and adverse weather probability for a selection.)*
 
-![Profitability & Market UI](Report_Images/crop_UI4.jpeg)
+![Profitability & Market UI](AIPredictions/Report_Images/crop_UI4.jpeg)
 *(Caption: Display of projected profitability, incorporating market trends, predicted prices, and relevant subsidies.)*
 *(Accuracy metric for price prediction is often represented by error metrics like MAE/MAPE rather than classification accuracy; 92.48% is presented here as a conceptual equivalent for summary purposes based on the user's input.)*
 
