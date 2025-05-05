@@ -5,6 +5,9 @@
 
 Kisanverse aims to provide an AI-powered suite of tools for farmers, including a voice assistant for interaction, a marketplace backend, crop prediction capabilities, and administrative/mobile interfaces.
 
+
+**➡️ View the [AI System Technical Report (PredictionReport.md)](./PredictionReport.md)**
+
 ## Features
 
 *   **AI Voice Assistant (`AICallAssistant`):** A Flask-based application providing a conversational interface via voice (integrates with Twilio, STT, LLM). Handles core voice interaction logic and uses backend functions for data operations.
