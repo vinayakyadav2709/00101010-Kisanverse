@@ -82,13 +82,9 @@ def soil_classification(email: str, file: UploadFile = File(...), store: bool = 
 
         # Extract prediction details
         soil_type = prediction_result["predicted_class"]
-<<<<<<< HEAD
         confidence = round(
             prediction_result["confidence"] * 100, 2
         )  # Convert to percentage
-=======
-        confidence = prediction_result["confidence"] * 100  # Convert to percentage
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
         if not store:
             # If store is False, return the prediction result without storing
             if os.path.exists(local_file_path):
@@ -210,13 +206,9 @@ def disease_prediction(email: str, file: UploadFile = File(...), store: bool = T
         # Extract prediction details
         plant_name = prediction_result["plant_name"]
         disease_name = prediction_result["disease_name"]
-<<<<<<< HEAD
         confidence = round(
             prediction_result["confidence"] * 100, 2
         )  # Convert to percentage
-=======
-        confidence = prediction_result["confidence"] * 100  # Convert to percentage
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
         if not store:
             # If store is False, return the prediction result without storing
             if os.path.exists(local_file_path):
@@ -458,11 +450,7 @@ def weather_prediction(input_data: WeatherPredictionInput, store: bool = True):
         )
 
         # Step 7: Return the weather data
-<<<<<<< HEAD
         return weather_data
-=======
-        return serialized_weather_data
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -723,11 +711,7 @@ def llm(data: Dict[str, Any]) -> Dict[str, Any]:
     """
     # Simulate LLM processing
     try:
-<<<<<<< HEAD
         result = recommendation_api.get_recommendations(data)
-=======
-        result = json.dumps(recommendation_api.get_recommendations(data))
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
         return result
     except Exception as e:
         raise HTTPException(
@@ -863,7 +847,6 @@ def crop_prediction(
                 )
                 file_id = response["$id"]
                 file_url = get_url(BUCKET_CROP, file_id)
-<<<<<<< HEAD
                 # Call the soil repdiction api as fucntion
                 prediction_result = soil.soil_prediction_service.predict(
                     local_file_path
@@ -874,8 +857,6 @@ def crop_prediction(
                         round(prediction_result["confidence"] * 100, 2)
                     ),  # Assuming 100% confidence if provided
                 }
-=======
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 
             except Exception as e:
                 raise HTTPException(
@@ -930,13 +911,8 @@ def crop_prediction(
 
         # Step 6: Merge all data into a single hash
         combined_data = {
-<<<<<<< HEAD
             "soil_type": soil_data["soil_type"],
             "soil_type_confidence": soil_data["confidence"],
-=======
-            "soil_type": soil_data["soil_type"] if file is None else None,
-            "soil_type_confidence": soil_data["confidence"] if file is None else None,
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
             "latitude": latitude,
             "longitude": longitude,
             "start_date": start_date,
@@ -972,12 +948,6 @@ def crop_prediction(
                     "yield_per_kg": yield_per_kg,
                 }
             )
-<<<<<<< HEAD
-=======
-        print("\n\n\n\n")
-        print(combined_data)
-        print("\n\n\n\n")
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
         # Step 8: Call the LLM function
         llm_result = llm(combined_data)
 
@@ -989,10 +959,6 @@ def crop_prediction(
             "acres": acres,
             "soil_type": soil_type if file is None else file_url,
         }
-<<<<<<< HEAD
-
-=======
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
         DATABASES.create_document(
             database_id=DATABASE_ID,
             collection_id=COLLECTION_CROPS,
@@ -1001,20 +967,12 @@ def crop_prediction(
                 "user_id": user_id,
                 "requested_at": datetime.now(timezone.utc).isoformat(),
                 "input": json.dumps(input_data_to_store),
-<<<<<<< HEAD
                 "output": json.dumps(llm_result),
-=======
-                "output": llm_result,
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
             },
         )
 
         # Step 10: Return the result from the LLM function
-<<<<<<< HEAD
         return llm_result
-=======
-        return json.loads(llm_result)
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -1031,11 +989,7 @@ def get_crop_prediction_history(email: str):
         email (str): The user's email.
 
     Returns:
-<<<<<<< HEAD
         dict: A list of crop prediction history records with JSON fields.
-=======
-        dict: A list of crop prediction history records.
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
     """
     try:
         # Get user details
@@ -1052,7 +1006,6 @@ def get_crop_prediction_history(email: str):
             ],
         )
 
-<<<<<<< HEAD
         # Process and sort documents by requested_at in descending order
         history = sorted(
             [
@@ -1065,11 +1018,6 @@ def get_crop_prediction_history(email: str):
                 }
                 for doc in documents["documents"]
             ],
-=======
-        # Sort documents by requested_at in descending order
-        history = sorted(
-            documents["documents"],
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
             key=lambda x: x["requested_at"],
         )
 

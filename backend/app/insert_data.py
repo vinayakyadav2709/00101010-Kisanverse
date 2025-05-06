@@ -1,12 +1,9 @@
 from appwrite.id import ID
 from core.config import (
     DATABASE_ID,
-<<<<<<< HEAD
     DATABASES,
     STORAGE,
     COLLECTION_DISEASE,
-=======
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
     COLLECTION_USERS,
     COLLECTION_CROP_LISTINGS,
     COLLECTION_BIDS,
@@ -14,7 +11,6 @@ from core.config import (
     COLLECTION_CONTRACT_REQUESTS,
     COLLECTION_SUBSIDIES,
     COLLECTION_SUBSIDY_REQUESTS,
-<<<<<<< HEAD
     COLLECTION_CROPS,
     COLLECTION_WEATHER_HISTORY,
     COLLECTION_PRICES_HISTORY,
@@ -29,18 +25,12 @@ import urllib3
 
 # Suppress InsecureRequestWarning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-=======
-    DATABASES,
-)
-from datetime import datetime, timedelta, timezone
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 
 
 def clear_collection(collection_id):
     """
     Deletes all documents in the specified collection.
     """
-<<<<<<< HEAD
     try:
         print(f"Clearing collection: {collection_id}")
         documents = DATABASES.list_documents(
@@ -68,27 +58,11 @@ def clear_bucket(bucket_id):
     for file in files:
         STORAGE.delete_file(bucket_id=bucket_id, file_id=file["$id"])
     print(f"Cleared all files in bucket: {bucket_id}")
-=======
-    print(f"Clearing collection: {collection_id}")
-    documents = DATABASES.list_documents(
-        database_id=DATABASE_ID, collection_id=collection_id
-    )["documents"]
-    for document in documents:
-        DATABASES.delete_document(
-            database_id=DATABASE_ID,
-            collection_id=collection_id,
-            document_id=document["$id"],
-        )
-    print(f"Cleared all documents in collection: {collection_id}")
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 
 
 # Clear all collections before inserting new data
 collections_to_clear = [
-<<<<<<< HEAD
     COLLECTION_DISEASE,
-=======
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
     COLLECTION_USERS,
     COLLECTION_CROP_LISTINGS,
     COLLECTION_BIDS,
@@ -96,27 +70,21 @@ collections_to_clear = [
     COLLECTION_CONTRACT_REQUESTS,
     COLLECTION_SUBSIDIES,
     COLLECTION_SUBSIDY_REQUESTS,
-<<<<<<< HEAD
     COLLECTION_CROPS,
     COLLECTION_WEATHER_HISTORY,
     COLLECTION_PRICES_HISTORY,
     COLLECTION_SOIL,
-=======
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 ]
 
 for collection in collections_to_clear:
     clear_collection(collection)
 
-<<<<<<< HEAD
 # Clear all storage buckets
 buckets_to_clear = [BUCKET_SOIL, BUCKET_CROP, BUCKET_DISEASE]
 
 for bucket in buckets_to_clear:
     clear_bucket(bucket)
 
-=======
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 
 def get_date(days_offset):
     """
@@ -129,11 +97,8 @@ def get_date(days_offset):
     return target_datetime.isoformat()
 
 
-<<<<<<< HEAD
 # The rest of your data insertion logic remains unchanged...
 
-=======
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 # Users
 users = [
     {
@@ -151,11 +116,7 @@ users = [
         "address": "The/Nudge HQ, Bengaluru, Karnataka",
     },
     {
-<<<<<<< HEAD
         "email": "buyer@example.com",
-=======
-        "email": "demobuyer1@example.com",
->>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
         "name": "Ankit Verma",
         "role": "buyer",
         "zipcode": "123456",
