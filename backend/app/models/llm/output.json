@@ -1,0 +1,571 @@
+{
+  "request_details": {
+    "latitude": 22.520393976898,
+    "longitude": 88.007016991204,
+    "soil_type": "Black",
+    "land_size_acres": 2.0,
+    "planting_date_estimate": "2025-07-01",
+    "timestamp": "2025-05-04T13:16:38.920643"
+  },
+  "recommendations": [
+    {
+      "rank": 1,
+      "crop_name": "Urad Bean (Black Gram - Kharif)",
+      "recommendation_score": 93.9,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is strong, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Slightly Rising (1.1) * InvCostFactor:Low (1.2)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for Black soil. Water needs (Low) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: Medium (Mod: 1.05), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "3.0-6.0 q/acre",
+        "price_forecast_trend": "Slightly Rising",
+        "estimated_input_cost_category": "Low",
+        "primary_fertilizer_needs": "Rhizobium Inoculant, Low N starter, Medium P"
+      },
+      "relevant_subsidies": [],
+      "primary_risks": [
+        "Monitor common pests/diseases: pod borer, aphids, jassids, whitefly, yellow mosaic virus (YMV)."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Acephate",
+          "target_pest": "aphids (common); jassids (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Acetamiprid",
+          "target_pest": "aphids (common); whitefly (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Buprofezin",
+          "target_pest": "jassids (common); whitefly (common)",
+          "timing_stage": "Nymph Stage"
+        },
+        {
+          "chemical_name": "Chlorantraniliprole (Coragen)",
+          "target_pest": "pod borer (common)",
+          "timing_stage": "Flowering/Podding"
+        },
+        {
+          "chemical_name": "Diafenthiuron",
+          "target_pest": "jassids (common); whitefly (common)",
+          "timing_stage": "Vegetative"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 3046.0,
+              "predicted_price_max": 3878.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 3137.0,
+              "predicted_price_max": 3994.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 3231.0,
+              "predicted_price_max": 4113.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 3328.0,
+              "predicted_price_max": 4236.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 1
+            },
+            { "growth_stage": "Vegetative Growth", "relative_need_level": 1 },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 2
+            },
+            { "growth_stage": "Maturity/Harvest", "relative_need_level": 1 }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Rhizobium Inoculant, Low N starter, Medium P)"
+            }
+          ]
+        }
+      },
+      "relevant_news": [
+        {
+          "headline": "Indian agriculture’s response to global warming",
+          "url": "https://news.google.com/read/CBMiwwFBVV95cUxNWEdxbHhUczF3dkFvWXh0M3ZNd0tfUVZ2MmZ1RkJ6dnItUEJQUWdLcHVLM19mU0k5Ym9UcnhoOGlfYmM2Ykp5NXVLQ095ZG9xUHBHS1FTTFpXOUdabGxMS3d1UE85bE1zbDVMeEd2RmlVVEZMTGZCQzVkd3ZJTlZRU1NFSDhxSG1BMDNxNllRbi1fYlMxQ04xcDNMazJMblpvMnprdkE1elN6MWZmbTJ1MXlCLU1RcEVrdFBkM3ZscnVHdEk?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "Hindustan Times",
+          "date": "2025-05-02T09:25:31+00:00"
+        },
+        {
+          "headline": "There’s potential to double India’s crop yields even with existing technologies: Mangi Lal Jat, Secretary,",
+          "url": "https://news.google.com/read/CBMikwJBVV95cUxNMEwxWUJXNjk1V29NV2JFeGtFSGpmU3NnMHkwc0hDQVM3SU9VR0hOWkFJOW9DTk41X3lRbFJ6dXhGNUVGbGxOY3gyNHN6cnhpRER6aGItY09WaGxlaXhxQV9GSnZXNEFJZHFINnppZnBMOGFUdEJZMTdVc1hXM18teHF5LU15QUZtMFlVamd4UDhqTEFTdGtkdGRjbmRaSkxLMVJZal9xVWYyWnRZZGRiZUFaVld3WURFT1VGS0xSQ28tX09VQnZvVHBXRkF3blNiZGNHbDFrNFBXU2tkQnFLNGFVQ1FRTUhyZlVaZzJ4eG93UEk4cHF2WWFlcmZrM0xRTVFPYVE5TDhfU3JOZl9YOEFUUdIBmAJBVV95cUxNdzJyeFJ0X3NkUjMycmFmZkVfcUJ1LW9UcEhmOUtWeno5R1FZTnJwdXJJc2V3dTZDNm04cnZQcTRKS25Jb2pLQ0JiSUxlbDV0RzJZMURUWnZ4LU5INXJoSVRNLWdYdkFIMV9EWDZWQ09YaVhTeHFQYnRNLTFzbEM2RjkxT3FqZGtBOXU4UzBKRmlfMDktNnM1NDdiZzBQbTRfVlN1Nlo2OGxMRTJOeTFQbmRhUFc0dU0wTWt6cVVDRG4tVjE1S2xJQmhaaVFaNTlsa0xtVlh4UVpxVElva2p3R1lSMy1OU2RZYUk5czhkelh2Uzd1dlBzb29mV1VJLWlxaWlWZ3Noa0NydjVTM3ZLZHhJeFNpakRU?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "The Economic Times",
+          "date": "2025-05-01T07:23:21+00:00"
+        },
+        {
+          "headline": "Climate change reshapes Uttarakhand agriculture, pulses stay resilient: Report",
+          "url": "https://news.google.com/read/CBMixAFBVV95cUxNVEZmR1ZIdmtTQVZHSld1Y21LTmtxakpfbnJuNnlUZ0VOWUtRemJCZzdiM05ybHY1em5WTU5xWndONVpSMU5BRjI2LUpRVUtiVXBQZHBuREljbVhyUzllckU2NEE0OFVZVmV1eThMdWhVUG1VanBtRm41NzZmT1UxYUpvM1NtMFBYNTN4ck1LZ3ZtZElBRFJSNjdYeEFsR0pvUnR4OWRLcGp1bERlaHBUMG5vV3QwcWxCNWI5ZUl3M0kweEU00gHKAUFVX3lxTE5xYVAyejVfWk5qYmVRSGRFc1N1VmV5SXFfa24zbk1XUFYza2JLQU1fQmlNUUhKR3FBVTg0MFZJUUtNcjhPRURPTldRdEdzZDFRWS1QcFRZZ0szUHlkVG1MZ0FEa2dPMHhHVkZ3VUpTUHlWVDNkbk03NVlnX0p3S04yS0ZFQ0pyTU1MelpGdllLNTFYNWRocTA4UE1CWUVJQ2JGdUQ0cUxpZXExYnlFenJqM0dBX3dWcmZVME1uZ0V2MHhNd1p5VDFLcGc?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "India Today",
+          "date": "2025-05-03T16:21:39+00:00"
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "crop_name": "Sorghum (Jowar - Kharif/Rabi)",
+      "recommendation_score": 83.6,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is strong, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Stable (1.0) * InvCostFactor:Low (1.2)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for Black soil. Water needs (Low) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: Low (Mod: 0.95), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "8.0-22.0 q/acre",
+        "price_forecast_trend": "Stable",
+        "estimated_input_cost_category": "Low",
+        "primary_fertilizer_needs": "Medium N, Low P, Low K"
+      },
+      "relevant_subsidies": [],
+      "primary_risks": [
+        "Monitor common pests/diseases: shoot fly, stem borer, midge, head smut, grain mold."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Cartap Hydrochloride",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Chlorantraniliprole (Coragen)",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Early"
+        },
+        {
+          "chemical_name": "Chlorpyrifos",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Basal Spray"
+        },
+        {
+          "chemical_name": "Fipronil",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Imidacloprid",
+          "target_pest": "shoot fly (common)",
+          "timing_stage": "Seed Treatment"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 3005.0,
+              "predicted_price_max": 3747.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 3005.0,
+              "predicted_price_max": 3747.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 3005.0,
+              "predicted_price_max": 3747.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 3005.0,
+              "predicted_price_max": 3747.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 1
+            },
+            { "growth_stage": "Vegetative Growth", "relative_need_level": 1 },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 2
+            },
+            { "growth_stage": "Maturity/Harvest", "relative_need_level": 1 }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Medium N, Low P, Low K)"
+            }
+          ]
+        }
+      },
+      "relevant_news": [
+        {
+          "headline": "Indian agriculture’s response to global warming",
+          "url": "https://news.google.com/read/CBMiwwFBVV95cUxNWEdxbHhUczF3dkFvWXh0M3ZNd0tfUVZ2MmZ1RkJ6dnItUEJQUWdLcHVLM19mU0k5Ym9UcnhoOGlfYmM2Ykp5NXVLQ095ZG9xUHBHS1FTTFpXOUdabGxMS3d1UE85bE1zbDVMeEd2RmlVVEZMTGZCQzVkd3ZJTlZRU1NFSDhxSG1BMDNxNllRbi1fYlMxQ04xcDNMazJMblpvMnprdkE1elN6MWZmbTJ1MXlCLU1RcEVrdFBkM3ZscnVHdEk?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "Hindustan Times",
+          "date": "2025-05-02T09:25:31+00:00"
+        },
+        {
+          "headline": "There’s potential to double India’s crop yields even with existing technologies: Mangi Lal Jat, Secretary,",
+          "url": "https://news.google.com/read/CBMikwJBVV95cUxNMEwxWUJXNjk1V29NV2JFeGtFSGpmU3NnMHkwc0hDQVM3SU9VR0hOWkFJOW9DTk41X3lRbFJ6dXhGNUVGbGxOY3gyNHN6cnhpRER6aGItY09WaGxlaXhxQV9GSnZXNEFJZHFINnppZnBMOGFUdEJZMTdVc1hXM18teHF5LU15QUZtMFlVamd4UDhqTEFTdGtkdGRjbmRaSkxLMVJZal9xVWYyWnRZZGRiZUFaVld3WURFT1VGS0xSQ28tX09VQnZvVHBXRkF3blNiZGNHbDFrNFBXU2tkQnFLNGFVQ1FRTUhyZlVaZzJ4eG93UEk4cHF2WWFlcmZrM0xRTVFPYVE5TDhfU3JOZl9YOEFUUdIBmAJBVV95cUxNdzJyeFJ0X3NkUjMycmFmZkVfcUJ1LW9UcEhmOUtWeno5R1FZTnJwdXJJc2V3dTZDNm04cnZQcTRKS25Jb2pLQ0JiSUxlbDV0RzJZMURUWnZ4LU5INXJoSVRNLWdYdkFIMV9EWDZWQ09YaVhTeHFQYnRNLTFzbEM2RjkxT3FqZGtBOXU4UzBKRmlfMDktNnM1NDdiZzBQbTRfVlN1Nlo2OGxMRTJOeTFQbmRhUFc0dU0wTWt6cVVDRG4tVjE1S2xJQmhaaVFaNTlsa0xtVlh4UVpxVElva2p3R1lSMy1OU2RZYUk5czhkelh2Uzd1dlBzb29mV1VJLWlxaWlWZ3Noa0NydjVTM3ZLZHhJeFNpakRU?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "The Economic Times",
+          "date": "2025-05-01T07:23:21+00:00"
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "crop_name": "Maize (Kharif)",
+      "recommendation_score": 50.1,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is lower, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Stable (1.0) * InvCostFactor:Medium-High (0.9)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for Black soil. Water needs (High) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: Low (Mod: 0.95), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "20.0-35.0 q/acre",
+        "price_forecast_trend": "Stable",
+        "estimated_input_cost_category": "Medium-High",
+        "primary_fertilizer_needs": "Very High N, High P, Medium K, Zinc"
+      },
+      "relevant_subsidies": [],
+      "primary_risks": [
+        "EVENT (MEDIUM): Pest Alert - Simulated MEDIUM alert for Armyworm.",
+        "Monitor common pests/diseases: fall armyworm, stem borer, shoot fly, cob borer.",
+        "Yield sensitive to dry spells during tasseling/silking."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Cartap Hydrochloride",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Chlorantraniliprole (Coragen)",
+          "target_pest": "stem borer (common); armyworm (alert)",
+          "timing_stage": "Early"
+        },
+        {
+          "chemical_name": "Chlorpyrifos",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Basal Spray"
+        },
+        {
+          "chemical_name": "Emamectin Benzoate",
+          "target_pest": "armyworm (alert)",
+          "timing_stage": "Vegetative/Reproductive"
+        },
+        {
+          "chemical_name": "Fipronil",
+          "target_pest": "stem borer (common)",
+          "timing_stage": "Vegetative"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 7125.0,
+              "predicted_price_max": 8887.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 7125.0,
+              "predicted_price_max": 8887.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 7125.0,
+              "predicted_price_max": 8887.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 7125.0,
+              "predicted_price_max": 8887.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 3
+            },
+            { "growth_stage": "Vegetative Growth", "relative_need_level": 5 },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 5
+            },
+            { "growth_stage": "Maturity/Harvest", "relative_need_level": 2 }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Very High N, High P, Medium K, Zinc)"
+            },
+            {
+              "stage": "Top Dress 1",
+              "timing": "~25-40 DAS",
+              "nutrients": "Nitrogen Focus (e.g., Urea)"
+            },
+            {
+              "stage": "Top Dress 2 / Foliar",
+              "timing": "~50-75 DAS",
+              "nutrients": "NPK Balance / Potassium / Micronutrients as needed"
+            }
+          ]
+        }
+      },
+      "relevant_news": [
+        {
+          "headline": "Indian agriculture’s response to global warming",
+          "url": "https://news.google.com/read/CBMiwwFBVV95cUxNWEdxbHhUczF3dkFvWXh0M3ZNd0tfUVZ2MmZ1RkJ6dnItUEJQUWdLcHVLM19mU0k5Ym9UcnhoOGlfYmM2Ykp5NXVLQ095ZG9xUHBHS1FTTFpXOUdabGxMS3d1UE85bE1zbDVMeEd2RmlVVEZMTGZCQzVkd3ZJTlZRU1NFSDhxSG1BMDNxNllRbi1fYlMxQ04xcDNMazJMblpvMnprdkE1elN6MWZmbTJ1MXlCLU1RcEVrdFBkM3ZscnVHdEk?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "Hindustan Times",
+          "date": "2025-05-02T09:25:31+00:00"
+        },
+        {
+          "headline": "There’s potential to double India’s crop yields even with existing technologies: Mangi Lal Jat, Secretary,",
+          "url": "https://news.google.com/read/CBMikwJBVV95cUxNMEwxWUJXNjk1V29NV2JFeGtFSGpmU3NnMHkwc0hDQVM3SU9VR0hOWkFJOW9DTk41X3lRbFJ6dXhGNUVGbGxOY3gyNHN6cnhpRER6aGItY09WaGxlaXhxQV9GSnZXNEFJZHFINnppZnBMOGFUdEJZMTdVc1hXM18teHF5LU15QUZtMFlVamd4UDhqTEFTdGtkdGRjbmRaSkxLMVJZal9xVWYyWnRZZGRiZUFaVld3WURFT1VGS0xSQ28tX09VQnZvVHBXRkF3blNiZGNHbDFrNFBXU2tkQnFLNGFVQ1FRTUhyZlVaZzJ4eG93UEk4cHF2WWFlcmZrM0xRTVFPYVE5TDhfU3JOZl9YOEFUUdIBmAJBVV95cUxNdzJyeFJ0X3NkUjMycmFmZkVfcUJ1LW9UcEhmOUtWeno5R1FZTnJwdXJJc2V3dTZDNm04cnZQcTRKS25Jb2pLQ0JiSUxlbDV0RzJZMURUWnZ4LU5INXJoSVRNLWdYdkFIMV9EWDZWQ09YaVhTeHFQYnRNLTFzbEM2RjkxT3FqZGtBOXU4UzBKRmlfMDktNnM1NDdiZzBQbTRfVlN1Nlo2OGxMRTJOeTFQbmRhUFc0dU0wTWt6cVVDRG4tVjE1S2xJQmhaaVFaNTlsa0xtVlh4UVpxVElva2p3R1lSMy1OU2RZYUk5czhkelh2Uzd1dlBzb29mV1VJLWlxaWlWZ3Noa0NydjVTM3ZLZHhJeFNpakRU?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "The Economic Times",
+          "date": "2025-05-01T07:23:21+00:00"
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "crop_name": "Sugarcane",
+      "recommendation_score": 11.3,
+      "explanation_points": [
+        {
+          "reason_type": "Profitability Analysis",
+          "detail": "Estimated profitability is lower, driven by price trend and relative input costs (YieldFactor:1.0 * PriceTrend:Falling (0.8) * InvCostFactor:High (0.8)).",
+          "ai_component": "Predictive Analytics (Price), Heuristic Evaluation (Yield/Cost)"
+        },
+        {
+          "reason_type": "Agronomic Suitability",
+          "detail": "Good match for Black soil. Water needs (Very High) considered against forecast.",
+          "ai_component": "Knowledge-Based Rules (Soil), Weather Data Integration"
+        },
+        {
+          "reason_type": "Risk Assessment",
+          "detail": "Calculated risk profile considers Base Volatility: High (Mod: 1.20), News Sentiment Mod: +0.00. See primary risks below.",
+          "ai_component": "Risk Factor Analysis (Volatility, News Sentiment)"
+        },
+        {
+          "reason_type": "Methodology Note",
+          "detail": "Recommendation derived using a hybrid approach combining rules, predictive signals, scoring models, and a knowledge base.",
+          "ai_component": "Hybrid AI System"
+        }
+      ],
+      "key_metrics": {
+        "expected_yield_range": "250.0-500.0 q/acre",
+        "price_forecast_trend": "Falling",
+        "estimated_input_cost_category": "High",
+        "primary_fertilizer_needs": "Very High NPK, High Organic Matter, Sulphur, Iron"
+      },
+      "relevant_subsidies": [],
+      "primary_risks": [
+        "Long duration crop; high water/nutrient needs.",
+        "Monitor common pests/diseases: early shoot borer, top borer, internode borer, termites, whitefly, red rot disease."
+      ],
+      "suggested_pesticides": [
+        {
+          "chemical_name": "Acetamiprid",
+          "target_pest": "whitefly (common)",
+          "timing_stage": "Vegetative"
+        },
+        {
+          "chemical_name": "Buprofezin",
+          "target_pest": "whitefly (common)",
+          "timing_stage": "Nymph Stage"
+        },
+        {
+          "chemical_name": "Chlorpyrifos",
+          "target_pest": "termite (alert)",
+          "timing_stage": "Soil Application (Pre/Post-sowing)"
+        },
+        {
+          "chemical_name": "Diafenthiuron",
+          "target_pest": "whitefly (common); mites (alert)",
+          "timing_stage": "Adult Stage"
+        },
+        {
+          "chemical_name": "Dimethoate",
+          "target_pest": "mites (alert)",
+          "timing_stage": "Any Stage"
+        }
+      ],
+      "plotting_data": {
+        "price_forecast_chart": {
+          "description": "Predicted Price Range (INR/Quintal, Simulated)",
+          "data": [
+            {
+              "date": "2025-09-01",
+              "predicted_price_min": 9105.0,
+              "predicted_price_max": 11948.0
+            },
+            {
+              "date": "2025-10-01",
+              "predicted_price_min": 8831.0,
+              "predicted_price_max": 11589.0
+            },
+            {
+              "date": "2025-10-31",
+              "predicted_price_min": 8566.0,
+              "predicted_price_max": 11241.0
+            },
+            {
+              "date": "2025-11-30",
+              "predicted_price_min": 8308.0,
+              "predicted_price_max": 10904.0
+            }
+          ]
+        },
+        "water_need_chart": {
+          "description": "Relative Water Requirement by Growth Stage (1-5)",
+          "data": [
+            {
+              "growth_stage": "Germination/Establishment",
+              "relative_need_level": 4
+            },
+            { "growth_stage": "Vegetative Growth", "relative_need_level": 5 },
+            {
+              "growth_stage": "Flowering/Reproductive",
+              "relative_need_level": 5
+            },
+            { "growth_stage": "Maturity/Harvest", "relative_need_level": 2 }
+          ]
+        },
+        "fertilizer_schedule_chart": {
+          "description": "Typical Nutrient Application Timing",
+          "data": [
+            {
+              "stage": "Basal",
+              "timing": "At/Before Sowing",
+              "nutrients": "Foundation Dose (Very High NPK, High Organic Matter, Sulphur, Iron)"
+            },
+            {
+              "stage": "Top Dress 1",
+              "timing": "~25-40 DAS",
+              "nutrients": "Nitrogen Focus (e.g., Urea)"
+            },
+            {
+              "stage": "Top Dress 2 / Foliar",
+              "timing": "~50-75 DAS",
+              "nutrients": "NPK Balance / Potassium / Micronutrients as needed"
+            }
+          ]
+        }
+      },
+      "relevant_news": [
+        {
+          "headline": "Indian agriculture’s response to global warming",
+          "url": "https://news.google.com/read/CBMiwwFBVV95cUxNWEdxbHhUczF3dkFvWXh0M3ZNd0tfUVZ2MmZ1RkJ6dnItUEJQUWdLcHVLM19mU0k5Ym9UcnhoOGlfYmM2Ykp5NXVLQ095ZG9xUHBHS1FTTFpXOUdabGxMS3d1UE85bE1zbDVMeEd2RmlVVEZMTGZCQzVkd3ZJTlZRU1NFSDhxSG1BMDNxNllRbi1fYlMxQ04xcDNMazJMblpvMnprdkE1elN6MWZmbTJ1MXlCLU1RcEVrdFBkM3ZscnVHdEk?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "Hindustan Times",
+          "date": "2025-05-02T09:25:31+00:00"
+        },
+        {
+          "headline": "There’s potential to double India’s crop yields even with existing technologies: Mangi Lal Jat, Secretary,",
+          "url": "https://news.google.com/read/CBMikwJBVV95cUxNMEwxWUJXNjk1V29NV2JFeGtFSGpmU3NnMHkwc0hDQVM3SU9VR0hOWkFJOW9DTk41X3lRbFJ6dXhGNUVGbGxOY3gyNHN6cnhpRER6aGItY09WaGxlaXhxQV9GSnZXNEFJZHFINnppZnBMOGFUdEJZMTdVc1hXM18teHF5LU15QUZtMFlVamd4UDhqTEFTdGtkdGRjbmRaSkxLMVJZal9xVWYyWnRZZGRiZUFaVld3WURFT1VGS0xSQ28tX09VQnZvVHBXRkF3blNiZGNHbDFrNFBXU2tkQnFLNGFVQ1FRTUhyZlVaZzJ4eG93UEk4cHF2WWFlcmZrM0xRTVFPYVE5TDhfU3JOZl9YOEFUUdIBmAJBVV95cUxNdzJyeFJ0X3NkUjMycmFmZkVfcUJ1LW9UcEhmOUtWeno5R1FZTnJwdXJJc2V3dTZDNm04cnZQcTRKS25Jb2pLQ0JiSUxlbDV0RzJZMURUWnZ4LU5INXJoSVRNLWdYdkFIMV9EWDZWQ09YaVhTeHFQYnRNLTFzbEM2RjkxT3FqZGtBOXU4UzBKRmlfMDktNnM1NDdiZzBQbTRfVlN1Nlo2OGxMRTJOeTFQbmRhUFc0dU0wTWt6cVVDRG4tVjE1S2xJQmhaaVFaNTlsa0xtVlh4UVpxVElva2p3R1lSMy1OU2RZYUk5czhkelh2Uzd1dlBzb29mV1VJLWlxaWlWZ3Noa0NydjVTM3ZLZHhJeFNpakRU?hl=en-IN&gl=IN&ceid=IN%3Aen",
+          "source": "The Economic Times",
+          "date": "2025-05-01T07:23:21+00:00"
+        }
+      ]
+    }
+  ],
+  "weather_context_summary": "Forecast (3 days) indicates avg temp ~30.2°C, total rainfall ~31.0mm.",
+  "news_headlines_considered": [
+    "Indian agriculture’s response to global warming",
+    "There’s potential to double India’s crop yields even with existing technologies: Mangi Lal Jat, Secretary,",
+    "How WTO Rules Undermine Indian Agriculture",
+    "‘Beej Ratna’ recognition framework for boosting India’s R&D in seed sector",
+    "Climate change reshapes Uttarakhand agriculture, pulses stay resilient: Report"
+  ],
+  "news_impact_summary_llm": "The headlines suggest a growing concern regarding climate change's impact on Indian agriculture, alongside efforts to enhance agricultural productivity through R&D and technology. Trade policy and its potential effects on the sector are also highlighted, alongside ongoing discussions about farmer welfare and input costs. There's a noticeable focus on adapting to changing environmental conditions and bolstering domestic agricultural capabilities.",
+  "overall_llm_summary": "Based on the current weather forecast of average temperatures around 30.2°C and moderate rainfall, alongside the evolving news regarding climate change and agricultural policy, you’re looking at a season where adaptability is key. Considering these factors, Urad Bean (Black Gram) currently stands out as a particularly strong recommendation due to its projected profitability, and Sorghum (Jowar) also offers excellent potential. While both crops are promising, keep a close watch on potential fluctuations in input costs – monitoring these will be crucial for maximizing your returns this season."
+}

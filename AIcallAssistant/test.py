@@ -1,0 +1,23 @@
+from openai import OpenAI
+
+client = OpenAI(
+  base_url = "https://infer.e2enetworks.net/project/p-5491/genai/llama_4_scout_17b_16e_instruct/v1",
+  api_key = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJGSjg2R2NGM2pUYk5MT2NvNE52WmtVQ0lVbWZZQ3FvcXRPUWVNZmJoTmxFIn0.eyJleHAiOjE3Nzc4MDQ3NTgsImlhdCI6MTc0NjI2ODc1OCwianRpIjoiZGIxM2ExY2QtMGNlMC00ZjYwLWFhODUtMGY5Mzk1MmJiYjk0IiwiaXNzIjoiaHR0cDovL2dhdGV3YXkuZTJlbmV0d29ya3MuY29tL2F1dGgvcmVhbG1zL2FwaW1hbiIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJiZWMxN2YwYi04ODNlLTQ5ZTEtOWI0YS1hMDVmMWQwNTc0MWMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhcGltYW51aSIsInNlc3Npb25fc3RhdGUiOiI0MzdkNDYxOC1jMmQzLTQ4MmQtYWRkYy1kNTg5OTM0OGU5N2YiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbIiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImFwaXVzZXIiLCJkZWZhdWx0LXJvbGVzLWFwaW1hbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsInNpZCI6IjQzN2Q0NjE4LWMyZDMtNDgyZC1hZGRjLWQ1ODk5MzQ4ZTk3ZiIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNfcGFydG5lcl9yb2xlIjpmYWxzZSwibmFtZSI6IlZpbmF5YWsgWWFkYXYiLCJwcmltYXJ5X2VtYWlsIjoidmluYXlha3lhZGF2MjcwOUBnbWFpbC5jb20iLCJpc19wcmltYXJ5X2NvbnRhY3QiOnRydWUsInByZWZlcnJlZF91c2VybmFtZSI6InZpbmF5YWt5YWRhdjI3MDlAZ21haWwuY29tIiwiZ2l2ZW5fbmFtZSI6IlZpbmF5YWsiLCJmYW1pbHlfbmFtZSI6IllhZGF2IiwiZW1haWwiOiJ2aW5heWFreWFkYXYyNzA5QGdtYWlsLmNvbSIsImlzX2luZGlhYWlfdXNlciI6ZmFsc2V9.h6Jm7soFglzI8K2Pz3G2HbK8LBytjnz1_zf3EWmDKe-1a3Z36eZ1GIcZNh6KbCWTCPBlFohRTtiDPwvOvE6zgdaFHY4puxV-sQRvOaN4CnOXJUIhAYIpUCKcSsamNsRGsOcWzWGrvUxdNPo3M_GD2bXL5_C5A5IBg2jLa0pPlWA"
+)
+
+
+completion = client.chat.completions.create(
+    model='llama_4_scout_17b_16e_instruct',
+    messages=[{"role":"user","content":"Can you write a poem about open source machine learning?"}],
+    temperature=0.5,
+    max_tokens=2048,
+    top_p=1,
+    frequency_penalty=0,
+    presence_penalty=1,
+    stream=True
+  )
+
+for chunk in completion:
+  if chunk.choices[0].delta.content is not None:
+    print(chunk.choices[0].delta.content, end="")
+
