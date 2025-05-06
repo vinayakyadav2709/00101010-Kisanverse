@@ -1,5 +1,4 @@
 
-## **Updated Project Setup and Running Instructions**
 # Kisanverse Project
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -46,21 +45,6 @@ Kisanverse aims to provide an AI-powered suite of tools for farmers, including a
 └── .gitignore            # Git ignore rules
 ```
 
-### **Prerequisites**
-- Python 3.8 or higher installed on your system.
-- `pip` (Python package manager) installed.
-- **Ollama** installed for running LLM models locally.
-- **Appwrite** installed and configured.
-
----
-
-### **Installation Steps**
-
-1. **Clone the Repository**:
-   ```bash
-   git clone git@github.com:vinayakyadav2709/00101010-Kisanverse.git
-   cd 00101010-Kisanverse
-   ```
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -84,54 +68,6 @@ Before you begin, ensure you have the following installed:
     cd 00101010-Kisanverse
     ```
 
-2. **Create a Virtual Environment (Optional but Recommended)**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install the Required Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Install Ollama**:
-   - Follow the instructions to install Ollama from the [official website](https://ollama.com/).
-   - After installation, download the required model:
-     ```bash
-     ollama pull gemma3:4b-it-q8_0
-     ```
-
-5. **Install Appwrite**:
-   - Follow the [Appwrite installation guide](https://appwrite.io/docs/installation) to set up Appwrite locally or on a server.
-   - Create a project in Appwrite and note the **Project ID** and **API Key**.
-
-6. **Set Environment Variables**:
-   - Update the .env file in the root directory with the following variables:
-     ```properties
-     # Ollama Configuration
-     OLLAMA_BASE_URL=http://localhost:11434
-     OLLAMA_MODEL=gemma3:4b-it-q8_0
-
-     # Appwrite Configuration
-     APPWRITE_API_KEY=your_appwrite_api_key
-     APPWRITE_PROJECT_ID=your_appwrite_project_id
-     APPWRITE_ENDPOINT=http://localhost/v1  # Update this if Appwrite is hosted elsewhere
-     ```
-
----
-
-### **Running the Application**
-
-1. **Navigate to the app Directory**:
-   ```bash
-   cd app
-   ```
-
-2. **Start the Application Using `uvicorn`**:
-   ```bash
-   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-   ```
 2.  **Configure Environment Variables:**
     *   Copy the example environment file:
         ```bash
