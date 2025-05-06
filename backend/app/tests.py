@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 # file is used for testing fucntions
 
 
+=======
+>>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 # import logging
 # import uvicorn
 # from fastapi import FastAPI
@@ -42,6 +45,14 @@
 # from models.llm import test
 
 
+<<<<<<< HEAD
 from routers.other_scripts.days import fetch_and_store_weather_data
 
 fetch_and_store_weather_data(21.5929, 81.3761)
+=======
+
+
+from routers.other_scripts.days import fetch_and_store_weather_data
+
+fetch_and_store_weather_data(21.5929 , 81.3761)
+>>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae

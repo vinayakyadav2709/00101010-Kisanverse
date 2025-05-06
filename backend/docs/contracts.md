@@ -37,6 +37,7 @@ curl -X GET "http://localhost:8000/contracts?email=buyer@example.com&status=list
   "documents": [
     {
       "locations": ["location1", "location1"],
+<<<<<<< HEAD
       "dynamic_fields": "{\"field1\": \"value1\"}",
       "crop_type": "wheat",
       "quantity": 1000,
@@ -77,6 +78,8 @@ curl -X GET "http://localhost:8000/contracts/121323"
   "documents": [
     {
       "locations": ["location1", "location1"],
+=======
+>>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
       "dynamic_fields": "{\"field1\": \"value1\"}",
       "crop_type": "wheat",
       "quantity": 1000,

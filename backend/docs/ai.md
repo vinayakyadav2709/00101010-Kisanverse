@@ -283,6 +283,7 @@ curl -X GET http://localhost:8000/predictions/weather/history?email=farmer@examp
 
 ---
 
+<<<<<<< HEAD
 
 
 
@@ -370,6 +371,9 @@ curl -X GET http://localhost:8000/predictions/prices/history?email=farmer@exampl
 ---
 
 ## **9. Crop Prediction**
+=======
+## **7. Crop Prediction**
+>>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 
 ### **Endpoint**
 `POST /predictions/crop_prediction`
@@ -470,6 +474,95 @@ curl -X POST http://localhost:8000/predictions/crop_prediction \
 
 ---
 
+<<<<<<< HEAD
+=======
+
+
+
+## **8. Fetch Crop Prices**
+
+### **Endpoint**
+`POST /predictions/prices`
+
+### **Description**
+Fetches crop prices for a specific crop and date range based on the user's location. Optionally stores the result in the `PRICES_HISTORY` collection.
+
+### **Who Can Call It**
+Internal and external users.
+
+### **Query Parameters**
+- `crop_type` (string): The crop type. Must be in uppercase.
+- `email` (string): The email of the user.
+- `end_date` (string): The end date in `YYYY-MM-DD` format.
+- `start_date` (string, optional): The start date in `YYYY-MM-DD` format. Defaults to today.
+- `store` (boolean, optional): Whether to store the result in the database. Defaults to `true`. For internal use only.
+
+### **Response**
+- **Success**: Returns the crop prices and dates.
+- **Error**: Returns an error message if the price retrieval fails.
+
+### **Example API Call**
+```bash
+curl -X POST "http://localhost:8000/predictions/prices?crop_type=WHEAT&email=farmer@example.com&start_date=2025-07-01&end_date=2025-07-10&store=true"
+```
+
+### **Example Response**
+```json
+{
+  "dates": ["2025-07-01", "2025-07-02", "2025-07-03"],
+  "prices": [100, 105, 110]
+}
+```
+
+---
+
+## **9. Fetch Price History**
+
+### **Endpoint**
+`GET /predictions/prices/history`
+
+### **Description**
+Fetches the price history for a user from the `PRICES_HISTORY` collection.
+
+### **Who Can Call It**
+Anyone.
+
+### **Query Parameters**
+- `email` (string): The email of the user.
+
+### **Response**
+- **Success**: Returns a list of price history records sorted by `requested_at` in descending order.
+- **Error**: Returns an error message if the history retrieval fails.
+
+### **Example API Call**
+```bash
+curl -X GET http://localhost:8000/predictions/prices/history?email=farmer@example.com
+```
+
+### **Example Response**
+```json
+{
+  "history": [
+    {
+      "user_id": "user_id",
+      "dates": ["2025-07-01", "2025-07-02", "2025-07-03"],
+      "prices": [100, 105, 110],
+      "requested_at": "2025-05-01T12:00:00.000+00:00"
+    },
+    {
+      "user_id": "user_id",
+      "dates": ["2025-06-01", "2025-06-02", "2025-06-03"],
+      "prices": [90, 95, 100],
+      "requested_at": "2025-04-01T12:00:00.000+00:00"
+    }
+  ]
+}
+```
+
+
+---
+
+>>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
 ## **10. Crop Prediction History**
 
 ### **Endpoint**

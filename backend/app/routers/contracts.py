@@ -117,9 +117,13 @@ def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
                     )
                 )
         query_filters.append(Query.limit(10000))
+<<<<<<< HEAD
 
         # Fetch contracts from the database
         documents = DATABASES.list_documents(
+=======
+        return DATABASES.list_documents(
+>>>>>>> 926cbc3e2be1b9c532d2e65f6f7a731893a5a7ae
             DATABASE_ID, COLLECTION_CONTRACTS, queries=query_filters
         )
 
