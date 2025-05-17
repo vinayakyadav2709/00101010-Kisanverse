@@ -409,7 +409,16 @@ def generate_llm_summary(
         return f"Summary generation failed (Error: {e})."
 
 
-_date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$|^\d{2}/\d{2}/\d{4}$|^\d{4}/\d{2}/\d{2}$")
+_date_regex = re.compile(
+    r"""^(
+        \d{4}-\d{2}-\d{2} |         # 2025-05-06
+        \d{2}/\d{2}/\d{4} |         # 06/05/2025
+        \d{4}/\d{2}/\d{2} |         # 2025/05/06
+        \d{2}-\d{2}-\d{4} |         # 06-05-2025
+        \d{2}-\d{2}-\d{4},\s*\d{2}:\d{2}:\d{2}(?:\.\d+)?\s*[+-]\d{2}:\d{2} # 06-05-2025, 19:26:07.533 +00:00
+    )$""",
+    re.VERBOSE,
+)
 
 
 def _is_date_string(s: str) -> bool:
@@ -418,7 +427,7 @@ def _is_date_string(s: str) -> bool:
 
 def _translate_text_with_ollama(text: str, target_lang: str) -> str:
     prompt = (
-        f"Translate the following text to {target_lang} (use native script, be accurate):\n\n{text}\n\n"
+        f"Translate the following text to {target_lang} and do not translate dates,time and links and only do translation, nothing else (use native script, be accurate):\n\n{text}\n\n"
         f"Only output the translated text, no explanations."
     )
     try:
@@ -435,7 +444,8 @@ def _translate_text_with_ollama(text: str, target_lang: str) -> str:
             options={"temperature": LLM_TEMPERATURE},
         )
         if response and "message" in response and "content" in response["message"]:
-            return response["message"]["content"].strip()
+            result = response["message"]["content"].strip()
+            return result if result else text
         else:
             log.error("Ollama translation response missing content.")
             return text
@@ -444,28 +454,70 @@ def _translate_text_with_ollama(text: str, target_lang: str) -> str:
         return text
 
 
-def _translate_json_values(data: Any, target_lang: str, parent_key: str = "") -> Any:
+SPECIAL_KEYS_NO_TRANSLATE = {
+    "$id",
+    "$createdAt",
+    "$updatedAt",
+    "$permissions",
+    "$databaseId",
+    "$collectionId",
+    "provider",
+}
+
+
+def _translate_json_values(
+    data: Any, target_lang: str, parent_key: str = "", in_dynamic_fields: bool = False
+) -> Any:
     if isinstance(data, str):
         if _is_date_string(data):
             return data
         return _translate_text_with_ollama(data, target_lang)
     elif isinstance(data, dict):
-        # If the parent key is "dynamic_fields", translate both keys and values
-        if parent_key == "dynamic_fields":
-            return {
-                _translate_text_with_ollama(k, target_lang): _translate_json_values(
-                    v, target_lang
-                )
-                for k, v in data.items()
-            }
+        # If the parent key is "dynamic_fields", translate both keys and values, but skip translation for date keys/values
+        if parent_key == "dynamic_fields" or in_dynamic_fields:
+            result = {}
+            for k, v in data.items():
+                # Do not translate key if it's a date
+                if _is_date_string(k):
+                    translated_key = k
+                else:
+                    try:
+                        translated_key = _translate_text_with_ollama(k, target_lang)
+                    except Exception:
+                        translated_key = k
+                # Do not translate value if it's a date or a special key
+                if (
+                    (isinstance(v, str) and _is_date_string(v))
+                    or k in SPECIAL_KEYS_NO_TRANSLATE
+                    or "link" in k
+                ):
+                    translated_value = v
+                else:
+                    translated_value = _translate_json_values(
+                        v,
+                        target_lang,
+                        parent_key=translated_key,
+                        in_dynamic_fields=True,
+                    )
+                result[translated_key] = translated_value
+            return result
         else:
             return {
-                k: _translate_json_values(v, target_lang, parent_key=k)
+                k: (
+                    v
+                    if k in SPECIAL_KEYS_NO_TRANSLATE or "link" in k
+                    else _translate_json_values(v, target_lang, parent_key=k)
+                )
                 for k, v in data.items()
             }
     elif isinstance(data, list):
         return [
-            _translate_json_values(item, target_lang, parent_key=parent_key)
+            _translate_json_values(
+                item,
+                target_lang,
+                parent_key=parent_key,
+                in_dynamic_fields=in_dynamic_fields,
+            )
             for item in data
         ]
     else:
@@ -473,7 +525,7 @@ def _translate_json_values(data: Any, target_lang: str, parent_key: str = "") ->
 
 
 def get_translations(
-    input_json: Union[Dict[str, Any], str], language: str = "hi"
+    input_json: Union[Dict[str, Any], str], language: str = "english"
 ) -> Any:
     """
     Translates the input JSON (English) to the specified language.
@@ -492,14 +544,15 @@ def get_translations(
             data = input_json
         else:
             log.error(f"Invalid input type: {type(input_json)}")
-            raise ValueError("Input must be a JSON string or dict.")
+            return input_json  # fallback: return as-is
 
         if language == "english":
             return data
         elif language in ["marathi", "hindi"]:
             return _translate_json_values(data, language)
         else:
-            raise ValueError("language must be one of: 'hindi', 'marathi', 'english'.")
+            log.error("language must be one of: 'hindi', 'marathi', 'english'.")
+            return data
     except Exception as e:
         log.error(f"Translation failed: {e}", exc_info=True)
-        raise ValueError(f"Translation error: {e}")
+        return input_json  # fallback: return as-is

@@ -210,9 +210,6 @@ def create_crop_listing(
             )
         crop_listing_data["farmer_id"] = user["$id"]
         crop_listing_data["available_quantity"] = crop_listing_data["total_quantity"]
-        now_utc = datetime.now(timezone.utc).isoformat()
-        crop_listing_data["added_at"] = now_utc
-        crop_listing_data["updated_at"] = now_utc
         crop_listing_data["total_quantity"] = round(
             crop_listing_data["total_quantity"], 2
         )
@@ -307,8 +304,6 @@ def update_crop_listing(
         ):
             updated_data["status"] = "fulfilled"
 
-        # Final timestamp
-        updated_data["updated_at"] = datetime.now(timezone.utc).isoformat()
         updated_data["total_quantity"] = round(
             updated_data.get("total_quantity", listing["total_quantity"]), 2
         )
@@ -405,7 +400,6 @@ def place_bid(data: BidCreateModel, email: str, language: str = "english"):
                 detail="Bid quantity exceeds available quantity in the listing",
             )
         bid_data["buyer_id"] = user["$id"]
-        bid_data["timestamp"] = datetime.now(timezone.utc).isoformat()
         data.quantity = round(data.quantity, 2)
         data.price_per_kg = round(data.price_per_kg, 2)
         val = DATABASES.create_document(
@@ -539,7 +533,6 @@ def accept_bid(bid_id: str, email: str, language: str = "english"):
             {
                 "available_quantity": new_available_quantity,
                 "status": status,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
             },
         )
         if status == "fulfilled":

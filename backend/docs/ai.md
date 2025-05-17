@@ -1,6 +1,6 @@
 > **Note:**  
 > All APIs documented below support an optional `language` query parameter.  
-> You can set `language` to `"english"` (default), `"hindi"`, or `"marathi"` to receive responses in your preferred language.
+> You can set `language` to `"english"` (default), `"hindi"`, or `"marathi"` to receive responses in your preferred language. if anything else given, taken as english.
 >
 > **Example usage:**  
 > ```bash

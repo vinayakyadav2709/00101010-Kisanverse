@@ -10,6 +10,7 @@ from core.dependencies import (
     get_document_or_raise,
     get_state,
     translate_json,
+    string_to_json,
 )
 from pydantic import BaseModel, field_validator
 from typing import List, Optional

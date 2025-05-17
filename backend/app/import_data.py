@@ -6,6 +6,7 @@ from core.config import (
 )
 from appwrite.id import ID
 import os
+# havent imported schema yet. so wont work.
 
 
 def delete_all_collections():
@@ -54,7 +55,7 @@ def import_collections():
                 database_id=DATABASE_ID,
                 collection_id=collection,
                 name=collection,
-                permissions=["read('any')"],  # Add appropriate permissions if needed
+                permissions=[],  # Add appropriate permissions if needed
                 document_security=True,
             )
             for document in documents:
@@ -82,7 +83,7 @@ def import_buckets():
             STORAGE.create_bucket(
                 bucket_id=bucket,
                 name=bucket,
-                permissions=[],  # Add appropriate permissions if needed
+                permissions=["read('any')"],  # Add appropriate permissions if needed
                 file_security=True,
             )
             for file_name in files:

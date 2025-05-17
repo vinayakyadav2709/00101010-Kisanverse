@@ -75,6 +75,36 @@ def get_state(zipcode: str):
         )
 
 
+import json
+
+
+def string_to_json(obj):
+    """
+    Recursively parses any string value in the input dict/list that is itself valid JSON,
+    and replaces it with the parsed JSON object.
+    """
+    if isinstance(obj, dict):
+        new_obj = {}
+        for k, v in obj.items():
+            if isinstance(v, str):
+                try:
+                    parsed = json.loads(v)
+                    # If parsing succeeds and result is dict or list, replace
+                    if isinstance(parsed, (dict, list)):
+                        new_obj[k] = string_to_json(parsed)
+                    else:
+                        new_obj[k] = v
+                except (json.JSONDecodeError, TypeError):
+                    new_obj[k] = v
+            else:
+                new_obj[k] = string_to_json(v)
+        return new_obj
+    elif isinstance(obj, list):
+        return [string_to_json(item) for item in obj]
+    else:
+        return obj
+
+
 def translate_json(json_data, language="english"):
     """
     Translate the JSON data to a different format.
@@ -82,7 +112,10 @@ def translate_json(json_data, language="english"):
     """
     try:
         language = language.lower() if language else "english"
-        result = get_translations(json_data, language)
+        result = get_translations(string_to_json(json_data), language)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error translating JSON: {str(e)}")
+
+
+# You can place this anywhere in your codebase, e.g., utils.py
