@@ -1,3 +1,26 @@
+> **Note:**  
+> All APIs documented below support an optional `language` query parameter.  
+> You can set `language` to `"english"` (default), `"hindi"`, or `"marathi"` to receive responses in your preferred language.
+>
+> **Example usage:**  
+> ```bash
+> curl -X GET "http://localhost:8000/predictions/soil_type/history?email=farmer@example.com&language=hindi"
+> ```
+>
+> **Example output (Hindi):**
+> ```json
+> {
+>   "history": [
+>     {
+>       "file_id": "file_id",
+>       "file_url": "http://localhost/v1/storage/buckets/soil/files/file_id/view",
+>       "soil_type": "दोमट",
+>       "confidence": 95.0,
+>       "uploaded_at": "2025-05-01T12:00:00.000+00:00"
+>     }
+>   ]
+> }
+> ```
 # API Documentation for `/listing` and `/bids` Endpoints
 
 This document provides details about the API endpoints defined in the listings.py file. It includes information about who can call the endpoints, required parameters, request bodies, and example API calls with expected outputs.
@@ -614,3 +637,41 @@ curl -X GET http://localhost:8000/bids/bid_id
 ```
 
 ---
+## **14. Get image from url**
+### **Endpoint**
+`GET /proxy-image/`
+
+### **Description**
+Fetches and proxies an image from a given URL. If the URL contains `http://localhost`, it is replaced with the configured Appwrite host. This endpoint is useful for bypassing CORS restrictions when accessing images from protected or local sources.
+
+### **Who Can Call It**
+Anyone.
+
+### **Query Parameters**
+- `image_url` (string, required): The URL of the image to fetch and proxy. (from the history apis.)
+
+### **Response**
+- **Success**: Returns the raw image content with the correct `Content-Type` header.
+- **Error**: Returns a JSON error message if the image cannot be fetched.
+
+### **Example API Call**
+```bash
+curl -X GET "http://localhost:8000/proxy-image/?image_url=http://localhost/v1/storage/buckets/abc/files/xyz/view"
+```
+
+### **Example Success Response**
+- Content-Type: `image/jpeg` (or as returned by the proxied server)
+- Body: Raw image bytes
+
+### **Example Error Response**
+```json
+{
+  "detail": "Image not found"
+}
+```
+or
+```json
+{
+  "detail": "Internal server error"
+}
+```

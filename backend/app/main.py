@@ -4,9 +4,10 @@ from fastapi import FastAPI
 from routers import users, listings, contracts, subsidies, ai
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi import Request
+from fastapi import Query, Response, HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 import traceback
+import httpx
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -45,6 +46,42 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={"detail": f"Internal Server Error: {str(exc)}"},
     )
+
+
+@app.get("/proxy-image/")
+async def proxy_image(image_url: str = Query(...)):
+    appwrite_host = "https://d62b-124-66-175-40.ngrok-free.app"
+    # Replace localhost URL with ngrok-hosted Appwrite URL
+    proxied_url = image_url.replace("http://localhost", appwrite_host)
+    logger.info(f"Original URL: {image_url}")
+    logger.info(f"Proxied URL: {proxied_url}")
+
+    headers = {
+        "ngrok-skip-browser-warning": "true",
+    }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(proxied_url, headers=headers)
+            logger.info(f"Response status: {resp.status_code}")
+            if resp.status_code != 200:
+                logger.error(f"Failed to fetch image: HTTP {resp.status_code}")
+                raise HTTPException(
+                    status_code=resp.status_code, detail="Image not found"
+                )
+
+            content_type = resp.headers.get("Content-Type", "image/jpeg")
+            logger.info(f"Content-Type: {content_type}")
+
+            # Log type of the content and first few bytes (limit to 100 bytes for readability)
+            logger.info(f"Content type in Python: {type(resp.content)}")
+            logger.info(f"First 100 bytes of content (raw): {resp.content[:100]!r}")
+
+            return Response(content=resp.content, media_type=content_type)
+
+    except Exception as e:
+        logger.exception(f"Exception during image fetch: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 class LogMiddleware(BaseHTTPMiddleware):

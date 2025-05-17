@@ -1,4 +1,26 @@
-note: zipcode have been added. document api response may not show them. 
+> **Note:**  
+> All APIs documented below support an optional `language` query parameter.  
+> You can set `language` to `"english"` (default), `"hindi"`, or `"marathi"` to receive responses in your preferred language.
+>
+> **Example usage:**  
+> ```bash
+> curl -X GET "http://localhost:8000/predictions/soil_type/history?email=farmer@example.com&language=hindi"
+> ```
+>
+> **Example output (Hindi):**
+> ```json
+> {
+>   "history": [
+>     {
+>       "file_id": "file_id",
+>       "file_url": "http://localhost/v1/storage/buckets/soil/files/file_id/view",
+>       "soil_type": "दोमट",
+>       "confidence": 95.0,
+>       "uploaded_at": "2025-05-01T12:00:00.000+00:00"
+>     }
+>   ]
+> }
+> ```
 # API Documentation for `/users` Endpoint
 
 This document provides details about the API endpoints defined in the users.py file. It includes information about who can call the endpoints, required parameters, request bodies, and example API calls with expected outputs.
@@ -50,6 +72,7 @@ curl -X POST http://localhost:8000/users \
   "name": "John Doe",
   "role": "admin",
   "address": "123 Main St",
+  "zipcode" : "12345",
   "email": "john.doe@example.com",
   "$id": "680cd1cb0021422a786e",
   "$createdAt": "2025-04-26T12:30:03.816+00:00",
@@ -91,6 +114,7 @@ curl -X GET http://localhost:8000/users/john.doe@example.com
   "name": "John Doe",
   "role": "admin",
   "address": "123 Main St",
+  "zipcode" : "12345",
   "email": "john.doe@example.com",
   "$id": "680cd1cb0021422a786e",
   "$createdAt": "2025-04-26T12:30:03.816+00:00",
@@ -135,6 +159,7 @@ curl -X GET "http://localhost:8000/users?type=all"
       "name": "Admin User",
       "role": "admin",
       "address": "Admin Address",
+      "zipcode" : "12345",
       "email": "admin@example.com",
       "$id": "680ba2e30015e27516ac",
       "$createdAt": "2025-04-25T14:57:39.424+00:00",
@@ -196,6 +221,7 @@ curl -X PATCH http://localhost:8000/users/john.doe@example.com \
   "role": "admin",
   "address": "456 Updated St",
   "email": "john.doe@example.com",
+  "zipcode" : "12345",
   "$id": "680cd1cb0021422a786e",
   "$createdAt": "2025-04-26T12:30:03.816+00:00",
   "$updatedAt": "2025-04-26T12:45:03.816+00:00",

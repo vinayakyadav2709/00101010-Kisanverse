@@ -2,6 +2,8 @@ from fastapi import HTTPException
 from core.config import DATABASES, DATABASE_ID, COLLECTION_USERS, COLLECTION_ZIPCODES
 from appwrite.query import Query
 
+from models.llm.recommendation_api import get_translations
+
 
 def get_user_by_email(email: str | None) -> dict | None:
     if not email:
@@ -71,3 +73,16 @@ def get_state(zipcode: str):
         raise HTTPException(
             status_code=500, detail=f"Error fetching zipcodes: {str(e)}"
         )
+
+
+def translate_json(json_data, language="english"):
+    """
+    Translate the JSON data to a different format.
+    This is a placeholder function and should be implemented as needed.
+    """
+    try:
+        language = language.lower() if language else "english"
+        result = get_translations(json_data, language)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error translating JSON: {str(e)}")

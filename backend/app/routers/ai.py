@@ -6,7 +6,7 @@ from typing import Dict, Any
 import requests
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from appwrite.id import ID
-from models.llm import recommendation_api
+from models.llm.recommendation_api import get_recommendations
 from appwrite.input_file import InputFile
 from core.config import (
     COLLECTION_CONTRACTS,
@@ -33,7 +33,7 @@ from core.config import (
     ENDPOINT,
 )
 from routers import contracts, subsidies
-from core.dependencies import get_user_by_email_or_raise, get_coord
+from core.dependencies import get_user_by_email_or_raise, get_coord, translate_json
 from typing import List, Optional
 from pydantic import BaseModel
 from appwrite.query import Query
@@ -67,7 +67,12 @@ def convert_to_serializable(obj):
 
 
 @ai_router.post("/soil_type")
-def soil_classification(email: str, file: UploadFile = File(...), store: bool = True):
+def soil_classification(
+    email: str,
+    file: UploadFile = File(...),
+    store: bool = True,
+    language: str = "english",
+):
     try:
         # Step 1: Get the user ID from the email
         user_id = get_user_by_email_or_raise(email)["$id"]
@@ -124,8 +129,8 @@ def soil_classification(email: str, file: UploadFile = File(...), store: bool = 
             os.remove(local_file_path)
 
         # Step 7: Return the response
-        return document
-
+        val = translate_json(document, language)
+        return translate_json(val, language)
     except Exception as e:
         # Ensure the local file is deleted even if an error occurs
         if os.path.exists(local_file_path):
@@ -139,7 +144,7 @@ def soil_classification(email: str, file: UploadFile = File(...), store: bool = 
 
 
 @ai_router.get("/soil_type/history")
-def soil_classification_history(email: Optional[str] = None):
+def soil_classification_history(email: Optional[str] = None, language: str = "english"):
     """
     API endpoint to retrieve the soil classification history for a user or all users if email is not provided.
 
@@ -179,8 +184,8 @@ def soil_classification_history(email: Optional[str] = None):
 
         # Sort history by uploaded_at in descending order
         history.sort(key=lambda x: x["uploaded_at"])
-        return {"history": history}
-
+        val = translate_json({"history": history}, language)
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -189,7 +194,12 @@ def soil_classification_history(email: Optional[str] = None):
 
 
 @ai_router.post("/disease")
-def disease_prediction(email: str, file: UploadFile = File(...), store: bool = True):
+def disease_prediction(
+    email: str,
+    file: UploadFile = File(...),
+    store: bool = True,
+    language: str = "english",
+):
     try:
         user_id = get_user_by_email_or_raise(email)["$id"]
 
@@ -250,8 +260,8 @@ def disease_prediction(email: str, file: UploadFile = File(...), store: bool = T
             os.remove(local_file_path)
 
         # Step 6: Return the response
-        return document
-
+        val = translate_json(document, language)
+        return translate_json(val, language)
     except Exception as e:
         # Ensure the local file is deleted even if an error occurs
         if os.path.exists(local_file_path):
@@ -263,7 +273,7 @@ def disease_prediction(email: str, file: UploadFile = File(...), store: bool = T
 
 
 @ai_router.get("/disease/history")
-def disease_prediction_history(email: Optional[str] = None):
+def disease_prediction_history(email: Optional[str] = None, language: str = "english"):
     """
     API endpoint to retrieve the disease prediction history for a user or all users if email is not provided.
 
@@ -304,8 +314,8 @@ def disease_prediction_history(email: Optional[str] = None):
 
         # Sort history by uploaded_at in descending order
         history.sort(key=lambda x: x["uploaded_at"])
-        return {"history": history}
-
+        val = translate_json({"history": history}, language)
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -313,7 +323,9 @@ def disease_prediction_history(email: Optional[str] = None):
         raise HTTPException(status_code=500, detail=f"Error fetching history: {str(e)}")
 
 
-def get_weather(lat: float, lon: float, start_date: str, end_date: str):
+def get_weather(
+    lat: float, lon: float, start_date: str, end_date: str, language: str = "english"
+):
     try:
         # Validate if start_date is less than end_date
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -374,7 +386,7 @@ def get_weather(lat: float, lon: float, start_date: str, end_date: str):
         # Sort the results by month in ascending order
         result.sort(key=lambda x: x["month"])
 
-        return result
+        return translate_json(result, language)
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -396,7 +408,9 @@ class WeatherPredictionInput(BaseModel):
 
 
 @ai_router.post("/weather")
-def weather_prediction(input_data: WeatherPredictionInput, store: bool = True):
+def weather_prediction(
+    input_data: WeatherPredictionInput, store: bool = True, language: str = "english"
+):
     """
     API endpoint to fetch weather predictions and store them in the database.
 
@@ -450,8 +464,8 @@ def weather_prediction(input_data: WeatherPredictionInput, store: bool = True):
         )
 
         # Step 7: Return the weather data
-        return weather_data
-
+        val = weather_data
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -460,7 +474,7 @@ def weather_prediction(input_data: WeatherPredictionInput, store: bool = True):
 
 
 @ai_router.get("/weather/history")
-def weather_prediction_history(email: Optional[str] = None):
+def weather_prediction_history(email: Optional[str] = None, language: str = "english"):
     """
     API endpoint to retrieve the weather prediction history for a user or all users if email is not provided.
 
@@ -500,8 +514,8 @@ def weather_prediction_history(email: Optional[str] = None):
 
         # Sort history by end_date in descending order
         history.sort(key=lambda x: x["end_date"])
-        return {"history": history}
-
+        val = {"history": history}
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -510,7 +524,11 @@ def weather_prediction_history(email: Optional[str] = None):
 
 
 def fetch_prices(
-    lat: float, lon: float, crop: Optional[str], start_date: str, end_date: str
+    lat: float,
+    lon: float,
+    crop: Optional[str],
+    start_date: str,
+    end_date: str,
 ) -> Dict[str, Any]:
     """
     Fetch prices and dates for a given crop, latitude, longitude, and date range.
@@ -597,6 +615,7 @@ def fetch_prices_api(
     end_date: str,
     start_date: Optional[str] = None,
     store: bool = True,
+    language: str = "english",
 ):
     """
     API to fetch prices for a crop and store the result in PRICES_HISTORY.
@@ -648,8 +667,8 @@ def fetch_prices_api(
             },
         )
 
-        return prices_data
-
+        val = prices_data
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -658,7 +677,7 @@ def fetch_prices_api(
 
 
 @ai_router.get("/prices/history")
-def get_prices_history(email: str):
+def get_prices_history(email: str, language: str = "english"):
     """
     API to retrieve all price history records for a user.
 
@@ -688,8 +707,8 @@ def get_prices_history(email: str):
             key=lambda x: x["requested_at"],
         )
 
-        return {"history": history}
-
+        val = {"history": history}
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -711,7 +730,7 @@ def llm(data: Dict[str, Any]) -> Dict[str, Any]:
     """
     # Simulate LLM processing
     try:
-        result = recommendation_api.get_recommendations(data)
+        result = get_recommendations(data)
         return result
     except Exception as e:
         raise HTTPException(
@@ -801,7 +820,8 @@ def crop_prediction(
     acres: int,
     start_date: Optional[str] = None,
     soil_type: Optional[str] = None,
-    file: Optional[UploadFile] = File(None),  # Make file optional
+    file: Optional[UploadFile] = File(None),
+    language: str = "english",
 ):
     local_file_path = None
 
@@ -972,8 +992,8 @@ def crop_prediction(
         )
 
         # Step 10: Return the result from the LLM function
-        return llm_result
-
+        val = llm_result
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -981,7 +1001,7 @@ def crop_prediction(
 
 
 @ai_router.get("/crop_prediction/history")
-def get_crop_prediction_history(email: str):
+def get_crop_prediction_history(email: str, language: str = "english"):
     """
     API to retrieve all crop prediction history records for a user.
 
@@ -1021,8 +1041,8 @@ def get_crop_prediction_history(email: str):
             key=lambda x: x["requested_at"],
         )
 
-        return {"history": history}
-
+        val = {"history": history}
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is

@@ -5,6 +5,7 @@ from core.dependencies import (
     get_user_by_email,
     get_user_by_email_or_raise,
     get_document_or_raise,
+    translate_json,
 )
 from typing import List, Optional
 from pydantic import BaseModel, field_validator
@@ -31,7 +32,7 @@ class UpdateUserModel(BaseModel):
 
 
 @router.post("")
-def register_user(payload: RegisterUserModel):
+def register_user(payload: RegisterUserModel, language: str = "english"):
     if get_user_by_email(payload.email):
         raise HTTPException(status_code=400, detail="User already exists")
     if payload.role not in ["admin", "farmer", "buyer"]:
@@ -42,9 +43,10 @@ def register_user(payload: RegisterUserModel):
     for attempt in range(max_attempts):
         try:
             unique_id = ID.unique()
-            return DATABASES.create_document(
+            val = DATABASES.create_document(
                 DATABASE_ID, COLLECTION_USERS, unique_id, data
             )
+            return translate_json(val, language)
 
         except Exception as e:
             if "already exists" in str(e) and attempt < max_attempts - 1:
@@ -54,12 +56,12 @@ def register_user(payload: RegisterUserModel):
 
 
 @router.get("/{email}")
-def get_user(email: str):  # -> dict:
-    return get_user_by_email_or_raise(email)
+def get_user(email: str, language: str = "english"):  # -> dict:
+    return translate_json(get_user_by_email_or_raise(email), language)
 
 
 @router.get("")
-def list_users(type: Optional[str] = "all"):
+def list_users(type: Optional[str] = "all", language: str = "english"):
     try:
         # Prepare filters
         query_filters = []
@@ -78,8 +80,11 @@ def list_users(type: Optional[str] = "all"):
             raise HTTPException(status_code=400, detail="Invalid type provided")
         query_filters.append(Query.limit(10000))  # Limit to 100 results
         # List documents based on filters
-        return DATABASES.list_documents(
-            DATABASE_ID, COLLECTION_USERS, queries=query_filters
+        return translate_json(
+            DATABASES.list_documents(
+                DATABASE_ID, COLLECTION_USERS, queries=query_filters
+            ),
+            language,
         )
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -90,7 +95,10 @@ def list_users(type: Optional[str] = "all"):
 
 @router.patch("/{email}")
 def update_user(
-    payload: UpdateUserModel, email: str, requester_email: Optional[str] = None
+    payload: UpdateUserModel,
+    email: str,
+    requester_email: Optional[str] = None,
+    language: str = "english",
 ):
     user = get_user_by_email_or_raise(email)
     requestor_email = requester_email or email
@@ -132,29 +140,32 @@ def update_user(
         raise HTTPException(status_code=400, detail="No valid updates provided")
 
     try:
-        return DATABASES.update_document(
-            DATABASE_ID, COLLECTION_USERS, user_id, updates
+        return translate_json(
+            DATABASES.update_document(DATABASE_ID, COLLECTION_USERS, user_id, updates),
+            language,
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete("/{email}")
-def delete_user_by_email(email: str, requester_email: str):
+def delete_user_by_email(email: str, requester_email: str, language: str = "english"):
     user_id = get_user_by_email_or_raise(email)["$id"]
     requester = get_user_by_email_or_raise(requester_email)
     if requester["$id"] != user_id and requester["role"] != "admin":
         raise HTTPException(status_code=403, detail="Permission denied")
     try:
         DATABASES.delete_document(DATABASE_ID, COLLECTION_USERS, user_id)
-        return {"message": "User deleted successfully"}
+        val = {"message": "User deleted successfully"}
+        return translate_json(val, language)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/{email}/role")
-def get_user_type(email: str):
-    return {"role": get_user_by_email_or_raise(email)["role"]}
+def get_user_type(email: str, language: str = "english"):
+    val = {"role": get_user_by_email_or_raise(email)["role"]}
+    return translate_json(val, language)
 
 
 def create_all_user_types():

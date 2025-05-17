@@ -54,7 +54,7 @@ def import_collections():
                 database_id=DATABASE_ID,
                 collection_id=collection,
                 name=collection,
-                permissions=[],  # Add appropriate permissions if needed
+                permissions=["read('any')"],  # Add appropriate permissions if needed
                 document_security=True,
             )
             for document in documents:

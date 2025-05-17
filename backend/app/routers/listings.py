@@ -10,6 +10,7 @@ from core.dependencies import (
     get_user_by_email,
     get_user_by_email_or_raise,
     get_document_or_raise,
+    translate_json,
 )
 from typing import List, Optional
 from pydantic import BaseModel
@@ -138,7 +139,9 @@ LISTING_STATUSES = ["listed", "removed", "cancelled", "fulfilled"]
 
 
 @listings_router.get("")
-def get_crop_listings(email: Optional[str] = None, type: str = "all"):
+def get_crop_listings(
+    email: Optional[str] = None, type: str = "all", language: str = "english"
+):
     try:
         query_filters = []
 
@@ -155,9 +158,10 @@ def get_crop_listings(email: Optional[str] = None, type: str = "all"):
                 raise HTTPException(status_code=400, detail="Invalid listing status")
             query_filters.append(Query.equal("status", [type]))
         query_filters.append(Query.limit(10000))
-        return DATABASES.list_documents(
+        result = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_CROP_LISTINGS, queries=query_filters
         )
+        return translate_json(result, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -168,11 +172,12 @@ def get_crop_listings(email: Optional[str] = None, type: str = "all"):
 
 
 @listings_router.get("/{listing_id}")
-def get_crop_listing(listing_id: str):
+def get_crop_listing(listing_id: str, language: str = "english"):
     try:
-        return get_document_or_raise(
+        val = get_document_or_raise(
             COLLECTION_CROP_LISTINGS, listing_id, "Crop listing not found"
         )
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -183,7 +188,9 @@ def get_crop_listing(listing_id: str):
 
 
 @listings_router.post("")
-def create_crop_listing(data: CropListingCreateModel, email: str):
+def create_crop_listing(
+    data: CropListingCreateModel, email: str, language: str = "english"
+):
     try:
         user = get_user_by_email(email)
         role = user["role"]
@@ -214,9 +221,10 @@ def create_crop_listing(data: CropListingCreateModel, email: str):
         for attempt in range(max_attempts):
             try:
                 unique_id = ID.unique()
-                return DATABASES.create_document(
+                val = DATABASES.create_document(
                     DATABASE_ID, COLLECTION_CROP_LISTINGS, unique_id, crop_listing_data
                 )
+                return translate_json(val, language)
             except Exception as e:
                 if "already exists" in str(e) and attempt < max_attempts - 1:
                     continue  # Retry with a new unique ID
@@ -234,7 +242,12 @@ def create_crop_listing(data: CropListingCreateModel, email: str):
 
 
 @listings_router.patch("/{listing_id}")
-def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email: str):
+def update_crop_listing(
+    listing_id: str,
+    updates: CropListingUpdateModel,
+    email: str,
+    language: str = "english",
+):
     try:
         user = get_user_by_email(email)
         role = user["role"]
@@ -315,7 +328,8 @@ def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email:
                     listing["available_quantity"],
                 ),
             )
-        return output
+        val = output
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -326,7 +340,7 @@ def update_crop_listing(listing_id: str, updates: CropListingUpdateModel, email:
 
 
 @listings_router.delete("/{listing_id}")
-def cancel_crop_listing(listing_id: str, email: str):
+def cancel_crop_listing(listing_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email(email)
         role = user["role"]
@@ -346,7 +360,8 @@ def cancel_crop_listing(listing_id: str, email: str):
         )
 
         reject_pending_bids(listing_id)
-        return updated_listing
+        val = updated_listing
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -361,7 +376,7 @@ bids_router = APIRouter(prefix="/bids", tags=["Listings"])
 
 
 @bids_router.post("")
-def place_bid(data: BidCreateModel, email: str):
+def place_bid(data: BidCreateModel, email: str, language: str = "english"):
     try:
         user = get_user_by_email(email)
         bid_data = data.model_dump()
@@ -393,9 +408,10 @@ def place_bid(data: BidCreateModel, email: str):
         bid_data["timestamp"] = datetime.now(timezone.utc).isoformat()
         data.quantity = round(data.quantity, 2)
         data.price_per_kg = round(data.price_per_kg, 2)
-        return DATABASES.create_document(
+        val = DATABASES.create_document(
             DATABASE_ID, COLLECTION_BIDS, ID.unique(), bid_data
         )
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -418,6 +434,7 @@ def get_bids(
     email: Optional[str] = None,
     type: Optional[str] = "all",
     listing_id: Optional[str] = None,
+    language: str = "english",
 ):
     try:
         query_filters = []
@@ -459,9 +476,10 @@ def get_bids(
             query_filters.append(Query.equal("listing_id", [listing_id]))
         query_filters.append(Query.limit(10000))
         # Fetch and return bids
-        return DATABASES.list_documents(
+        val = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_BIDS, queries=query_filters
         )
+        return translate_json(val, language)
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -471,10 +489,11 @@ def get_bids(
 
 
 @bids_router.get("/{bid_id}")
-def get_specific_bid(bid_id: str):
+def get_specific_bid(bid_id: str, language: str = "english"):
     try:
         bid = get_document_or_raise(COLLECTION_BIDS, bid_id, "Bid not found")
-        return bid
+        val = bid
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -483,7 +502,7 @@ def get_specific_bid(bid_id: str):
 
 
 @bids_router.patch("/{bid_id}/accept")
-def accept_bid(bid_id: str, email: str):
+def accept_bid(bid_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email(email)
         bid = get_document_or_raise(COLLECTION_BIDS, bid_id, "Bid not found")
@@ -527,7 +546,8 @@ def accept_bid(bid_id: str, email: str):
             reject_pending_bids(listing["$id"])
         else:
             reject_bids_below_available_quantity(listing["$id"], new_available_quantity)
-        return bid_updated
+        val = bid_updated
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -536,7 +556,7 @@ def accept_bid(bid_id: str, email: str):
 
 
 @bids_router.patch("/{bid_id}/reject")
-def reject_bid(bid_id: str, email: str):
+def reject_bid(bid_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email(email)
         bid = get_document_or_raise(COLLECTION_BIDS, bid_id, "Bid not found")
@@ -555,9 +575,10 @@ def reject_bid(bid_id: str, email: str):
             )
 
         # Update bid status to rejected
-        return DATABASES.update_document(
+        val = DATABASES.update_document(
             DATABASE_ID, COLLECTION_BIDS, bid_id, {"status": "rejected"}
         )
+        return translate_json(val, language)
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -567,7 +588,9 @@ def reject_bid(bid_id: str, email: str):
 
 
 @bids_router.patch("/{bid_id}")
-def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
+def update_bid(
+    bid_id: str, updates: BidUpdateModel, email: str, language: str = "english"
+):
     try:
         user = get_user_by_email(email)
         bid = get_document_or_raise(COLLECTION_BIDS, bid_id, "Bid not found")
@@ -648,7 +671,8 @@ def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
                 listing["$id"],
                 new_available_quantity,
             )
-        return updated_bid
+        val = updated_bid
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -657,7 +681,7 @@ def update_bid(bid_id: str, updates: BidUpdateModel, email: str):
 
 
 @bids_router.delete("/{bid_id}")
-def delete_bid(bid_id: str, email: str):
+def delete_bid(bid_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email(email)
         role = user["role"]
@@ -715,7 +739,8 @@ def delete_bid(bid_id: str, email: str):
                         "total_quantity": new_total_quantity,
                     },
                 )
-        return bid_updated
+        val = bid_updated
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -725,7 +750,7 @@ def delete_bid(bid_id: str, email: str):
 
 # bid fulfilled. set by admin or creator of the bid i.e buyer can
 @bids_router.patch("/{bid_id}/fulfill")
-def fulfill_bid(bid_id: str, email: str):
+def fulfill_bid(bid_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email(email)
         bid = get_document_or_raise(COLLECTION_BIDS, bid_id, "Bid not found")
@@ -740,9 +765,10 @@ def fulfill_bid(bid_id: str, email: str):
             )
 
         # Update bid status to fulfilled
-        return DATABASES.update_document(
+        val = DATABASES.update_document(
             DATABASE_ID, COLLECTION_BIDS, bid_id, {"status": "fulfilled"}
         )
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is

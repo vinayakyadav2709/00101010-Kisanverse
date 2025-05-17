@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from typing import Union, Dict, Optional, Any
+from models.llm.explanation import get_translations
 
 # Import necessary components from the project files
 # These imports assume all .py files are in the same directory structure
@@ -16,6 +17,7 @@ from pydantic import ValidationError
 
 log = logging.getLogger(__name__)
 # Configure logging if this file is run directly or imported early
+logging.getLogger("httpx").setLevel(logging.WARNING)
 if not log.handlers:
     logging.basicConfig(
         level=logging.INFO,

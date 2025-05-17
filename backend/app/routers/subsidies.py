@@ -11,6 +11,7 @@ from core.dependencies import (
     get_document_or_raise,
     get_user_by_email_or_raise,
     get_state,
+    translate_json,
 )
 from pydantic import BaseModel, field_validator
 from typing import List, Optional, Union
@@ -119,7 +120,7 @@ class SubsidyUpdateModel(BaseModel):
 
 
 @subsidies_router.post("")
-def create_subsidy(data: SubsidyCreateModel, email: str):
+def create_subsidy(data: SubsidyCreateModel, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "admin":
@@ -134,8 +135,11 @@ def create_subsidy(data: SubsidyCreateModel, email: str):
         # Retry mechanism for ID uniqueness
         for attempt in range(3):
             try:
-                return DATABASES.create_document(
-                    DATABASE_ID, COLLECTION_SUBSIDIES, ID.unique(), subsidy_data
+                return translate_json(
+                    DATABASES.create_document(
+                        DATABASE_ID, COLLECTION_SUBSIDIES, ID.unique(), subsidy_data
+                    ),
+                    language,
                 )
             except Exception as e:
                 if "already exists" in str(e).lower() and attempt < 2:
@@ -151,6 +155,7 @@ def create_subsidy(data: SubsidyCreateModel, email: str):
 
 @subsidies_router.get("")
 def get_subsidies(
+    language: str = "english",
     email: str = None,
     type: Optional[str] = "all",
     status: Optional[str] = "all",
@@ -197,7 +202,7 @@ def get_subsidies(
         subsidies = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_SUBSIDIES, queries=query_filters
         )
-        return subsidies
+        return translate_json(subsidies, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -207,7 +212,9 @@ def get_subsidies(
 
 
 @subsidies_router.patch("/{subsidy_id}")
-def update_subsidy(subsidy_id: str, updates: SubsidyUpdateModel, email: str):
+def update_subsidy(
+    subsidy_id: str, updates: SubsidyUpdateModel, email: str, language: str = "english"
+):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "admin":
@@ -245,7 +252,7 @@ def update_subsidy(subsidy_id: str, updates: SubsidyUpdateModel, email: str):
         if updated_data.get("status") == "fulfilled":
             # If the subsidy is fulfilled, reject all pending requests
             reject_pending_requests(subsidy["$id"])
-        return val
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -253,7 +260,7 @@ def update_subsidy(subsidy_id: str, updates: SubsidyUpdateModel, email: str):
 
 
 @subsidies_router.delete("/{subsidy_id}")
-def delete_subsidy(subsidy_id: str, email: str):
+def delete_subsidy(subsidy_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "admin":
@@ -271,7 +278,7 @@ def delete_subsidy(subsidy_id: str, email: str):
         )
         # Reject all pending requests for the removed subsidy
         reject_pending_requests(subsidy_id)
-        return val
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -303,6 +310,7 @@ def get_requests(
     email: Optional[str] = None,
     status: Optional[str] = "all",
     subsidy_id: Optional[str] = None,
+    language: str = "english",
 ):
     try:
         query_filters = []
@@ -323,9 +331,10 @@ def get_requests(
         if subsidy_id:
             query_filters.append(Query.equal("subsidy_id", [subsidy_id]))
         query_filters.append(Query.limit(10000))
-        return DATABASES.list_documents(
+        result = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS, queries=query_filters
         )
+        return translate_json(result, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -335,7 +344,9 @@ def get_requests(
 
 
 @subsidy_requests_router.post("")
-def create_request(data: SubsidyRequestCreateModel, email: str):
+def create_request(
+    data: SubsidyRequestCreateModel, email: str, language: str = "english"
+):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "farmer":
@@ -383,9 +394,10 @@ def create_request(data: SubsidyRequestCreateModel, email: str):
         # Retry mechanism for ID uniqueness
         for attempt in range(3):
             try:
-                return DATABASES.create_document(
+                val = DATABASES.create_document(
                     DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS, ID.unique(), request_data
                 )
+                return translate_json(val, language)
             except Exception as e:
                 if "already exists" in str(e).lower() and attempt < 2:
                     continue  # Retry if ID conflict occurs
@@ -401,7 +413,7 @@ def create_request(data: SubsidyRequestCreateModel, email: str):
 
 
 @subsidy_requests_router.patch("/{request_id}/accept")
-def accept_request(request_id: str, email: str):
+def accept_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "admin":
@@ -448,7 +460,7 @@ def accept_request(request_id: str, email: str):
             if updated_status == "fulfilled":
                 # If the subsidy is fulfilled, reject all pending requests
                 reject_pending_requests(subsidy["$id"])
-            return val
+            return translate_json(val, language)
         else:
             raise HTTPException(
                 status_code=400,
@@ -464,7 +476,7 @@ def accept_request(request_id: str, email: str):
 
 
 @subsidy_requests_router.patch("/{request_id}/reject")
-def reject_request(request_id: str, email: str):
+def reject_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "admin":
@@ -483,9 +495,10 @@ def reject_request(request_id: str, email: str):
                 detail="Only requests with 'requested' status can be rejected",
             )
 
-        return DATABASES.update_document(
+        val = DATABASES.update_document(
             DATABASE_ID, COLLECTION_SUBSIDY_REQUESTS, request_id, {"status": "rejected"}
         )
+        return translate_json(val, language)
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -496,7 +509,7 @@ def reject_request(request_id: str, email: str):
 
 
 @subsidy_requests_router.delete("/{request_id}")
-def delete_request(request_id: str, email: str):
+def delete_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         request = get_document_or_raise(
@@ -526,7 +539,7 @@ def delete_request(request_id: str, email: str):
             )
         else:
             raise HTTPException(status_code=403, detail="Permission denied")
-        return val
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -536,7 +549,7 @@ def delete_request(request_id: str, email: str):
 
 
 @subsidy_requests_router.patch("/{request_id}/fulfill")
-def fulfill_request(request_id: str, email: str):
+def fulfill_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         request = get_document_or_raise(
@@ -557,12 +570,13 @@ def fulfill_request(request_id: str, email: str):
             )
 
         # Update request status to fulfilled
-        return DATABASES.update_document(
+        val = DATABASES.update_document(
             DATABASE_ID,
             COLLECTION_SUBSIDY_REQUESTS,
             request_id,
             {"status": "fulfilled"},
         )
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is

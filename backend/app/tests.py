@@ -42,6 +42,10 @@
 # from models.llm import test
 
 
-from routers.other_scripts.days import fetch_and_store_weather_data
+# from routers.other_scripts.days import fetch_and_store_weather_data
 
-fetch_and_store_weather_data(21.5929, 81.3761)
+# fetch_and_store_weather_data(21.5929, 81.3761)
+
+from routers.ai import get_translations
+
+print(get_translations({"greeting": "Hello, how are you?", "date": "2024-05-17"}, "en"))

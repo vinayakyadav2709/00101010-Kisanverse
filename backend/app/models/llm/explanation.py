@@ -1,7 +1,8 @@
 # explanation.py
 import logging
 import json
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any, Union
+import re
 
 # --- MODIFIED: Use direct ollama library ---
 import ollama
@@ -406,3 +407,99 @@ def generate_llm_summary(
     except Exception as e:
         log.error(f"Error invoking direct Ollama call (Summary): {e}", exc_info=True)
         return f"Summary generation failed (Error: {e})."
+
+
+_date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$|^\d{2}/\d{2}/\d{4}$|^\d{4}/\d{2}/\d{2}$")
+
+
+def _is_date_string(s: str) -> bool:
+    return bool(_date_regex.match(s.strip()))
+
+
+def _translate_text_with_ollama(text: str, target_lang: str) -> str:
+    prompt = (
+        f"Translate the following text to {target_lang} (use native script, be accurate):\n\n{text}\n\n"
+        f"Only output the translated text, no explanations."
+    )
+    try:
+        client = ollama.Client(host=OLLAMA_BASE_URL)
+        response = client.chat(
+            model=OLLAMA_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful translation assistant.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            options={"temperature": LLM_TEMPERATURE},
+        )
+        if response and "message" in response and "content" in response["message"]:
+            return response["message"]["content"].strip()
+        else:
+            log.error("Ollama translation response missing content.")
+            return text
+    except Exception as e:
+        log.error(f"Ollama translation failed: {e}")
+        return text
+
+
+def _translate_json_values(data: Any, target_lang: str, parent_key: str = "") -> Any:
+    if isinstance(data, str):
+        if _is_date_string(data):
+            return data
+        return _translate_text_with_ollama(data, target_lang)
+    elif isinstance(data, dict):
+        # If the parent key is "dynamic_fields", translate both keys and values
+        if parent_key == "dynamic_fields":
+            return {
+                _translate_text_with_ollama(k, target_lang): _translate_json_values(
+                    v, target_lang
+                )
+                for k, v in data.items()
+            }
+        else:
+            return {
+                k: _translate_json_values(v, target_lang, parent_key=k)
+                for k, v in data.items()
+            }
+    elif isinstance(data, list):
+        return [
+            _translate_json_values(item, target_lang, parent_key=parent_key)
+            for item in data
+        ]
+    else:
+        return data
+
+
+def get_translations(
+    input_json: Union[Dict[str, Any], str], language: str = "hi"
+) -> Any:
+    """
+    Translates the input JSON (English) to the specified language.
+    Only values are translated, not keys or date strings.
+    Args:
+        input_json: dict or JSON string.
+        language: 'hi' (Hindi), 'ma' (Marathi), or 'en' (English/original).
+    Returns:
+        The translated JSON (or original if language is 'en').
+    """
+    log.info(f"--- Received request for translation to '{language}' ---")
+    try:
+        if isinstance(input_json, str):
+            data = json.loads(input_json)
+        elif isinstance(input_json, dict):
+            data = input_json
+        else:
+            log.error(f"Invalid input type: {type(input_json)}")
+            raise ValueError("Input must be a JSON string or dict.")
+
+        if language == "english":
+            return data
+        elif language in ["marathi", "hindi"]:
+            return _translate_json_values(data, language)
+        else:
+            raise ValueError("language must be one of: 'hindi', 'marathi', 'english'.")
+    except Exception as e:
+        log.error(f"Translation failed: {e}", exc_info=True)
+        raise ValueError(f"Translation error: {e}")

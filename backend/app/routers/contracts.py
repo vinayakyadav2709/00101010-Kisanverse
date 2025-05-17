@@ -9,6 +9,7 @@ from core.dependencies import (
     get_user_by_email_or_raise,
     get_document_or_raise,
     get_state,
+    translate_json,
 )
 from pydantic import BaseModel, field_validator
 from typing import List, Optional
@@ -88,7 +89,11 @@ class ContractUpdateModel(BaseModel):
 
 
 @contracts_router.get("")
-def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
+def get_contracts(
+    email: Optional[str] = None,
+    status: Optional[str] = "all",
+    language: str = "english",
+):
     try:
         query_filters = []
         if status and status != "all":
@@ -134,8 +139,8 @@ def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
             for doc in documents["documents"]
         ]
 
-        return {"total": len(contracts), "documents": contracts}
-
+        val = {"total": len(contracts), "documents": contracts}
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -145,7 +150,7 @@ def get_contracts(email: Optional[str] = None, status: Optional[str] = "all"):
 
 
 @contracts_router.get("/{contract_id}")
-def get_contract(contract_id: str):
+def get_contract(contract_id: str, language: str = "english"):
     try:
         contract = get_document_or_raise(
             COLLECTION_CONTRACTS, contract_id, "Contract not found"
@@ -153,7 +158,8 @@ def get_contract(contract_id: str):
         # Convert dynamic_fields to JSON
         if "dynamic_fields" in contract and contract["dynamic_fields"]:
             contract["dynamic_fields"] = json.loads(contract["dynamic_fields"])
-        return contract
+        val = contract
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -163,7 +169,7 @@ def get_contract(contract_id: str):
 
 
 @contracts_router.post("")
-def create_contract(data: ContractCreateModel, email: str):
+def create_contract(data: ContractCreateModel, email: str, language: str = "english"):
     try:
         cleanup_expired_contracts()
         user = get_user_by_email_or_raise(email)
@@ -179,9 +185,10 @@ def create_contract(data: ContractCreateModel, email: str):
         # Retry mechanism for ID uniqueness
         for attempt in range(3):
             try:
-                return DATABASES.create_document(
+                val = DATABASES.create_document(
                     DATABASE_ID, COLLECTION_CONTRACTS, ID.unique(), contract_data
                 )
+                return translate_json(val, language)
             except Exception as e:
                 if "already exists" in str(e).lower() and attempt < 2:
                     continue  # Retry if ID conflict occurs
@@ -197,7 +204,12 @@ def create_contract(data: ContractCreateModel, email: str):
 
 
 @contracts_router.patch("/{contract_id}")
-def update_contract(contract_id: str, updates: ContractUpdateModel, email: str):
+def update_contract(
+    contract_id: str,
+    updates: ContractUpdateModel,
+    email: str,
+    language: str = "english",
+):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "admin":
@@ -215,9 +227,10 @@ def update_contract(contract_id: str, updates: ContractUpdateModel, email: str):
                 detail="Status can only be updated if the contract is listed or accepted",
             )
 
-        return DATABASES.update_document(
+        val = DATABASES.update_document(
             DATABASE_ID, COLLECTION_CONTRACTS, contract_id, updated_data
         )
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -227,13 +240,13 @@ def update_contract(contract_id: str, updates: ContractUpdateModel, email: str):
 
 
 @contracts_router.delete("/{contract_id}")
-def delete_contract(contract_id: str, email: str):
+def delete_contract(contract_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         contract = get_document_or_raise(
             COLLECTION_CONTRACTS, contract_id, "Contract not found"
         )
-
+        val = None
         if user["role"] == "buyer" and contract["buyer_id"] == user["$id"]:
             # Buyer cancels the contract if it is listed
             if contract["status"] != "listed":
@@ -241,7 +254,7 @@ def delete_contract(contract_id: str, email: str):
                     status_code=400,
                     detail="Only listed contracts can be cancelled by the buyer",
                 )
-            return DATABASES.update_document(
+            val = DATABASES.update_document(
                 DATABASE_ID, COLLECTION_CONTRACTS, contract_id, {"status": "cancelled"}
             )
         elif user["role"] == "admin":
@@ -251,11 +264,12 @@ def delete_contract(contract_id: str, email: str):
                     status_code=400,
                     detail="Only listed or accepted contracts can be removed by the admin",
                 )
-            return DATABASES.update_document(
+            val = DATABASES.update_document(
                 DATABASE_ID, COLLECTION_CONTRACTS, contract_id, {"status": "removed"}
             )
         else:
             raise HTTPException(status_code=403, detail="Permission denied")
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
@@ -351,6 +365,7 @@ def get_requests(
     email: Optional[str] = None,
     status: Optional[str] = None,
     contract_id: Optional[str] = None,
+    language: str = "english",
 ):
     try:
         query_filters = []
@@ -386,9 +401,10 @@ def get_requests(
         if contract_id:
             query_filters.append(Query.equal("contract_id", [contract_id]))
         query_filters.append(Query.limit(10000))
-        return DATABASES.list_documents(
+        val = DATABASES.list_documents(
             DATABASE_ID, COLLECTION_CONTRACT_REQUESTS, queries=query_filters
         )
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -399,7 +415,9 @@ def get_requests(
 
 
 @contract_requests_router.post("")
-def create_request(data: ContractRequestCreateModel, email: str):
+def create_request(
+    data: ContractRequestCreateModel, email: str, language: str = "english"
+):
     try:
         user = get_user_by_email_or_raise(email)
         if user["role"] != "farmer":
@@ -460,9 +478,10 @@ def create_request(data: ContractRequestCreateModel, email: str):
         # Retry mechanism for ID uniqueness
         for attempt in range(3):
             try:
-                return DATABASES.create_document(
+                val = DATABASES.create_document(
                     DATABASE_ID, COLLECTION_CONTRACT_REQUESTS, ID.unique(), request_data
                 )
+                return translate_json(val, language)
             except Exception as e:
                 if "already exists" in str(e).lower() and attempt < 2:
                     continue  # Retry if ID conflict occurs
@@ -479,7 +498,7 @@ def create_request(data: ContractRequestCreateModel, email: str):
 
 
 @contract_requests_router.patch("/{request_id}/accept")
-def accept_request(request_id: str, email: str):
+def accept_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         request = get_document_or_raise(
@@ -514,7 +533,8 @@ def accept_request(request_id: str, email: str):
 
         # Reject all other pending requests for the contract
         reject_pending_requests(contract["$id"])
-        return d
+        val = d
+        return translate_json(val, language)
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -526,7 +546,7 @@ def accept_request(request_id: str, email: str):
 
 
 @contract_requests_router.patch("/{request_id}/reject")
-def reject_request(request_id: str, email: str):
+def reject_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         request = get_document_or_raise(
@@ -544,12 +564,13 @@ def reject_request(request_id: str, email: str):
             raise HTTPException(status_code=403, detail="Permission denied")
 
         # Update the request status
-        return DATABASES.update_document(
+        val = DATABASES.update_document(
             DATABASE_ID,
             COLLECTION_CONTRACT_REQUESTS,
             request_id,
             {"status": "rejected"},
         )
+        return translate_json(val, language)
 
     except Exception as e:
         if isinstance(e, HTTPException):
@@ -561,7 +582,7 @@ def reject_request(request_id: str, email: str):
 
 
 @contract_requests_router.delete("/{request_id}")
-def delete_request(request_id: str, email: str):
+def delete_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         request = get_document_or_raise(
@@ -603,7 +624,8 @@ def delete_request(request_id: str, email: str):
         DATABASES.update_document(
             DATABASE_ID, COLLECTION_CONTRACTS, contract["$id"], {"status": "removed"}
         )
-        return d
+        val = d
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
@@ -614,7 +636,7 @@ def delete_request(request_id: str, email: str):
 
 
 @contract_requests_router.patch("/{request_id}/fulfill")
-def fulfill_request(request_id: str, email: str):
+def fulfill_request(request_id: str, email: str, language: str = "english"):
     try:
         user = get_user_by_email_or_raise(email)
         request = get_document_or_raise(
@@ -644,7 +666,8 @@ def fulfill_request(request_id: str, email: str):
             DATABASE_ID, COLLECTION_CONTRACTS, contract["$id"], {"status": "fulfilled"}
         )
 
-        return d
+        val = d
+        return translate_json(val, language)
     except Exception as e:
         if isinstance(e, HTTPException):
             # If it's already an HTTPException, return it as is
