@@ -33,7 +33,12 @@ from core.config import (
     ENDPOINT,
 )
 from routers import contracts, subsidies
-from core.dependencies import get_user_by_email_or_raise, get_coord, translate_json
+from core.dependencies import (
+    get_user_by_email_or_raise,
+    get_coord,
+    translate_json,
+    translate_string,
+)
 from typing import List, Optional
 from pydantic import BaseModel
 from appwrite.query import Query
@@ -552,7 +557,20 @@ def fetch_prices(
             Query.limit(10000),
         ]
         if crop:
-            crop = crop.upper()
+            crop = crop.lower()
+            if crop not in [
+                "jowar",
+                "maize",
+                "mango",
+                "onion",
+                "potato",
+                "rice",
+                "wheat",
+            ]:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid crop type '{crop}'. Valid crops are: {', '.join([])}",
+                )
             queries.append(Query.equal("crop", [crop]))
 
         # Query the PRICES collection
@@ -633,6 +651,31 @@ def fetch_prices_api(
     try:
         # Set start_date to today if not provided
         start_date = start_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        crop_type = (
+            translate_string(
+                crop_type,
+                [
+                    "jowar",
+                    "maize",
+                    "mango",
+                    "onion",
+                    "potato",
+                    "rice",
+                    "wheat",
+                ],
+            )
+            if crop_type.lower()
+            not in [
+                "jowar",
+                "maize",
+                "mango",
+                "onion",
+                "potato",
+                "rice",
+                "wheat",
+            ]
+            else crop_type
+        )
         crop_type = crop_type.upper()
         # Validate date range
         if datetime.strptime(start_date, "%Y-%m-%d") > datetime.strptime(
@@ -889,8 +932,7 @@ def crop_prediction(
 
         else:
             # Use the provided soil_type
-            soil_type = soil_type.upper()
-            if soil_type not in [
+            possible_soil_types = [
                 "BLACK",
                 "ALLUVIAL",
                 "CINDER",
@@ -901,7 +943,17 @@ def crop_prediction(
                 "RED",
                 "SANDY",
                 "YELLOW",
-            ]:
+            ]
+            soil_type = (
+                soil_type.upper()
+                if soil_type.upper() in possible_soil_types
+                else translate_string(
+                    soil_type,
+                    possible_soil_types,
+                ).upper()
+            )
+
+            if soil_type not in possible_soil_types:
                 raise HTTPException(
                     status_code=400,
                     detail="Invalid soil type. Valid options are: black, Alluvial, Cinder, Clay, Laterite, Loamy, Peat, Red, Sandy, Yellow",

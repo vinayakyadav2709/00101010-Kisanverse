@@ -1,7 +1,7 @@
 # explanation.py
 import logging
 import json
-from typing import List, Dict, Optional, Tuple, Any, Union
+from typing import List, Dict, Optional, Tuple, Any, Union, Generator
 import re
 
 # --- MODIFIED: Use direct ollama library ---
@@ -409,6 +409,22 @@ def generate_llm_summary(
         return f"Summary generation failed (Error: {e})."
 
 
+import time
+
+SPECIAL_KEYS_NO_TRANSLATE = {
+    "$id",
+    "$createdAt",
+    "$updatedAt",
+    "$permissions",
+    "$databaseId",
+    "$collectionId",
+    "provider",
+}
+
+MAX_BATCH_CHARS = 1500
+MAX_BATCH_ITEMS = 50
+
+# Date regex to detect date-like strings
 _date_regex = re.compile(
     r"""^(
         \d{4}-\d{2}-\d{2} |         # 2025-05-06
@@ -422,13 +438,230 @@ _date_regex = re.compile(
 
 
 def _is_date_string(s: str) -> bool:
+    """Check if a string is a date or datetime format."""
     return bool(_date_regex.match(s.strip()))
+
+
+def _extract_json_content(text: str) -> str:
+    """Remove ```json ... ``` or ``` ... ``` from a wrapped string."""
+    match = re.search(r"```(?:json)?\s*(.*?)```", text, re.DOTALL)
+    return match.group(1).strip() if match else text.strip()
+
+
+def batch_texts(texts: list[str]) -> Generator[list[str], None, None]:
+    """Split a list of texts into batches that respect max character and item limits."""
+    batch = []
+    char_count = 0
+
+    for text in texts:
+        if (len(batch) >= MAX_BATCH_ITEMS and False) or char_count + len(
+            text
+        ) > MAX_BATCH_CHARS:
+            yield batch
+            batch = []
+            char_count = 0
+        batch.append(text)
+        char_count += len(text)
+
+    if batch:
+        yield batch
+
+
+def translate_texts(texts: list[str], target_lang: str) -> list[str]:
+    """Translate a list of texts using Ollama in batches."""
+    all_translations = []
+
+    for i, batch in enumerate(batch_texts(texts)):
+        prompt = (
+            f"Translate the following {len(batch)} items to {target_lang} (use native script). "
+            f"Do NOT translate dates, times, or links and if possible use only native script characters, not original language characters. Only output a JSON array of translated texts, in order. "
+            f"Strictly return valid JSON.\n\n{json.dumps(batch, ensure_ascii=False)}"
+        )
+
+        log.info(f"Translating batch {i + 1} of size {len(batch)}")
+        start_time = time.time()
+
+        try:
+            client = ollama.Client(host=OLLAMA_BASE_URL)
+            response = client.chat(
+                model=OLLAMA_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a helpful translation assistant.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                options={"temperature": LLM_TEMPERATURE},
+            )
+
+            elapsed = time.time() - start_time
+            log.info(f"Batch {i + 1} translated in {elapsed:.2f} seconds")
+
+            raw_content = response.get("message", {}).get("content", "")
+            extracted = _extract_json_content(raw_content.strip())
+            translated = json.loads(extracted)
+
+            if isinstance(translated, list):
+                all_translations.extend(translated)
+            else:
+                raise ValueError("Expected list in translation response.")
+
+        except Exception as e:
+            log.error(f"Translation failed in {time.time() - start_time:.2f} sec: {e}")
+            all_translations.extend(batch)
+
+    return all_translations
+
+
+def translate_json_values(data: Any, target_lang: str) -> Any:
+    """
+    Traverse a nested JSON-like structure, collect translatable values,
+    translate them, and re-apply them in the same structure.
+    """
+    translations = []
+    paths = []
+
+    def collect(d, path=(), in_dynamic=False):
+        if isinstance(d, str) and not _is_date_string(d):
+            translations.append(d)
+            paths.append(path)
+        elif isinstance(d, dict):
+            is_dynamic = in_dynamic or (path and path[-1] == "dynamic_fields")
+            for k, v in d.items():
+                key_path = path + (k,)
+                if is_dynamic and not _is_date_string(k):
+                    translations.append(k)
+                    paths.append(path + ("__key__",))
+                if isinstance(v, (dict, list)) or (
+                    isinstance(v, str)
+                    and not _is_date_string(v)
+                    and k not in SPECIAL_KEYS_NO_TRANSLATE
+                    and "link" not in k
+                ):
+                    collect(v, key_path, is_dynamic)
+        elif isinstance(d, list):
+            for idx, item in enumerate(d):
+                collect(item, path + (idx,), in_dynamic)
+
+    collect(data)
+
+    translated_texts = translate_texts(translations, target_lang)
+    path_map = {p: t for p, t in zip(paths, translated_texts)}
+
+    def apply(d, path=()):
+        if isinstance(d, dict):
+            result = {}
+            for k, v in d.items():
+                key_path = path + ("__key__",)
+                val_path = path + (k,)
+                new_k = path_map.get(key_path, k)
+                result[new_k] = apply(v, val_path)
+            return result
+        elif isinstance(d, list):
+            return [apply(item, path + (i,)) for i, item in enumerate(d)]
+        elif isinstance(d, str):
+            return path_map.get(path, d)
+        else:
+            return d
+
+    return apply(data)
 
 
 def _translate_text_with_ollama(text: str, target_lang: str) -> str:
     prompt = (
-        f"Translate the following text to {target_lang} and do not translate dates,time and links and only do translation, nothing else (use native script, be accurate):\n\n{text}\n\n"
-        f"Only output the translated text, no explanations."
+        f"Translate the following text to {target_lang} and do not translate dates, time, and links. "
+        f"Only return translated text in native script, if possible use only native script characters, not original language characters and give no explanations:\n\n{text}"
+    )
+    try:
+        client = ollama.Client(host=OLLAMA_BASE_URL)
+        response = client.chat(
+            model=OLLAMA_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful translation assistant.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            options={"temperature": LLM_TEMPERATURE},
+        )
+        if response and "message" in response and "content" in response["message"]:
+            return response["message"]["content"].strip() or text
+        else:
+            log.error("Ollama translation response missing content.")
+            return text
+    except Exception as e:
+        log.error(f"Ollama translation failed: {e}")
+        return text
+
+
+def _translate_name_key(data: Any, target_lang: str) -> Any:
+    """
+    Recursively translates only the 'name' key in the given dict to the target language.
+    """
+    if isinstance(data, dict):
+        result = {}
+        for k, v in data.items():
+            if k == "name" and isinstance(v, str):
+                result[k] = _translate_text_with_ollama(v, target_lang)
+            else:
+                result[k] = _translate_name_key(v, target_lang)
+        return result
+    elif isinstance(data, list):
+        return [_translate_name_key(item, target_lang) for item in data]
+    else:
+        return data
+
+
+def get_translations(
+    input_json: Union[Dict[str, Any], str], language: str = "english"
+) -> Any:
+    """
+    Translates the input JSON (English) to the specified language.
+    For 'english', only the 'name' key is translated using LLM.
+    For 'hindi' and 'marathi', all values are translated.
+    Args:
+        input_json: dict or JSON string.
+        language: 'hindi', 'marathi', or 'english'.
+    Returns:
+        The translated JSON (or original if language is not supported).
+    """
+    log.info(f"--- Received request for translation to '{language}' ---")
+    try:
+        if isinstance(input_json, str):
+            data = json.loads(input_json)
+        elif isinstance(input_json, dict):
+            data = input_json
+        else:
+            log.error(f"Invalid input type: {type(input_json)}")
+            return input_json  # fallback: return as-is
+
+        if language == "english":
+            # Only translate the 'name' key using LLM
+            return _translate_name_key(data, "english")
+        elif language in ["marathi", "hindi"]:
+            return translate_json_values(data, language)
+        else:
+            log.error("language must be one of: 'hindi', 'marathi', 'english'.")
+            return data
+    except Exception as e:
+        log.error(f"Translation failed: {e}", exc_info=True)
+        return input_json  # fallback: return as-is
+
+
+def translate_string(text: str, possible_outputs: list[str]) -> str:
+    """
+    Uses Ollama LLM to translate the input string to English, but ONLY to one of the allowed outputs.
+    If not possible, returns 'Error: Cannot be translated'.
+    """
+    prompt = (
+        "You are a translation assistant. "
+        "Translate the following input to English, but ONLY use one of these allowed outputs: "
+        f"{possible_outputs}. "
+        "If the input cannot be translated to any of these, return the input string exactly as it is.\n\n"
+        f"Input: {text}\n"
+        "Output:"
     )
     try:
         client = ollama.Client(host=OLLAMA_BASE_URL)
@@ -445,114 +678,13 @@ def _translate_text_with_ollama(text: str, target_lang: str) -> str:
         )
         if response and "message" in response and "content" in response["message"]:
             result = response["message"]["content"].strip()
-            return result if result else text
+            if result in possible_outputs:
+                return result
+            else:
+                return "Error: Cannot be translated"
         else:
-            log.error("Ollama translation response missing content.")
-            return text
+            log.error("Ollama translation-to-allowed response missing content.")
+            return "Error: Cannot be translated"
     except Exception as e:
-        log.error(f"Ollama translation failed: {e}")
-        return text
-
-
-SPECIAL_KEYS_NO_TRANSLATE = {
-    "$id",
-    "$createdAt",
-    "$updatedAt",
-    "$permissions",
-    "$databaseId",
-    "$collectionId",
-    "provider",
-}
-
-
-def _translate_json_values(
-    data: Any, target_lang: str, parent_key: str = "", in_dynamic_fields: bool = False
-) -> Any:
-    if isinstance(data, str):
-        if _is_date_string(data):
-            return data
-        return _translate_text_with_ollama(data, target_lang)
-    elif isinstance(data, dict):
-        # If the parent key is "dynamic_fields", translate both keys and values, but skip translation for date keys/values
-        if parent_key == "dynamic_fields" or in_dynamic_fields:
-            result = {}
-            for k, v in data.items():
-                # Do not translate key if it's a date
-                if _is_date_string(k):
-                    translated_key = k
-                else:
-                    try:
-                        translated_key = _translate_text_with_ollama(k, target_lang)
-                    except Exception:
-                        translated_key = k
-                # Do not translate value if it's a date or a special key
-                if (
-                    (isinstance(v, str) and _is_date_string(v))
-                    or k in SPECIAL_KEYS_NO_TRANSLATE
-                    or "link" in k
-                ):
-                    translated_value = v
-                else:
-                    translated_value = _translate_json_values(
-                        v,
-                        target_lang,
-                        parent_key=translated_key,
-                        in_dynamic_fields=True,
-                    )
-                result[translated_key] = translated_value
-            return result
-        else:
-            return {
-                k: (
-                    v
-                    if k in SPECIAL_KEYS_NO_TRANSLATE or "link" in k
-                    else _translate_json_values(v, target_lang, parent_key=k)
-                )
-                for k, v in data.items()
-            }
-    elif isinstance(data, list):
-        return [
-            _translate_json_values(
-                item,
-                target_lang,
-                parent_key=parent_key,
-                in_dynamic_fields=in_dynamic_fields,
-            )
-            for item in data
-        ]
-    else:
-        return data
-
-
-def get_translations(
-    input_json: Union[Dict[str, Any], str], language: str = "english"
-) -> Any:
-    """
-    Translates the input JSON (English) to the specified language.
-    Only values are translated, not keys or date strings.
-    Args:
-        input_json: dict or JSON string.
-        language: 'hi' (Hindi), 'ma' (Marathi), or 'en' (English/original).
-    Returns:
-        The translated JSON (or original if language is 'en').
-    """
-    log.info(f"--- Received request for translation to '{language}' ---")
-    try:
-        if isinstance(input_json, str):
-            data = json.loads(input_json)
-        elif isinstance(input_json, dict):
-            data = input_json
-        else:
-            log.error(f"Invalid input type: {type(input_json)}")
-            return input_json  # fallback: return as-is
-
-        if language == "english":
-            return data
-        elif language in ["marathi", "hindi"]:
-            return _translate_json_values(data, language)
-        else:
-            log.error("language must be one of: 'hindi', 'marathi', 'english'.")
-            return data
-    except Exception as e:
-        log.error(f"Translation failed: {e}", exc_info=True)
-        return input_json  # fallback: return as-is
+        log.error(f"Ollama translation-to-allowed failed: {e}")
+        return "Error: Cannot be translated"

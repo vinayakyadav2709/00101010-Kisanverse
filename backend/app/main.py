@@ -52,7 +52,9 @@ async def global_exception_handler(request: Request, exc: Exception):
 async def proxy_image(image_url: str = Query(...)):
     appwrite_host = "https://f9c8-124-66-175-40.ngrok-free.app"
     # Replace localhost URL with ngrok-hosted Appwrite URL
-    proxied_url = image_url.replace("http://localhost", appwrite_host)
+    proxied_url = image_url.replace("https://localhost", appwrite_host).replace(
+        "http://localhost", appwrite_host
+    )
     logger.info(f"Original URL: {image_url}")
     logger.info(f"Proxied URL: {proxied_url}")
 

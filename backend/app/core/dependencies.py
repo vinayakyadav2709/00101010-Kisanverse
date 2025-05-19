@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from core.config import DATABASES, DATABASE_ID, COLLECTION_USERS, COLLECTION_ZIPCODES
 from appwrite.query import Query
 
-from models.llm.recommendation_api import get_translations
+from models.llm.recommendation_api import get_translations, translate_string
 
 
 def get_user_by_email(email: str | None) -> dict | None:

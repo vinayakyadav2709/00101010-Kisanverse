@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from typing import Union, Dict, Optional, Any
-from models.llm.explanation import get_translations
+from models.llm.explanation import get_translations, translate_string
 
 # Import necessary components from the project files
 # These imports assume all .py files are in the same directory structure
